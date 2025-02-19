@@ -1,0 +1,53 @@
+lawson1977software:
+  type: article
+  title: Software for C1 interpolation
+  author: Lawson, Charles L
+  date: 1977
+  parent:
+    type: proceedings
+    title: Symp. on Mathematical Software
+    issue: JPL-PUBL-77-30
+klein2005voronoi:
+  type: article
+  title: Voronoi-Diagramme
+  author: Klein, Rolf
+  date: 2005
+  page-range: 209–268
+  parent:
+    type: periodical
+    title: 'Algorithmische Geometrie: Grundlagen, Methoden, Anwendungen'
+    publisher: Springer
+lucas2018delaunay:
+  type: misc
+  title: An Introduction to the Delaunay Triangulation
+  author: Lucas, Gary
+  date: 2018
+  url: https://gwlucastrig.github.io/TinfourDocs/DelaunayIntro/index.html
+peeters2015:
+  type: reference
+  title: GKW how and why
+  author: 
+    - Peeters, A.
+    - Buchholz, R.
+    - Camenen, Y.
+    - Casson, F.J.
+    - Grosshauser, S.
+    - Hornsby, W.A.
+    - Manas, P.
+    - Migliano, P.
+    - Siccinio, M.
+    - Snodin, A.P.
+    - Strintzi, D.
+    - Sung, T.
+    - Szepesi, G.
+    - Zarzosi, D.
+  date: 2015
+  url: 
+    value: https://bitbucket.org/gkw/gkw/wiki/Documentation
+    date: 2025-01-17
+
+samaniego2024topovis:
+  type: thesis
+  title: Visualizing Poloidal Cross Sections of Small Scale Turbolence in Global Tokamak Geometry
+  author: Samaniego, Sofia
+  date: 2024
