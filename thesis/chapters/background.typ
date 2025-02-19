@@ -8,6 +8,14 @@ The _Gyrokinetic Workshop (GKW)_ is a code to simulate and study turbolences of 
 
 // image of a tokamak torus with hamada coordinates
 
+== Triangulation
+
+// Delaunay triangulation: what is is and how does it work
+
+// potential flaws
+
+== Interpolation
+
 == ToPoVis
 === What is ToPoVis?
 _ToPoVis_ is a python script developed by Sofia Samaniego in 2024 @samaniego2024topovis. It aims to compute and visualize poloidal cross sections of eletrostatic potential #sym.Phi inside a tokamak, hence the name "ToPoVis" (#strong[To]kamak #strong[Po]loidal cross section #strong[Vis]ualisation) @samaniego2024topovis[p.10,72]. ToPoVis works with the simulation data outputted by GKW.

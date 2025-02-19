@@ -6,10 +6,12 @@
 === What is the cause of artifacts?
 // one main issue: numerical artifacts caused by triangulation on non-uniform grid
 
-=== Triangulation 
-// how *excactly* does triangulation work? how can triangulation be improved?
-
 // visualize this with an image
+
+// this becomes more apparent if a scatter + triplot is used instead
+
+// how can triangulation be improved?
+
 
 === Refining the grid through interpolation
 
