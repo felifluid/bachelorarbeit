@@ -39,7 +39,7 @@ The triangle grid in figure b) on the other hand tend to be more equilateral lea
 // But there are also limits to the delaunay triangulation, which comes from two assumptions. No subset of four points are on the same circumcircle and no subset of three points lie on a straight line @klein2005voronoi[p.234]. 
 
 
-While delaunay triangulation works efficiently when the grid is more or less uniform, it doesn't perform well on non-uniform grids @lo2013multigrid[p.15]. Moreover, different examples from #cite(<lo2013multigrid>,form: "prose", supplement: [p.21]) and #cite(<peethambaran2015delaunay>, form: "prose", supplement: [p.166ff]) show, that delaunay triangulation on non-uniform grid leads to many acute or "fat" triangles.
+While delaunay triangulation works efficiently when the grid is more or less uniform, it doesn't perform well on non-uniform grids @lo2013multigrid[p.15]. Moreover, different examples from #cite(<lo2013multigrid>,form: "prose", supplement: [p.21]), #cite(<peethambaran2015delaunay>, form: "prose", supplement: [p.166ff]) and #cite(<liu2008delaunay>, form: "prose", supplement: [p.1269]) show, that delaunay triangulation on non-uniform grid leads to many acute or "fat" triangles.
 
 
 

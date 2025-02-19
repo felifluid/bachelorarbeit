@@ -86,3 +86,22 @@ peethambaran2015delaunay:
     type: periodical
     title: Computer-Aided Design
     volume: 62
+
+liu2008delaunay:
+  type: article
+  title: Effective clustering and boundary detection algorithm based on Delaunay triangulation
+  author:
+  - Liu, Dongquan
+  - Nosovskiy, Gleb V.
+  - Sourina, Olga
+  date: 2008
+  page-range: 1261–1273
+  url: https://www.sciencedirect.com/science/article/pii/S0167865508000500
+  serial-number:
+    doi: https://doi.org/10.1016/j.patrec.2008.01.028
+    issn: 0167-8655
+  parent:
+    type: periodical
+    title: Pattern Recognition Letters
+    issue: 9
+    volume: 29
