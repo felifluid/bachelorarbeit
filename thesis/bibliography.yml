@@ -7,6 +7,7 @@ lawson1977software:
     type: proceedings
     title: Symp. on Mathematical Software
     issue: JPL-PUBL-77-30
+
 klein2005voronoi:
   type: article
   title: Voronoi-Diagramme
@@ -17,12 +18,14 @@ klein2005voronoi:
     type: periodical
     title: 'Algorithmische Geometrie: Grundlagen, Methoden, Anwendungen'
     publisher: Springer
+
 lucas2018delaunay:
   type: misc
   title: An Introduction to the Delaunay Triangulation
   author: Lucas, Gary
   date: 2018
   url: https://gwlucastrig.github.io/TinfourDocs/DelaunayIntro/index.html
+
 peeters2015:
   type: reference
   title: GKW how and why
@@ -51,3 +54,35 @@ samaniego2024topovis:
   title: Visualizing Poloidal Cross Sections of Small Scale Turbolence in Global Tokamak Geometry
   author: Samaniego, Sofia
   date: 2024
+
+lo2013multigrid:
+  type: article
+  title: Delaunay triangulation of non-uniform point distributions by means of multi-grid insertion
+  author: Lo, Sai Huen
+  date: 2013
+  page-range: 8–22
+  url: https://www.sciencedirect.com/science/article/pii/S0168874X12001618
+  serial-number:
+    doi: https://doi.org/10.1016/j.finel.2012.08.005
+    issn: 0168-874X
+  parent:
+    type: periodical
+    title: Finite Elements in Analysis and Design
+    volume: 63
+
+peethambaran2015delaunay:
+  type: article
+  title: A non-parametric approach to shape reconstruction from planar point sets through Delaunay filtering
+  author:
+  - Peethambaran, Jiju
+  - Muthuganapathy, Ramanathan
+  date: 2015
+  page-range: 164–175
+  url: https://www.sciencedirect.com/science/article/pii/S0010448514002851
+  serial-number:
+    doi: https://doi.org/10.1016/j.cad.2014.12.002
+    issn: 0010-4485
+  parent:
+    type: periodical
+    title: Computer-Aided Design
+    volume: 62
