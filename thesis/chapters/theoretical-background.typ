@@ -1,5 +1,5 @@
 #import "@preview/subpar:0.2.1"
-#import "bib.typ" : load-bib
+#import "thesis/bib.typ" : load-bib
 
 #set par(justify: true)
 
