@@ -133,3 +133,12 @@ shewchuk1996triangle:
     title: 'Applied Computational Geometry: Towards Geometric Engineering'
     publisher: Springer-Verlag
     volume: 1148
+
+shewchuck2025triangle:
+  type: article
+  title: 'Triangle: A Two-Dimensional Quality Mesh Generator and Delaunay Triangulator'
+  author: Shewchuk, Jonathan Richard
+  date: 2025
+  url:
+    value: https://www.cs.cmu.edu/~quake/triangle.html
+    date: 2025-01-20

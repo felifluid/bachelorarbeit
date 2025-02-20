@@ -63,9 +63,9 @@ Moreover, different examples from #cite(<lo2013multigrid>,form: "prose", supplem
 )
 
 Even on a non-uniform grid like the spiral shown in @fig:spiral_linear, the delaunay triangulation results in a uniform representation of the grid. However, this triangulation is quiet sensitive to noise, as can be observed in @fig:spiral_noisy. This is caused by preffering tiny, but delaunay-conform triangles in high-density ares, instead of big but acute triangles in low-density areas. // TODO: what excactly is caused?
-A possible refinement of the triangulation is to add more data points in areas with low density, as being shown in @fig:two_noisy_spirals. 
+A possible refinement of the triangulation is to add more data points in areas with low density, as being shown in @fig:two_noisy_spirals #footnote[#cite(<ruppert1995delaunay>, form: "prose") and further #cite(<shewchuk1996triangle>, form: "prose") present more elaborate ways of refining a triangulation. Both offer algorithmical approaches to add the least amount of extra vertices to the grid so that no resulting angles exceed a given angle. _Triangle_ is an implementation of this and is freely availiable at https://www.cs.cmu.edu/~quake/triangle.html @shewchuck2025triangle.]. // ??: maybe move this to outlook? 
 
-There are more eleborate ways of adding more grid points to refine a triangulation. #cite(<ruppert1995delaunay>, form: "prose") and further #cite(<shewchuk1996triangle>, form: "prose") present algorithmical approaches to add the least amount of extra vertices to the grid so that the resulting delaunay triangles don't exceed a given angle.
+
 
 // in the context of ...
 // vertices storing extra data → 3D data
