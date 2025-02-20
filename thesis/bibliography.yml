@@ -105,3 +105,31 @@ liu2008delaunay:
     title: Pattern Recognition Letters
     issue: 9
     volume: 29
+
+ruppert1995delaunay:
+  type: article
+  title: A Delaunay refinement algorithm for quality 2-dimensional mesh generation
+  author: Ruppert, Jim
+  date: 1995
+  page-range: 548–585
+  parent:
+    type: periodical
+    title: Journal of algorithms
+    publisher: Elsevier
+    issue: 3
+    volume: 18
+
+shewchuk1996triangle:
+  type: anthos
+  title: 'Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator'
+  author: Shewchuk, Jonathan Richard
+  date: 1996-05
+  editor:
+  - Lin, Ming C.
+  - Manocha, Dinesh
+  page-range: 203–222
+  parent:
+    type: anthology
+    title: 'Applied Computational Geometry: Towards Geometric Engineering'
+    publisher: Springer-Verlag
+    volume: 1148

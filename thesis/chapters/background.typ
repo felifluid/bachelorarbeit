@@ -1,5 +1,5 @@
-#import "../functions.typ" : load-bib
 #import "@preview/subpar:0.2.1"
+#import "../functions.typ" : load-bib
 
 = Background
 == GKW
@@ -39,11 +39,37 @@ The triangles in @delaunay_triangulation on the other hand tend to be more equil
 // But there are also limits to the delaunay triangulation, which comes from two assumptions. No subset of four points are on the same circumcircle and no subset of three points lie on a straight line @klein2005voronoi[p.234]. 
 
 While delaunay triangulation works efficiently when the grid is more or less uniform, it doesn't perform well on non-uniform grids @lo2013multigrid[p.15]. // TODO: kinda misleading → cpu performance is not great under certain circumstances
-Moreover, different examples from #cite(<lo2013multigrid>,form: "prose", supplement: [p.21]), #cite(<peethambaran2015delaunay>, form: "prose", supplement: [p.166ff]) and #cite(<liu2008delaunay>, form: "prose", supplement: [p.1269]) show, that delaunay triangulation on non-uniform grids leads to many acute or big triangles. 
+Moreover, different examples from #cite(<lo2013multigrid>,form: "prose", supplement: [p.21]), #cite(<peethambaran2015delaunay>, form: "prose", supplement: [p.166ff]) and #cite(<liu2008delaunay>, form: "prose", supplement: [p.1269]) show, that delaunay triangulation on non-uniform grids leads to many acute or big triangles. This can be illustrized well by examining the delaunay triangulation results of a spiral distrubution.
 
+// ??: are these images too small?
+#subpar.grid(
+  figure(
+    image("../../figs/triangulation/spiral_lin.svg"),
+    caption: [spiral]
+  ), <fig:spiral_linear>,
+  figure(
+    image("../../figs/triangulation/spiral_noisy.svg"),
+    caption: [noisy spiral],
+  ), <fig:spiral_noisy>,
+  figure(
+    image("../../figs/triangulation/spiral_interpolation.svg"),
+    caption: [two noisy spirals],
+  ), <fig:two_noisy_spirals>,
+  columns: (1fr, 1fr, 1fr),
+  caption: [
+    Comparison of delaunay triangulations for three spiral distrubutions.
+  ],
+  label: <fig:delaunay_spiral>,
+)
 
+Even on a non-uniform grid like the spiral shown in @fig:spiral_linear, the delaunay triangulation results in a uniform representation of the grid. However, this triangulation is quiet sensitive to noise, as can be observed in @fig:spiral_noisy. This is caused by preffering tiny, but delaunay-conform triangles in high-density ares, instead of big but acute triangles in low-density areas. // TODO: what excactly is caused?
+A possible refinement of the triangulation is to add more data points in areas with low density, as being shown in @fig:two_noisy_spirals. 
 
-// Refinement algorithms needs arbitrary grid points, therefore interpolation
+There are more eleborate ways of adding more grid points to refine a triangulation. #cite(<ruppert1995delaunay>, form: "prose") and further #cite(<shewchuk1996triangle>, form: "prose") present algorithmical approaches to add the least amount of extra vertices to the grid so that the resulting delaunay triangles don't exceed a given angle.
+
+// in the context of ...
+// vertices storing extra data → 3D data
+// → interpolation is needed always to store data at new points
 
 // if we need interpolation anyways, we can interpolate the grid to a point, where we either don't need refinement of triangles (triangulation performs well), or regular grid works similarly well
 
