@@ -10,3 +10,19 @@
     bibliography(bib)
   }
 }
+
+#let enum_numbering(..schemes) = {
+  (..nums) => {
+    let (enum, ..subenums) = nums.pos()
+    let (enum_schema, ..subschemes) = schemes.pos()
+
+    if subenums.len() == 0 {
+      numbering(enum_schema, enum)
+    } else if subenums.len() == 0 {
+      numbering(enum_schema, ..nums.pos())
+    }
+    else {
+      enum_numbering(..subschemes)(..subenums)
+    }
+  }
+}
