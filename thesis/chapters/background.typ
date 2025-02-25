@@ -1,5 +1,5 @@
 #import "@preview/subpar:0.2.1"
-#import "../functions.typ" : load-bib
+#import "../functions.typ" : load-bib,  enum_numbering
 
 = Background
 == GKW
@@ -105,10 +105,43 @@ _ToPoVis_ is a python script developed by Sofia Samaniego in 2024 @samaniego2024
 
 === How does ToPoVis work?
 
+The program can be subdivided into the following sequences: //TODO: not happy with this
 
-// zeta shift - how does it work
+#set enum(numbering: "1.", full: true)
+1. Reading values from `gkwdata.h5` file.
+2. Calculating #sym.zeta for a given #sym.phi, also known as #sym.zeta\-shift
+  1. Linear case: Calculating potential #sym.Phi using fourier eigenmodes $hat(f)$
+  2. Non-linear case: Interpolating 3D-potential and evaluating it at #sym.zeta\-shift
+3. Plotting the potential on poloidal slice
+
+// TODO: maybe add flow chart?
+
+==== Calculating the #sym.zeta\-shift
+A poloidal slice implies satisfying the condition $#sym.phi = #text("const")$. The way the #sym.zeta\-shift is calculated is different for the kind of geometry being used for the simulation. ToPoVis works for three different geometries: 1) circular, 2) CHEASE and 3) s-#sym.alpha. In each geometry the transformations between toroidal and hamada coordinates are different @samaniego2024topovis[p.20ff]. // ??: cite after each sentence?
+
+In all geometries #sym.zeta is the only coordinate that is dependend on #sym.phi and can be defined generally as follows:
+
+$ #sym.zeta = -frac(#sym.phi, 2#sym.pi) + G $
+
+With each geometry having its own definition of $G$. // TODO: formulation 
+
+===== Circular geometry
+// #sym.psi\(r) &= frac(r, R_#text("ref")) \
+// s(r, #sym.theta) &= frac(1, 2#sym.pi) [#sym.theta + #sym.psi\(r) sin(#sym.theta)] \
+In circular geometry, the factor $G$ is defined like follows @peeters2015[p.25].
+$ 
+  G = frac(1,#sym.pi) s_B s_j abs(q(#sym.psi)) arctan[sqrt(frac(1-#sym.psi, 1+#sym.psi)) tan frac(#sym.theta, 2)] 
+$ 
+It is outputted directly by GKW and can be found under `geom/gmap` as a discrete function of #sym.psi and $s$. // ??: can i call this "discrete function"?
+
 
 ==== Linear simulations
+For linear simulations the calculation of the poloidal potential is simple, as a function in hamada coordinates $f(#sym.psi, #sym.zeta, s)$ can be expressed as a Fourier series.
+
+$ sum_k_#sym.zeta hat(f)(#sym.psi, k_#sym.zeta, s) exp(i k_#sym.zeta #sym.zeta) $
+
+$ f(#sym.psi, #sym.zeta, s) = hat(f)(#sym.psi, #sym.zeta, s) exp(i k_#sym.zeta #sym.zeta) + hat(f^*)(#sym.psi, #sym.zeta, s) exp(-i k_#sym.zeta #sym.zeta) $
+
 
 ==== Non-linear simulations
 
