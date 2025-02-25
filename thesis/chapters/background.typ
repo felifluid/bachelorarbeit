@@ -3,7 +3,18 @@
 
 = Background
 == GKW
-The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of a confined plasma, usually inside of a tokamak @peeters2015[p.1]. It is written in Fortran 95 and was initially developed at the University of Warwick in 2007 @peeters2015[p.1]. The code is freely availiable and currently being hosted at https://bitbucket.org/gkw/gkw. 
+The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of a confined plasma, usually inside of a tokamak @peeters2015[p.1]. It is written in Fortran 95 and was initially developed at the University of Warwick in 2007 @peeters2015[p.1]. The code is freely availiable and currently being hosted at https://bitbucket.org/gkw/gkw. It works in both linear and non-linear regimes @peeters2015[p.1]
+
+// ??: linear case
+// GKW solves eigenvalues k_zeta (fourier eigenmodes)
+// eigenvalues are symmetrical
+// as "linear" they do not couple and evolve independently
+// usually only one fourier mode is simulated
+// → fourier coefficient is 2D (psi, s) with k_zeta constant
+// ??: Quelle außer Sophias BA?
+
+// ??: nonlinear run
+
 
 == Hamada coordinates
 
@@ -93,6 +104,7 @@ _ToPoVis_ is a python script developed by Sofia Samaniego in 2024 @samaniego2024
 // geometries: circular, s-alpha, chease-global
 
 === How does ToPoVis work?
+
 
 // zeta shift - how does it work
 
