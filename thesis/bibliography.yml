@@ -142,3 +142,21 @@ shewchuck2025triangle:
   url:
     value: https://www.cs.cmu.edu/~quake/triangle.html
     date: 2025-01-20
+
+scipy2025rgi:
+  type: repository
+  title: scipy.interpolate.RegularGridInterpolator
+  author: The SciPy Community
+  date: 2025
+  url:
+    value: https://github.com/scipy/scipy/blob/v1.15.2/scipy/interpolate/_rgi.py#L0-L1
+    date: 2025-02-24
+
+scipy2025rbf:
+  type: repository
+  title: scipy.interpolate.RBFInterpolator
+  author: The SciPy Community
+  date: 2025
+  url:
+    value: https://github.com/scipy/scipy/blob/v1.15.2/scipy/interpolate/_rbfinterp.py#L0-L1
+    date: 2025-02-24

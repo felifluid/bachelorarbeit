@@ -68,6 +68,19 @@ A possible refinement of the triangulation is to add more data points in areas w
 However, in the context of three-dimensional data, every point is assigned a value. In order to add more additional points interpolation is necessary. // for example with height data
 
 == Interpolation
+// focus on multidimensional data, at this is the data dimensions being interpolated in topovis
+When faced with multidimensional data, there are multiple different interpolation approaches to choose from. In this section two different methods are being introduced and discussed.
+
+=== RegularGridInterpolator
+The `RegularGridInterpolator` (RGI) is a python class provided by SciPy @scipy2025rgi. This class makes a few assumptions of the grid structure to avoid expensive triangulation and therefore speed up the interpolation @scipy2025rgi. That is, the grid must be rectilinear, means rectangular with even or uneven spacing @scipy2025rgi. The RGI supports different methods for interpolation, among them nearest, linear, cubic and quintic @scipy2025rgi. The last two involve solving a large sparse linear system @scipy2025rgi.
+
+// TODO: explain trilinear interpolation?
+
+// ??: different headline?
+=== RBFInterpolator
+Similar to the RGI The `RBFInterpolator` (RBFI) is also a class provided by SciPy @scipy2025rbf. 
+
+// TODO: cite underlying papers
 
 == ToPoVis
 === What is ToPoVis?
