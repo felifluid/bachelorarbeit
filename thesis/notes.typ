@@ -24,3 +24,6 @@ A:
 
 Q: Ist der safety factor q in allen Geometrien abhängig von #sym.psi? \
 A: 
+
+Q: Wie ist #sym.psi in circularer Geometrie definiert? \
+A:
