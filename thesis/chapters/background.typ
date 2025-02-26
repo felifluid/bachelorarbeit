@@ -132,17 +132,19 @@ In circular geometry, the factor $G$ is defined like follows @peeters2015[p.25].
 $ 
   G(psi, s) = frac(1,#sym.pi) s_B s_j abs(q(#sym.psi)) arctan[sqrt(frac(1-#sym.psi, 1+#sym.psi)) tan frac(#sym.theta, 2)] = #text("gmap")\(psi, s)
 $ 
-It is outputted directly by GKW and can be found under `geom/gmap` as a discrete function of #sym.psi and $s$. // ??: can i call this "discrete function"?
+It is outputted directly by GKW and can be found under `geom/gmap` as a discrete function of #sym.psi and $s$ @samaniego2024topovis[p.21]. // ?? can i call this "discrete function"?
 
 ===== CHEASE geometry
 For general geometries GKW interfaces the CHEASE code @peeters2015[p.2]. CHEASE (Cubic Hermite Element Axisymmetric Static Equilibrium) is a solver for toroidal magnetohydrodynamic equilibria developed by #cite(<lutjens1996chease>, form: "prose"). Unlike GKW, it treats the plasma as a fluid rather then a many-particle system. CHEASE can deal with general geometries, e.g. geometries with up-down-asymmetric cross sections as present in tokamaks like JET (Joint European Torus) and the planned ITER (International Thermonuclear Experimental Reactor) @lutjens1996chease[p.221f]. Hence, these general geometries are named CHEASE or CHEASE-global in GKW @peeters2015[p.42].
 The resulting geometry factor can be expressed as @samaniego2024topovis[p.21]:
 
-$ G(psi, s) = underbrace(s_B s_j frac(F(Psi) J_Psi _(zeta s)(Psi), 2pi), text("gmap")(psi, s)) integral_0^s d tilde(s) frac(1, R^2(psi, tilde(s))) $
+// !! citation other than topovis?
+
+$ G(psi, s) = underbrace(s_B s_j frac(F(Psi) J_Psi _(zeta s)(Psi), 4pi^2), text("gmap")(psi, s)) integral_0^s d tilde(s) frac(1, R^2(psi, tilde(s))) $
 
 The prefactor of the integral is calculated by GKW and is outputted to `geom/gmap` as a discrete 2D-function @samaniego2024topovis[p.21]. The $s$-integral, however, is being calculated by ToPoVis. This is being done using numerical trapezoidal integration @samaniego2024topovis[p.21]. In the usual case of an even number of grid points in the $s$ direction $s=0$ and therefore $R(s=0)$ doesn't not exist and is interpolated using B-splines @samaniego2024topovis[p.21]. 
 
-// ??: weiter ausführen?
+// ?? weiter ausführen?
 
 ===== s-#sym.alpha geometry
 The s-#sym.alpha geometry is a heavily simplified geometry approximating flux surfaces to be circular and having a small inverse aspect ratio $psi = r/R << 1$ @peeters2015[p.23]. // ??: numerically unstable
