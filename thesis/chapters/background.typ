@@ -147,9 +147,8 @@ The prefactor of the integral is calculated by GKW and is outputted to `geom/gma
 // ?? weiter ausführen?
 
 ===== s-#sym.alpha geometry
-The s-#sym.alpha geometry is a heavily simplified geometry approximating flux surfaces to be circular and having a small inverse aspect ratio $psi = r/R << 1$ @peeters2015[p.23]. // ??: numerically unstable
+The s-#sym.alpha geometry is the first order approximation of the circular geometry. Flux surfaces are circular and having a small inverse aspect ratio $psi = r/R << 1$ @peeters2015[p.23]. Because of the heavily simplified nature of this, it can lead to numerical instability for non-linear simulations @peeters2015[p.23]. In this geometry the geometry factor $G$ is defined like this @peeters2015[p.23] #footnote[In previous versions of @peeters2015 #sym.zeta was falsely defined as $zeta = frac(s_B s_j, 2pi) [abs(q) theta - phi]$.]:
 
-// !!: florian said this is an error in GKW and ToPoVis
 $ G(psi, s) = s_B s_j abs(q(psi)) s $
 
 This time, `geom/gmap` is not being used. Instead $G$ is calculated in ToPoVis through the geometry factors `input/geom/signB`, `input/geom/signJ` and `geom/q` exported by GKW.
@@ -166,5 +165,12 @@ $ f(#sym.psi, #sym.zeta, s) = hat(f)(#sym.psi, #sym.zeta, s) exp(i k_#sym.zeta #
 
 
 === What needs to be improved?
+
+// ! Numerical artifacts
+
+// readability of the code
+
+// vectorize / optimize some calculations
+
 
 #load-bib()
