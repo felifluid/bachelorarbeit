@@ -130,10 +130,18 @@ With each geometry having its own definition of $G$. // TODO: formulation
 // s(r, #sym.theta) &= frac(1, 2#sym.pi) [#sym.theta + #sym.psi\(r) sin(#sym.theta)] \
 In circular geometry, the factor $G$ is defined like follows @peeters2015[p.25].
 $ 
-  G = frac(1,#sym.pi) s_B s_j abs(q(#sym.psi)) arctan[sqrt(frac(1-#sym.psi, 1+#sym.psi)) tan frac(#sym.theta, 2)] 
+  G(psi, theta) = frac(1,#sym.pi) s_B s_j abs(q(#sym.psi)) arctan[sqrt(frac(1-#sym.psi, 1+#sym.psi)) tan frac(#sym.theta, 2)] 
 $ 
 It is outputted directly by GKW and can be found under `geom/gmap` as a discrete function of #sym.psi and $s$. // ??: can i call this "discrete function"?
 
+===== CHEASE geometry
+GKW also can be run on a geometry called CHEASE or `chease_global`. CHEASE (Cubic Hermite Element Axisymmetric Static Equilibrium) is a solver for toroidal magnetohydrodynamic equilibria developed by #cite(<lutjens1996chease>, form: "prose"). So unlike GKW, it treats the plasma as a fluid rather then a many-particle system. CHEASE can deal with up-down-asymmetric cross sections.
+
+$ G(psi, s) = underbrace(s_B s_j frac(F(Psi) J_Psi _(zeta s)(Psi), 2pi), text("gmap")(psi, s)) integral_0^s d tilde(s) frac(1, R^2(psi, tilde(s))) $
+
+The prefactor of the integral is calculated by GKW and is outputted to `geom/gmap` as a discrete 2D-function @samaniego2024topovis[p.21]. The $s$-integral, however, is being calculated by ToPoVis. This is being done using numerical trapezoidal integration @samaniego2024topovis[p.21]. In the usual case of an even number of grid points in the $s$ direction $s=0$ and therefore $R(s=0)$ doesn't not exist and is interpolated using B-splines @samaniego2024topovis[p.21]. 
+
+// ??: weiter ausführen?
 
 ==== Linear simulations
 For linear simulations the calculation of the poloidal potential is simple, as a function in hamada coordinates $f(#sym.psi, #sym.zeta, s)$ can be expressed as a Fourier series.

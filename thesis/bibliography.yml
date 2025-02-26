@@ -160,3 +160,22 @@ scipy2025rbf:
   url:
     value: https://github.com/scipy/scipy/blob/v1.15.2/scipy/interpolate/_rbfinterp.py#L0-L1
     date: 2025-02-24
+
+lutjens1996chease:
+  type: article
+  title: The CHEASE code for toroidal MHD equilibria
+  author:
+  - Lütjens, H.
+  - Bondeson, A.
+  - Sauter, O.
+  date: 1996
+  page-range: 219–260
+  url: https://www.sciencedirect.com/science/article/pii/001046559600046X
+  serial-number:
+    doi: https://doi.org/10.1016/0010-4655(96)00046-X
+    issn: 0010-4655
+  parent:
+    type: periodical
+    title: Computer Physics Communications
+    issue: 3
+    volume: 97
