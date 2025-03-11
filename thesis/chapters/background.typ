@@ -20,7 +20,7 @@ The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of 
 
 // image of a tokamak torus with hamada coordinates
 
-== Triangulation
+== Triangulation <sec:triang>
 
 In the context of graph-theory or computational geometry _triangulation_ is the maximum set of edges for a given set of vertices so that no edges are intersecting @klein2005voronoi[p.233]. Given a set of points, there are many possible ways of performing a triangulation. However, not all triangles are created equal. // TODO: informal, is this okay?
 
