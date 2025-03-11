@@ -1,6 +1,8 @@
 #import "functions.typ": load-bib
 
-#set heading()
+#set heading(
+    numbering: "1."
+)
 
 // TODO: Deckblatt
 
