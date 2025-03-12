@@ -27,3 +27,6 @@ A: Yes. Intern arbeitet GKW zum berechnen mit lokal konstantem q. Aber in all me
 
 Q: Wie ist #sym.psi in circularer Geometrie definiert? \
 A: r/R
+
+Q: Fachbegriff für die "Verschraubung" mit zunehmendem #sym.psi
+A: Lokale Magnetische Scherung
