@@ -5,15 +5,14 @@
 == GKW
 The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of a confined plasma, usually inside of a tokamak @peeters2015[p.1]. It is written in Fortran 95 and was initially developed at the University of Warwick in 2007 @peeters2015[p.1]. The code is freely availiable and currently being hosted at https://bitbucket.org/gkw/gkw. It works in both linear and non-linear regimes @peeters2015[p.1]
 
-// ??: linear case
+// linear case
 // GKW solves eigenvalues k_zeta (fourier eigenmodes)
 // eigenvalues are symmetrical
 // as "linear" they do not couple and evolve independently
 // usually only one fourier mode is simulated
 // → fourier coefficient is 2D (psi, s) with k_zeta constant
-// ??: Quelle außer Sophias BA?
 
-// ??: nonlinear run
+// nonlinear run
 
 
 == Hamada coordinates
@@ -117,7 +116,7 @@ The program can be subdivided into the following sequences: //TODO: not happy wi
 // TODO: maybe add flow chart?
 
 ==== Calculating the #sym.zeta\-shift
-A poloidal slice implies satisfying the condition $#sym.phi = #text("const")$. The way the #sym.zeta\-shift is calculated is different for the kind of geometry being used for the simulation. ToPoVis works for three different geometries: 1) circular, 2) CHEASE and 3) s-#sym.alpha. In each geometry the transformations between toroidal and hamada coordinates are different @samaniego2024topovis[p.20ff]. // ??: cite after each sentence?
+A poloidal slice implies satisfying the condition $#sym.phi = #text("const")$. The way the #sym.zeta\-shift is calculated is different for the kind of geometry being used for the simulation. ToPoVis works for three different geometries: 1) circular, 2) CHEASE and 3) s-#sym.alpha. In each geometry the transformations between toroidal and hamada coordinates are different @samaniego2024topovis[p.20ff].
 
 In all geometries #sym.zeta is the only coordinate that is dependend on #sym.phi and can be defined generally as follows:
 
@@ -132,7 +131,7 @@ In circular geometry, the factor $G$ is defined like follows @peeters2015[p.25].
 $ 
   G(psi, s) = frac(1,#sym.pi) s_B s_j abs(q(#sym.psi)) arctan[sqrt(frac(1-#sym.psi, 1+#sym.psi)) tan frac(#sym.theta, 2)] = #text("gmap")\(psi, s)
 $ 
-It is outputted directly by GKW and can be found under `geom/gmap` as a discrete function of #sym.psi and $s$ @samaniego2024topovis[p.21]. // ?? can i call this "discrete function"?
+It is outputted directly by GKW and can be found under `geom/gmap` as a discrete function of #sym.psi and $s$ @samaniego2024topovis[p.21]. // TODO: don't call the discrete function
 
 ===== CHEASE geometry
 For general geometries GKW interfaces the CHEASE code @peeters2015[p.2]. CHEASE (Cubic Hermite Element Axisymmetric Static Equilibrium) is a solver for toroidal magnetohydrodynamic equilibria developed by #cite(<lutjens1996chease>, form: "prose"). Unlike GKW, it treats the plasma as a fluid rather then a many-particle system. CHEASE can deal with general geometries, e.g. geometries with up-down-asymmetric cross sections as present in tokamaks like JET (Joint European Torus) and the planned ITER (International Thermonuclear Experimental Reactor) @lutjens1996chease[p.221f]. Hence, these general geometries are named CHEASE or CHEASE-global in GKW @peeters2015[p.42].
