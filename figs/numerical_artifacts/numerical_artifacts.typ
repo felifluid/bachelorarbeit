@@ -8,13 +8,13 @@
         caption: "delaunay contour plot",
     ), <fig:artifacts:contour_artifacts> ,
     figure(
-        image("chease_no_artifacts.svg"),
-        caption: "regular contour plot",
-    ), <fig:artifacts:contour_regular>,
-    figure(
         image("chease_bad_triangles.svg"),
         caption: "delaunay triangulation",
     ), <fig:artifacts:delaunay_triangles>,
+    figure(
+        image("chease_no_artifacts.svg"),
+        caption: "regular contour plot",
+    ), <fig:artifacts:contour_regular>,
     figure(
         image("chease_regular_triangles.svg"),
         caption: "regular triangulation",
