@@ -570,4 +570,8 @@ dset_Z[()] = data[:, 1]
 dset_Pot = f.create_dataset("Poten", (lng,), 'f')
 dset_Pot[()] = data[:, 2]
 
+# add for debugging
+f.create_dataset("s", data=s_grid)
+f.create_dataset("x", data=eps)
+
 f.close()
