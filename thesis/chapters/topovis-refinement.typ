@@ -4,19 +4,22 @@
 = Improving the ToPoVis Code
 
 == Numerical artifacts
-With the original version of ToPoVis some numerical artifacts could be observed as can be seen in @fig:artifacts:contour_artifacts. Fixing these artifacts is the original motivation underlying this thesis. // TODO: satz umformulieren
+With the original version of ToPoVis some numerical artifacts could be observed in the contour plots as can be seen in @fig:artifacts:contour_artifacts. 
+The artifacts are particularly severe at the edges of plots in CHEASE geometry. 
+This made it harder to study small scale turbulences in these areas.
+Fixing these artifacts is the original motivation underlying this thesis. 
 
-// @Flo important for his current research:
-// Visualisierung, Rand von simulationen in CHEASE geometrie, v.a. in nicht-linearen simulationen
-
-To create the plots in ToPoVis and the plots in this thesis the function `tricontourf` from the package `matplotlib.pyplot` is used @samaniego2024topovis[27].
+To create the plots in ToPoVis and the plots in this thesis the function `tricontourf` from the package `matplotlib.pyplot` is used @samaniego2024topovis[p.27].
 As the name suggests it uses an unstructured triangle mesh to draw contour regions.
 If no triangle grid is supplied, it will generate one implicitly using a delaunay algorithm @matplotlib2025tricontourf. 
-As a contour plot is a form of interpolation, the result can vary heavily with the choice of triangulation. // !! satz korrigieren
+The generation of smooth surfaces using triangulation is commonly used as a linear interpolation of (un-)structured three-dimensional data @lawson1977software[p.1-2]. 
+The triangulation defines sets of 3 grid points, that will be interpolated inbetween. 
+As such, the choice of triangulation has a big impact on the resulting interpolation. 
+As discussed in section !!, delaunay triangulation usually yields the best results, however, it faces issues with heavily non-uniform grids.
 
-@fig:artifacts shows a subsection of simulation data in CHEASE geometry outputted by ToPoVis. // TODO: add specific s values
+@fig:artifacts shows a subsection of simulation data in CHEASE geometry outputted by ToPoVis. 
 The section stands out with a really low density in poloidal direction and a high density in the radial direction and can therefore be classified as a heavily non-uniform grid.
-As explained in the previous section ??,//@sec:triang !! fix this
+As explained in the previous section !!,
 non-uniform distributions can lead to so called "fat" triangles in areas of low density, as well as many strongly acute triangles surrounding them.
 This is excactly what can be observed in @fig:artifacts:delaunay_triangles.
 Note that the axes aren't scaled equally to help visualize this effect. 
@@ -31,9 +34,15 @@ The method makes a triangulation in the equirectangular (meaning equally spaced 
 
 While the function provides a better triangulation in non-uniform areas, it leads to many acute triangles in other areas. // TODO: specify area?
 The CHEASE geometry is sheared poloidal in #sym.theta along the radial coordinate #sym.psi. However, the shearing is asymmetrical in the poloidal coordinate s. Around $s=0$ the shearing is minimal, so lines with constant s are nearly straight radially. The shearing reaches its maximum at $s=±0.5$. 
-In this area the constant-s-lines curve counter-clockwise. Because of this 
+In this area the constant-s-lines curve counter-clockwise. Because of this several s-contant-lines span poloidal parallel to each other. This leads to a high density unstructured grid, which is favorable for delaunay triangulation.
 
-// however it doesn't come without caveats: due to the poloidal shift 
+#include "../../figs/numerical_artifacts/sheared_triang/fig.typ"
+
+@fig:sheared_triang shows four plots. 
+The two on the top use delaunay triangulation, the bottom two make use of the `make_regular_triangles` method, each with a contour plot and a triangulation plot.  
+Even though the values of the discrete grid points stay the same, the resulting contour plot changes heavily, when using a regular triangulation. 
+
+// direction of stripes changes
 
 // every triangulation is a form of interpolation
 
