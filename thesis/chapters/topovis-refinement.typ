@@ -9,17 +9,17 @@ With the original version of ToPoVis some numerical artifacts could be observed 
 // @Flo important for his current research:
 // Visualisierung, Rand von simulationen in CHEASE geometrie, v.a. in nicht-linearen simulationen
 
-To create the plots in ToPoVis and the plots in this thesis the function `tricontourf` from the package `matplotlib.pyplot` is used.
-As the name suggests it uses an unstructured triangle mesh to draw contour regions. // !! cite matplotlib docs
-If no triangle grid is supplied, it will generate one implicitly using a delaunay algorithm. 
-As a contour plot is a form of interpolation, the result can vary heavily with the choice of triangulation.
+To create the plots in ToPoVis and the plots in this thesis the function `tricontourf` from the package `matplotlib.pyplot` is used @samaniego2024topovis[27].
+As the name suggests it uses an unstructured triangle mesh to draw contour regions.
+If no triangle grid is supplied, it will generate one implicitly using a delaunay algorithm @matplotlib2025tricontourf. 
+As a contour plot is a form of interpolation, the result can vary heavily with the choice of triangulation. // !! satz korrigieren
 
 @fig:artifacts shows a subsection of simulation data in CHEASE geometry outputted by ToPoVis. // TODO: add specific s values
-The section // auszeichnen with a low density in poloidal direction and a high density in the radial direction, so this can be classified as a heavily non-uniform grid.
+The section stands out with a really low density in poloidal direction and a high density in the radial direction and can therefore be classified as a heavily non-uniform grid.
 As explained in the previous section ??,//@sec:triang !! fix this
 non-uniform distributions can lead to so called "fat" triangles in areas of low density, as well as many strongly acute triangles surrounding them.
 This is excactly what can be observed in @fig:artifacts:delaunay_triangles.
-Note that the axes aren't scaled equally to help visualizing this effect. 
+Note that the axes aren't scaled equally to help visualize this effect. 
 Furthermore only every fourth point in the #sym.psi - direction is used to make the triangles distinguishable. 
 This has very little influence on the delaunay triangulation in this specific section.
 

@@ -179,3 +179,28 @@ lutjens1996chease:
     title: Computer Physics Communications
     issue: 3
     volume: 97
+
+hunter2007matplotlib:
+  type: article
+  title: 'Matplotlib: A 2D graphics environment'
+  author: Hunter, J. D.
+  date: 2007
+  page-range: 90–95
+  serial-number:
+    doi: 10.1109/MCSE.2007.55
+  abstract: Matplotlib is a 2D graphics package used for Python for application development, interactive scripting, and publication-quality image generation across user interfaces and operating systems.
+  parent:
+    type: periodical
+    title: Computing in Science & Engineering
+    publisher: IEEE COMPUTER SOC
+    issue: 3
+    volume: 9
+
+matplotlib2025tricontourf:
+  type: reference
+  title: matplotlib.pyplot.tricontourf
+  author: The Matplotlib development team
+  date: 2025
+  url:
+    value: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tricontourf.html
+    date: 2025-03-17
