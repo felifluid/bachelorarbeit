@@ -9,21 +9,41 @@ With the original version of ToPoVis some numerical artifacts could be observed 
 // @Flo important for his current research:
 // Visualisierung, Rand von simulationen in CHEASE geometrie, v.a. in nicht-linearen simulationen
 
-The artifacts are caused by an unfavorable delaunay triangulation done implicitly by the `pyplot.tricontourf` method. 
-As explained in the previous section ?,//@sec:triang // !! fix this
-heavily non-uniform distributions can lead to so called "fat" triangles in areas of low density, as well as many strongly acute triangles surrounding them. This is excactly what can be observed in @fig:artifacts:delaunay_triangles.
+To create the plots in ToPoVis and the plots in this thesis the function `tricontourf` from the package `matplotlib.pyplot` is used.
+As the name suggests it uses an unstructured triangle mesh to draw contour regions. // !! cite matplotlib docs
+If no triangle grid is supplied, it will generate one implicitly using a delaunay algorithm. 
+As a contour plot is a form of interpolation, the result can vary heavily with the choice of triangulation.
 
-Note that @fig:artifacts shows a specific small part of the poloidal slice at which the numerical artifacts are the strongest. To further help visualizing this effect the axes aren't equally scaled. To make the triangles distinguishable in the bottom two plots only every fourth point in the #sym.psi - direction is used, which has very little influence on the triangulation.
+@fig:artifacts shows a subsection of simulation data in CHEASE geometry outputted by ToPoVis. // TODO: add specific s values
+The section // auszeichnen with a low density in poloidal direction and a high density in the radial direction, so this can be classified as a heavily non-uniform grid.
+As explained in the previous section ??,//@sec:triang !! fix this
+non-uniform distributions can lead to so called "fat" triangles in areas of low density, as well as many strongly acute triangles surrounding them.
+This is excactly what can be observed in @fig:artifacts:delaunay_triangles.
+Note that the axes aren't scaled equally to help visualizing this effect. 
+Furthermore only every fourth point in the #sym.psi - direction is used to make the triangles distinguishable. 
+This has very little influence on the delaunay triangulation in this specific section.
 
 #include "../../figs/numerical_artifacts/numerical_artifacts.typ"
 
-A possible solution to this is presented in the two figures on the right. Instead of relying on complex algorithms to perform a delaunay-conform triangulation, a custom regular triangle grid is used. This is achieved by a new method called `make_regular_triangles`. 
+A possible solution to this is presented in the bottom two figures. Instead of relying on delaunay triangulation, a custom regular triangle grid is used. This is achieved by a new method called `make_regular_triangles`. 
 
-The method makes a triangulation in the equirectangular (meaning equally spaced and rectangular) hamada coordinates. Both poloidal coordinates R and Z are exported by GKW as functions of #sym.psi and s, represented as discrete values in a 2d-array. Therefore, each poloidal point P is assigned two hamadian indices. Its possible to map the indices of the arrays to a set of regular triangles. Regular meaning triangles have the form $ #sym.sum _(i=0)^n [(i,i), (i+1, i), (i, i+1)] $ // ??: ask Leo how to correctly write this mathematically
+The method makes a triangulation in the equirectangular (meaning equally spaced and rectangular) hamada coordinates. Both poloidal coordinates R and Z are exported by GKW as functions of #sym.psi and s, represented as discrete values in a 2d-array. Therefore, each pair of indices in hamada describe a point P. Its possible to map the indices of the arrays to a set of regular triangles. Regular meaning triangles have the form $ #sym.sum _(i=0)^n [(i,i), (i+1, i), (i, i+1)] $ // ??: ask Leo how to correctly write this mathematically
 
-As @fig:artifacts shows, the regular triangulation leads to a more uniform representation of the triangle mesh as well as the resulting contour plot. The approach guarantees that triangle sizes are within the same order of magnitude and have similar shapes. However the regular triangulation doesn't come without its own caveats. // ?? Fachbegriff für die Verwirbelung / Verschraubung der poloidalen coordinaten
+While the function provides a better triangulation in non-uniform areas, it leads to many acute triangles in other areas. // TODO: specify area?
+The CHEASE geometry is sheared poloidal in #sym.theta along the radial coordinate #sym.psi. However, the shearing is asymmetrical in the poloidal coordinate s. Around $s=0$ the shearing is minimal, so lines with constant s are nearly straight radially. The shearing reaches its maximum at $s=±0.5$. 
+In this area the constant-s-lines curve counter-clockwise. Because of this 
 
 // however it doesn't come without caveats: due to the poloidal shift 
+
+// every triangulation is a form of interpolation
+
+// as later experiments show: hamada is the prefered geometry to interpolate
+
+// delaunay triangulation in general "would" be better, if it wouldn't lead to artifacts on a sparse non-uniform grid
+
+// the best method would probably be to use delaunay refinement in combination with interpolation -> outlook
+
+// of course simulations with higher density in s would help. but those are really heavy to compute. for convergence of the simulation only relatively few s grid points are needed.
 
 === Refining the grid through interpolation
 
