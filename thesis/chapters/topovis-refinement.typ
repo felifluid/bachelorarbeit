@@ -50,7 +50,7 @@ That is why the regular triangulation can be considered as an interpolation in h
 There cannot be made a clear decision in favor of neither of the two approaches, without comparing the results with simulations with higher resolutions. 
 Findings in section !! show, that interpolations in hamada coordinates are coinciding better with the high resolution simulations.
 
-// TODO: Überleitung
+A more and refined way to improve triangulations is to avoid the causes of unfavorable triangulations in the first place. Is can be achieved by interpolating the grid by other means _before_ triangulation is done, which will be discussed next.
 
 // the best method would probably be to use delaunay refinement in combination with interpolation -> outlook
 
