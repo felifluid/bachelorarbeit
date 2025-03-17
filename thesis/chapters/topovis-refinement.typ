@@ -40,15 +40,17 @@ In this area the constant-s-lines curve counter-clockwise. Because of this sever
 
 @fig:sheared_triang shows four plots. 
 The two on the top use delaunay triangulation, the bottom two make use of the `make_regular_triangles` method, each with a contour plot and a triangulation plot.  
-Even though the values of the discrete grid points stay the same, the resulting contour plot changes heavily, when using a regular triangulation. 
+Even though the values of the discrete grid points stay the same, the resulting contour plot changes heavily between triangulation methods. While the contour plot using delaunay triangulation is characterized with big horizontal stripes, the regular contour plot consists of many thin vertical stripes. This is directly correlated with the shape and orientation of the triangulations. 
 
-// direction of stripes changes
+As interpolation is done along the edges of the triangles, the resulting contour plot might resemble the triangulation in its structure.
+Both triangulations operate on _nearest neighbor_ approaches. 
+However, while the delaunay algorithm leads to points being connected to near neighbors in _poloidal_ coordinates, the regular triangulation defines the distance of two points in _hamada_ coordinates. 
+Two points can be close to each other in hamada coordinates, while being really distant poloidally. 
+That is why the regular triangulation can be considered as an interpolation in hamada coordinates, and the delaunay triangulation as a interpolation in poloidal coordinates. 
+There cannot be made a clear decision in favor of neither of the two approaches, without comparing the results with simulations with higher resolutions. 
+Findings in section !! show, that interpolations in hamada coordinates are coinciding better with the high resolution simulations.
 
-// every triangulation is a form of interpolation
-
-// as later experiments show: hamada is the prefered geometry to interpolate
-
-// delaunay triangulation in general "would" be better, if it wouldn't lead to artifacts on a sparse non-uniform grid
+// TODO: Überleitung
 
 // the best method would probably be to use delaunay refinement in combination with interpolation -> outlook
 
