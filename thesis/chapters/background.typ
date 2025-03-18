@@ -78,19 +78,35 @@ A possible refinement of the triangulation is to add more data points in areas w
 However, in the context of three-dimensional data, every point is assigned a value. In order to add more additional points interpolation is necessary. // for example with height data
 
 == Interpolation
-// focus on multidimensional data, at this is the data dimensions being interpolated in topovis
-When faced with multidimensional data, there are multiple different interpolation approaches to choose from. In this section two different methods are being introduced and discussed.
+This section focuses on interpolation of multidimensional data, at this is the data being interpolated in ToPoVis is three-dimensional.
+When faced with multidimensional data, there are multiple different interpolation approaches to choose from. 
+In this section two different methods are being introduced and discussed: Firstly, the functionality of the `RegularGridInterpolator` will be discussed. The second section takes a look at the `RBFInterpolator` and points out the differences of the two.
 
 === RegularGridInterpolator
-The `RegularGridInterpolator` (RGI) is a python class provided by SciPy @scipy2025rgi. This class makes a few assumptions of the grid structure to avoid expensive triangulation and therefore speed up the interpolation @scipy2025rgi. That is, the grid must be rectilinear, means rectangular with even or uneven spacing @scipy2025rgi. The RGI supports different methods for interpolation, among them nearest, linear, cubic and quintic @scipy2025rgi. The last two involve solving a large sparse linear system @scipy2025rgi.
+The `RegularGridInterpolator` (RGI) is a python class provided by the package `scipy.interpolate` @scipy2025rgi. 
+The RGI is an interpolator, that is designed to work with N-dimensional data defined on a rectilinear grid; meaning a rectangular grid with even or uneven spacing @scipy2025rgi. 
+Different methods of interpolation are supported, namely nearest-neighbor, linear, or spline interpolations @scipy2025rgi.
+Higher degree spline interpolations usually yield more accurate results, at the cost of more expensive computations compared to linear interpolation @scipy2025rgi.
+However, due to the assumption of a regular grid structure, the RGI avoids expensive triangulation and operates efficiently even when constructing splines of degree 3 or 5 @scipy2025rgi. 
+On regular grids multivariate (or N-dimensional) linear interpolation can be done by interpolating consecutively in each dimension @weiser1988interpolation. 
+When constructing splines, this involves solving a large sparse linear system @scipy2025rgi.
 
-// TODO: explain trilinear interpolation?
+// TODO: Abschlusssatz
 
-// ??: different headline?
+// Bild maybe ??
+
 === RBFInterpolator
-Similar to the RGI The `RBFInterpolator` (RBFI) is also a class provided by SciPy @scipy2025rbf. 
+Similar to the RGI, the `RBFInterpolator` (RBFI) is a class provided by `scipy.interpolate` and also works on N-dimensional data @scipy2025rbf. 
+Unlike the RGI, which only operates with data on a regular grid, the RBFI also works with unstructured data @scipy2025rbf.
+A radial basis function (RBF) is a N-dimensional scalar function $f(r)$, that only depends on the distance $r=|x-c|$ between the evaluation point $x$ and the center $c$ of the RBF @scipy2025rbf.
+There are two main kinds of RBFs commonly used, also referred to as _kernels_. Firstly, infinitely smooth functions like the gaussian function $f(r)=e^(-(#sym.epsilon r)^2)$, an inverse quadratic $f(r)=frac(1, 1+(#sym.epsilon r)^2)$ or inverse multiquadric function $f(r)=frac(1,sqrt(1+(#sym.epsilon r)^2))$ @scipy2025rbf. 
+Note that these are scale variant and therefore require finding an appropriate smoothing parameter $#sym.epsilon$ (e.g. through cross validation, or machine learning) @scipy2025rbf.
+Secondly, a polyharmonic spline of form $f(r)=r^k$ with uneven $k$ or $f(r)=r^k ln(r)$ with even $k$ can be used @scipy2025rbf. 
+The default kernel used by the RBFI is also a polyharmonic spline called _thin plate spline_, which is defined as $f(r)=r^2 ln(r)$ @scipy2025rbf.
+The interpolant takes the form of a linear combination of RBFs centered at each data point respectively, which can then be evaluated at arbitrary points @scipy2025rbf.
+As memory required to solve the interpolation increases quadratically with the number of data points, the number of nearest neighbors to consider for each evaluation point can be specified @scipy2025rbf.
 
-// TODO: cite underlying papers
+// compare details in a table??
 
 == ToPoVis
 === What is ToPoVis?

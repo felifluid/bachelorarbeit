@@ -204,3 +204,17 @@ matplotlib2025tricontourf:
   url:
     value: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tricontourf.html
     date: 2025-03-17
+
+weiser1988interpolation:
+  type: article
+  title: A note on piecewise linear and multilinear table interpolation in many dimensions
+  author:
+  - Weiser, Alan
+  - Zarantonello, Sergio E
+  date: 1988
+  page-range: 189–196
+  parent:
+    type: periodical
+    title: Mathematics of Computation
+    issue: 181
+    volume: 50
