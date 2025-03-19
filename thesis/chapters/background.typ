@@ -125,9 +125,10 @@ The program can be subdivided into the following sequences: //TODO: not happy wi
 #set enum(numbering: "1.", full: true)
 1. Reading values from `gkwdata.h5` file.
 2. Calculating #sym.zeta for a given #sym.phi, also known as #sym.zeta\-shift
+3. Evaluating potential #sym.Phi
   1. Linear case: Calculating potential #sym.Phi using fourier eigenmodes $hat(f)$
   2. Non-linear case: Interpolating 3D-potential and evaluating it at #sym.zeta\-shift
-3. Plotting the potential on poloidal slice
+4. Plotting the potential on poloidal slice
 
 // TODO: maybe add flow chart?
 
