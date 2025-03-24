@@ -26,7 +26,7 @@ Note that the axes aren't scaled equally to help visualize this effect.
 Furthermore only every fourth point in the #sym.psi - direction is used to make the triangles distinguishable. 
 This has very little influence on the delaunay triangulation in this specific section.
 
-#include "../../figs/numerical_artifacts/numerical_artifacts.typ"
+#include "../../figs/triangulation_artifacts/sparse/fig.typ"
 
 A possible solution to this is presented in the bottom two figures. Instead of relying on delaunay triangulation, a custom regular triangle grid is used. This is achieved by a new method called `make_regular_triangles`. 
 
@@ -36,7 +36,7 @@ While the function provides a better triangulation in non-uniform areas, it lead
 The CHEASE geometry is sheared poloidal in #sym.theta along the radial coordinate #sym.psi. However, the shearing is asymmetrical in the poloidal coordinate s. Around $s=0$ the shearing is minimal, so lines with constant s are nearly straight radially. The shearing reaches its maximum at $s=±0.5$. 
 In this area the constant-s-lines curve counter-clockwise. Because of this several s-contant-lines span poloidal parallel to each other. This leads to a high density unstructured grid, which is favorable for delaunay triangulation.
 
-#include "../../figs/numerical_artifacts/sheared_triang/fig.typ"
+#include "../../figs/triangulation_artifacts/sheared/fig.typ"
 
 @fig:sheared_triang shows four plots. 
 The two on the top use delaunay triangulation, the bottom two make use of the `make_regular_triangles` method, each with a contour plot and a triangulation plot.  
@@ -58,11 +58,32 @@ A more and refined way to improve triangulations is to avoid the causes of unfav
 
 === Refining the grid through interpolation
 
-// solution: interpolation of said grid
+Similarly to the triangulation, the interpolation of the grid can be done in both poloidal coordinates and hamada coordinates. In this chapter, each approach is tested on circular simulations with a low density s-grid ($N_s=32$) and compared with a simulation with four times the amount of s-grid points ($N_s=128$). The technical functionality of the two interpolation methods is discussed in detail in !!. //@sec:background:interpolation
 
-// interpolation happens on regular hamada grid
+==== Interpolating in poloidal coordinates
+The challenge of interpolating in poloidal coordinates is caused by the scattered structure of the grid. 
 
-// interpolation results: picture comparision
+// comparable to gaussian blur in image upscaling
+
+// interpolating between first and last grid points is trivial → interpolation domain is not limited
+
+// 
+
+==== Interpolating in hamada coordinates
+
+
+
+// problem: regular grid interpolator can only interpolate
+
+// s-grid is defined from $s=0.5-Delta s/2$ to $s=-0.5+Delta s/2$. Note how this gap increases with lower s-grid resolution.
+
+// therefore we are left with a blank space without interpolated data between the first and last s.
+
+// of course this gap could be filled otherwise, e.g. through linear interpolation. However, this would give a false confidence of how the potential looks like in that area.
+
+// instead, when the flag '--periodic' is not supplied and the triangulation method is set to 'regular', ToPoVis will neither interpolate nor triangulate between $s=0.5-Delta s/2$ to $s=-0.5+Delta s/2$. This will lead to a white, blank space in that area.
+
+// However, there is an option to generate additional gridpoints *outside* the domain. This is being done through _double-periodic boundary conditions_.
 
 === Extending the grid through double-periodic boundary conditions
 
