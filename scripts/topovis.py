@@ -557,18 +557,23 @@ def parse_args(args):
                             default='plot.pdf',
                             help="(optional) Specify a file to write the plot into WITH extension. Can either be a full path, or a filename. If it's a filename, it will save to the current directory. Default is 'plot.pdf'."
                             )
+    plot_group.add_argument('--plot-grid',
+                            dest='plot_grid',
+                            action='store_true',
+                            help='(optional) plots scatter plot with triangulation instead of a contour plot. Good for debugging and spotting triangulation artifacts.'
+                            )
     plot_group.add_argument('--levels',
                             dest='levels',
                             nargs=1,
                             type=int,
                             default=200,
-                            help="(optional) How many levels to use for the tricontourf plot. Default is 200."
+                            help="(optional) How many levels to use for the tricontourf plot. Default is 200. Gets omitted when combined with --plot-grid"
                             )
     plot_group.add_argument('--dpi',
                             dest='dpi',
                             type=int,
                             default=400,
-                            help="(optional) How many DPI should the resulting png have? Has no effect when plotfile type is 'pdf' or 'svg'. Default is 300."
+                            help="(optional) How many DPI should the resulting png have? Has no effect when plotfile type is 'pdf' or 'svg'. Default is 400."
                             )
     plot_group.add_argument('--omit-axes',
                             dest='omit_axes',
@@ -582,6 +587,11 @@ def parse_args(args):
     interpolation_group.add_argument('fs', 
                                      type=int, 
                                      help='Factor by which to refine the s-grid through interpolation.')
+    interpolation_group.add_argument('--interpolator',
+                                     dest='interpolator',
+                                     choices=('rgi', 'rbfi'),
+                                     default='rgi',
+                                     help="(optional) Which interpolator to use to interpolate the potential. 'rgi' uses the RegularGridInterpolator, which interpolates on hamada coordinates, 'rbfi' uses the RBFInterpolator, which interpolates in poloidal coordinates. Default is 'rgi'.")
     interpolation_group.add_argument('--periodic',
                                      action='store_true',
                                      help='If supplied, applies period boundary condition to grid to interpolate between s=-0.5 and s=0.5. Has no effect when fs=1.'
@@ -596,7 +606,6 @@ def parse_args(args):
                                      type=str, 
                                      help="(optional) Specify a h5-file to write the interpolation data into. Can either be a full path, or a filename. If it's a filename, it will save to the current directory. Default is 'topovis_data.h5'.")
 
-    # FIXME: optional arguments doesnt quiet work when called from vscode debugger
     return parser.parse_args(args)
 ################################################# CLASSES ################################################
 
@@ -787,6 +796,7 @@ def main(args = None):
 
     INTERPOLATE : bool = FX > 1 or FS > 1
     PERIODIC : bool = args.periodic
+    INTERPOLATOR = args.interpolator
 
     VALID_METHODS = ['nearest', 'linear', 'cubic', 'quintic']
     if args.method in VALID_METHODS:
@@ -811,34 +821,109 @@ def main(args = None):
     DPI = int(args.dpi)
     PLOT_OUT = str(args.plot_out)
     OMIT_AXES = bool(args.omit_axes)
+    PLOT_GRID = bool(args.plot_grid)
 
     # ---------------------------------------------- GKWDATA -------------------------------------------------
 
     logging.info(f'Reading file {HDF5_PATH}')
     dat = GKWData(HDF5_PATH, poten_timestep=POTEN_TIMESTEP)
 
+    # perform zeta-shift
+    logging.info(f'Performing zeta-shift')
+    zeta_s = shift_zeta(dat.g, dat.s, PHI, dat.geom_type, 
+                    sign_b=dat.sign_b, 
+                    sign_j=dat.sign_j, 
+                    q=dat.q, 
+                    r_n=dat.r_n,
+                    r_ref=dat.r_ref, 
+                    nx=dat.nx, 
+                    ns=dat.ns)
+    # shape (nx,ns)
 
-    # ----------------------------------------- INTERPOLATE GRID ---------------------------------------------
+    if dat.is_lin:
+        fcoeffs = dat.fcoeffs    # shape (nx,ns)
 
-    x = dat.x
-    s = dat.s
+    if PERIODIC and FS > 1:     # apply periodic boundary condition
+        """
+        Extend all variables depending on s periodically using specific periodic boundary conditions.
+        This allows interpolation between first and last dataset.
+        """
+        logging.info("Applying double periodic boundary condition")
+        
+        # number of grid points to extend in each direction (overlap)
+        n = 4
 
-    r_n = dat.r_n
-    z = dat.z
+        # extend the s-grid out of bounds without wrapping periodically 
+        # as `RegularGridInterpolator` needs a regular spaced, strictly ascending or descending grid without discontinuities
+        s = extend_regular_array(dat.s, n)     # shape (ns+2n)
+        x = dat.x                              # shape (nx)
 
-    # Interpolate Grid
-    logging.info('Interpolating hamada grid')
-    x_fine, s_fine = interpolate_hamada_grid(dat.x, dat.s, FX, FS, extrapolate_s=PERIODIC)
+        ns = len(s)   # ns+2n
+        nx = len(x)   # nx
 
-    # new grid-size
-    nx_fine = len(x_fine)
-    ns_fine = len(s_fine)
+        if INTERPOLATOR == 'rgi':
+            # z(s0) = z(s0 ± 1) ± q = z(s1) ± q
+            zeta_s = periodic_wrap(zeta_s, n, 1)   # extend grid periodically in s
+            zeta_s[:, :n] += dat.q[:, None]        # apply boundary condition for zeta[s < -0.5]
+            zeta_s[:, -n:None] -= dat.q[:, None]   # apply boundary condition for zeta[s > 0.5]
+            zeta_s = zeta_s % 1                    # map zeta back to [0,1]
 
-    logging.info(f'Fine grid resolution: nx={nx_fine}, ns={ns_fine}')
+            if dat.is_lin:
+                # fourier coefficients only used in linear simulations
 
-    # precalculate different coordinate representations for reuse
-    xs_fine = xx_fine, ss_fine = np.meshgrid(x_fine, s_fine, indexing='ij')   # ! has to be in this order, or use indexing='ij'
-    xs_points_fine = grid_to_points(xs_fine)
+                fcoeffs = periodic_wrap(fcoeffs, n, 1)  # extend grid periodically in s
+                # ff[:, :n] *= np.exp(1j * k * dat.q[:, None])
+                # ff[:, -n:None] *= np.exp(-1j * k * dat.q[:, None])
+
+        r_n = periodic_wrap(dat.r_n, overlap=n, axis=1)
+        z = periodic_wrap(dat.z, overlap=n, axis=1)
+    else:
+        # don't apply periodic boundary condition
+        x = dat.x
+        s = dat.s
+
+        nx = dat.nx
+        ns = dat.ns
+
+        r_n = dat.r_n
+        z = dat.z
+
+    # ------------------- INTERPOLATE GRID ------------------------
+
+    if INTERPOLATE:
+        # Interpolate Grid
+        logging.info('Interpolating hamada grid')
+        x_fine, s_fine = interpolate_hamada_grid(dat.x, dat.s, FX, FS, extrapolate_s=PERIODIC)
+
+        # new grid-size
+        nx_fine = len(x_fine)
+        ns_fine = len(s_fine)
+
+        logging.info(f'Fine grid resolution: nx={nx_fine}, ns={ns_fine}')
+
+        # precalculate different coordinate representations for reuse
+        xs_fine = xx_fine, ss_fine = np.meshgrid(x_fine, s_fine, indexing='ij')   # ! has to be in this order, or use indexing='ij'
+        xs_points_fine = grid_to_points(xs_fine)
+
+        logging.info(f'Interpolating poloidal grid')
+        r_rgi = scipy.interpolate.RegularGridInterpolator((x,s), r_n, method=METHOD)
+        r_n_fine_flat = r_rgi(xs_points_fine)
+        r_n_fine = np.reshape(r_n_fine_flat, shape=(nx_fine, ns_fine))
+
+        z_rgi = scipy.interpolate.RegularGridInterpolator((x,s), z, method=METHOD)
+        z_fine_flat = z_rgi(xs_points_fine)
+        z_fine = np.reshape(z_fine_flat, shape=(nx_fine, ns_fine))
+    else: # no interpolation
+        # use sparse grid as "fine" grid
+        x_fine = x
+        s_fine = s
+        ns_fine = ns
+        nx_fine = nx
+
+        r_n_fine = dat.r_n
+        r_n_fine_flat = dat.r_n_flat
+        z_fine = dat.z
+        z_fine_flat = dat.z_flat
 
     # --------------------------------------- CALCULATE POTENTIAL ------------------------------------------
 
@@ -847,72 +932,42 @@ def main(args = None):
             # wave vector
             k = 2 * np.pi * dat.n_mod * dat.n_spacing   # constant
 
-            # perform zeta-shift
-            logging.info(f'Performing zeta-shift')
-            zz = shift_zeta(dat.g, dat.s, PHI, dat.geom_type, 
-                                    sign_b=dat.sign_b, 
-                                    sign_j=dat.sign_j, 
-                                    q=dat.q, 
-                                    r_n=dat.r_n,
-                                    r_ref=dat.r_ref, 
-                                    nx=dat.nx, 
-                                    ns=dat.ns)
-            # shape (nx, ns)
-
-            ff = dat.fcoeffs    # shape (nx, ns)
-            
-            
-
-            if PERIODIC and FS > 1:
-                # apply periodic boundary condition
-                logging.info("Applying double periodic boundary condition")
-
-                # TODO: this is equal procedure in linear and nonlinear > move outside if
-
-                # number of grid points to extend in each direction (overlap)
-                n = 4
-
-                # extend the grid out of bounds without applying periodic boundary conditions (yet).
-                # `RegularGridInterpolator` needs a regular spaced, strictly ascending or descending grid without discontinuities
-                s = extend_regular_array(dat.s, n)     # shape (ns+2n)
-                x = dat.x                              # shape (nx)
-
-                ns = len(s)   # ns+2n
-                nx = len(x)   # nx                         
-
-                # z(s0) = z(s0 ± 1) ± q = z(s1) ± q
-                zz = periodic_wrap(zz, n, 1)       # extend grid periodically in s
-                zz[:, :n] += dat.q[:, None]        # apply boundary condition for zeta[s < -0.5]
-                zz[:, -n:None] -= dat.q[:, None]   # apply boundary condition for zeta[s > 0.5]
-                zz = zz % 1                       # map zeta back to [0,1]
-
-                ff = periodic_wrap(ff, n, 1)  # extend grid periodically in s
-                # ff[:, :n] *= np.exp(1j * k * dat.q[:, None])
-                # ff[:, -n:None] *= np.exp(-1j * k * dat.q[:, None])
-
-            else:
-                # don't apply periodic boundary condition
-                x = dat.x
-                s = dat.s
-
             if INTERPOLATE:
-                # interpolate zeta-shift
-                logging.info(f'Interpolating zeta-shift')
-                zz_rgi = scipy.interpolate.RegularGridInterpolator((x, s), zz, method=METHOD)
-                zz_fine_flat = zz_rgi(xs_points_fine)   # shape (nx_fine*ns_fine,)
+                if INTERPOLATOR == 'rgi':
+                    logging.info(f'Interpolation geometry: Hamada')
 
-                # interpolate complex fourier coefficients
-                logging.info(f'Interpolating fcoeffs')
-                ff_hgi = scipy.interpolate.RegularGridInterpolator((x, s), ff, method=METHOD)
-                ff_fine_flat = ff_hgi(xs_points_fine)   # shape (nx_fine*ns_fine,)
-            else:
-                # do not interpolate
-                ff_fine_flat = np.ravel(ff)
-                zz_fine_flat = np.ravel(zz)
+                    # interpolate zeta-shift
+                    logging.info(f'Interpolating zeta-shift')
+                    zeta_s_rgi = scipy.interpolate.RegularGridInterpolator((x, s), zeta_s, method=METHOD)
+                    zeta_s_fine_flat = zeta_s_rgi(xs_points_fine)   # shape (nx_fine*ns_fine,)
 
-            logging.info(f'Calculating potential')
-            # calculate fine potential with fine fourier coefficients and fine zeta-shift
-            pot_fine_flat = calculate_potential(ff_fine_flat, zz_fine_flat, k)
+                    # interpolate complex fourier coefficients
+                    logging.info(f'Interpolating fcoeffs')
+                    fcoeffs_hgi = scipy.interpolate.RegularGridInterpolator((x, s), fcoeffs, method=METHOD)
+                    fcoeffs_fine_flat = fcoeffs_hgi(xs_points_fine)   # shape (nx_fine*ns_fine,)
+
+                    pot_fine_flat = calculate_potential(fcoeffs_fine_flat, zeta_s_fine_flat, k)
+                elif INTERPOLATOR == 'rbfi':
+                    logging.info(f'Interpolation geometry: Poloidal')
+
+                    # calculate potential on sparse grid
+                    pot = calculate_potential(fcoeffs, zeta_s, k)
+
+                    rz_points = np.column_stack((np.ravel(dat.r_n), np.ravel(dat.z)))
+                    rz_points_fine = np.column_stack((r_n_fine_flat, z_fine_flat))
+
+                    rbf_kwargs = {'neighbors':150, 'kernel': 'cubic', 'degree': 1}
+
+                    pot_rbfi = scipy.interpolate.RBFInterpolator(rz_points, np.ravel(pot), **rbf_kwargs)
+                    pot_fine_flat = pot_rbfi(rz_points_fine)
+
+            else:   # do not interpolate
+                # use sparse values as "fine" values
+                fcoeffs_fine_flat = np.ravel(fcoeffs)
+                zeta_s_fine_flat = np.ravel(zeta_s)
+
+                pot_fine_flat = calculate_potential(fcoeffs_fine_flat, zeta_s_fine_flat, k)
+            
 
     else:   # nonlinear simulation
         logging.info('Nonlinear simulation')
@@ -1053,36 +1108,6 @@ def main(args = None):
         xs_points_fine = xs_points_ex_fine
 
 
-
-
-    # ------------------------------------- MODIFY POLOIDAL GRID ----------------------------------------
-
-    if PERIODIC:
-        # wrap R and Z periodically to allow interpolation outside sparse grid
-        r_n = periodic_wrap(dat.r_n, overlap=n, axis=1)
-        z = periodic_wrap(dat.z, overlap=n, axis=1)
-    else:
-        # keep original values
-        r_n = dat.r_n
-        z = dat.z
-
-    if INTERPOLATE:
-        logging.info(f'Interpolating poloidal grid')
-
-        r_rgi = scipy.interpolate.RegularGridInterpolator((x,s), r_n, method=METHOD)
-        r_fine_flat = r_rgi(xs_points_fine)
-        r_fine = np.reshape(r_fine_flat, shape=(nx_fine, ns_fine))
-
-        z_rgi = scipy.interpolate.RegularGridInterpolator((x,s), z, method=METHOD)
-        z_fine_flat = z_rgi(xs_points_fine)
-        z_fine = np.reshape(z_fine_flat, shape=(nx_fine, ns_fine))
-    else:
-        r_fine = dat.r_n
-        r_fine_flat = dat.r_n_flat
-        z_fine = dat.z
-        z_fine_flat = dat.z_flat
-
-
     # -------------------------------------- SAVING RESULTS TO FILE -----------------------------------------
 
     if DATA_OUT:
@@ -1101,15 +1126,15 @@ def main(args = None):
             f.create_dataset("ns", dtype='i', data=ns_fine)
             f.create_dataset("x", dtype='f', data=x_fine)
             f.create_dataset("s", dtype='f', data=s_fine)
-            f.create_dataset("r_n", dtype='f', data=r_fine_flat)
+            f.create_dataset("r_n", dtype='f', data=r_n_fine_flat)
             f.create_dataset("z", dtype='f', data=z_fine_flat)
             f.create_dataset("pot", dtype='f', data=pot_fine_flat)
-            f.create_dataset("zeta_s", dtype='f', data=zz_fine_flat)
+            f.create_dataset("zeta_s", dtype='f', data=zeta_s_fine_flat)
             f.create_dataset("q", dtype='f', data=dat.q)
 
         if dat.is_lin:
-            f.create_dataset("fcoeffs_real", dtype='f', data=ff_fine_flat.real)
-            f.create_dataset("fcoeffs_imag", dtype='f', data=ff_fine_flat.imag)
+            f.create_dataset("fcoeffs_real", dtype='f', data=fcoeffs_fine_flat.real)
+            f.create_dataset("fcoeffs_imag", dtype='f', data=fcoeffs_fine_flat.imag)
 
 
     # --------------------------------------------- PLOTTING ---------------------------------------------
@@ -1121,8 +1146,8 @@ def main(args = None):
     elif TRIANG_METHOD == 'delaunay':
         logging.info('Performing delaunay triangulation')
         # NOTE: this ALWAYS creates periodic triangles
-        # TODO: maybe it's possible to filter these out? then again it's unneccessary when extrapolation works 
-        triangles = matplotlib.tri.Triangulation(r_fine_flat, z_fine_flat).triangles
+        # TODO: maybe it's possible to filter these out? then again it's unneccessary when periodic interpolation works
+        triangles = matplotlib.tri.Triangulation(r_n_fine_flat, z_fine_flat).triangles
     else:
         logging.fatal(f"No other triangulation method supported other than 'regular' and 'delaunay', got {TRIANG_METHOD}. Exiting")
         sys.exit(1)
@@ -1144,20 +1169,20 @@ def main(args = None):
         # NOTE: this has to be set to order='F'
         xx_fine_flat, ss_fine_flat = np.ravel(xx_fine, order='F'), np.ravel(ss_fine, order='F')
         triangulation = matplotlib.tri.Triangulation(xx_fine_flat, ss_fine_flat, triangles=triangles)
-        my_tricontourf(ax, triangulation, pot_fine_flat, plot_grid=False, cmap='seismic', **plot_args)
     else:   # polodial coordinates
-        triangulation = matplotlib.tri.Triangulation(r_fine_flat, z_fine_flat, triangles=triangles)
+        triangulation = matplotlib.tri.Triangulation(r_n_fine_flat, z_fine_flat, triangles=triangles)
 
         # plot closed line at x=0 and x=-1 (inner and outer radial border of data)
-        ax.plot(np.append(r_fine[0, :], r_fine[0,0]), np.append(z_fine[0, :], z_fine[0,0]), ls='-', c=(0,0,0, 0.8), lw=0.2, zorder=11)
-        ax.plot(np.append(r_fine[-1, :], r_fine[-1,0]), np.append(z_fine[-1, :], z_fine[-1,0]), ls='-', c=(0,0,0, 0.8), lw=0.2, zorder=11)
+        ax.plot(np.append(r_n_fine[0, :], r_n_fine[0,0]), np.append(z_fine[0, :], z_fine[0,0]), ls='-', c=(0,0,0, 0.8), lw=0.2, zorder=11)
+        ax.plot(np.append(r_n_fine[-1, :], r_n_fine[-1,0]), np.append(z_fine[-1, :], z_fine[-1,0]), ls='-', c=(0,0,0, 0.8), lw=0.2, zorder=11)
 
         # fill inner empty circle with white area, this is only neccessary in case of delaunay triangulation
-        ax.fill(r_fine[0, :], z_fine[0, :], color='white', zorder=10)
+        ax.fill(r_n_fine[0, :], z_fine[0, :], color='white', zorder=10)
         ax.set_aspect('equal')
 
-        # TODO: make this an argument
-        #plot_grid(ax, triangulation, pot_fine_flat, **plot_args)
+    if PLOT_GRID:    
+        plot_grid(ax, triangulation, pot_fine_flat, **plot_args)
+    else:
         my_tricontourf(ax, triangulation, pot_fine_flat, show_grid=False, cmap='seismic', **plot_args)
 
     logging.info(f'Saving plot to {PLOT_OUT}')
