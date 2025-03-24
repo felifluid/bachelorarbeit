@@ -37,7 +37,7 @@ def check_regular_spacing(a, tol=1e-9) -> tuple[bool, float]:
     
     return isRegular, float(np.mean(diffs, dtype=float))
 
-def periodic_wrap(a, overlap : int, axis : int | list[int]) -> np.ndarray:
+def extend_periodically(a, overlap : int, axis : int | list[int]) -> np.ndarray:
     """
     Wraps ndarray periodically along given singular axis or mulitple axes.
 
@@ -795,7 +795,7 @@ def main(args = None):
     FS = int(args.fs)
 
     INTERPOLATE : bool = FX > 1 or FS > 1
-    PERIODIC : bool = args.periodic
+    PERIODIC : bool = args.periodic and FS > 1
     INTERPOLATOR = args.interpolator
 
     VALID_METHODS = ['nearest', 'linear', 'cubic', 'quintic']
@@ -823,7 +823,7 @@ def main(args = None):
     OMIT_AXES = bool(args.omit_axes)
     PLOT_GRID = bool(args.plot_grid)
 
-    # ---------------------------------------------- GKWDATA -------------------------------------------------
+    # ----------------------------------------- GKWDATA ----------------------------------------------
 
     logging.info(f'Reading file {HDF5_PATH}')
     dat = GKWData(HDF5_PATH, poten_timestep=POTEN_TIMESTEP)
@@ -841,19 +841,50 @@ def main(args = None):
     # shape (nx,ns)
 
     if dat.is_lin:
+        # wave vector
+        k = 2 * np.pi * dat.n_mod * dat.n_spacing   # constant
         fcoeffs = dat.fcoeffs    # shape (nx,ns)
 
-    if PERIODIC and FS > 1:     # apply periodic boundary condition
+    if PERIODIC:
         """
-        Extend all variables depending on s periodically using specific periodic boundary conditions.
-        This allows interpolation between first and last dataset.
+        Apply periodic boundary conditions:
+        Extend all variables depending on s periodically using specific periodic boundary conditions, \
+        to allow interpolation between first and last dataset.
+
+          ---x---|---x-------------------|-------------------x---|---x---
+            s4 -0.5  s3                  0                   s1 0.5  s2
+
+        In this s3 and s1 are the first and last grid points in s.
+        To generate additional points outside this boundaries we have to apply periodic boundary conditions.
+
+            ζ(s) = ζ(s±1) ∓ q
+            f(s) = f(s±1) * exp(±ikq)
+
+        For a point s2 > 0.5 this translates as follows.
+
+        Zeta shift:
+        ζ(s2) = ζ(s2-1) = ζ(s3) + q
+
+        Fourier coefficients:
+        f(s2) = f(s2-1) = f(s3) * exp(-ikq)
+
+        For a point s4 < -0.5 the sign of q swaps: q → -q
+
+        R and Z are periodically in s:
+        R(s±1) = R(s)
+        Z(s±1) = Z(s)
+
+        To achieve this, the arrays are being wrapped around periodically, e.g. [0,1,2,3,4] → [3,4,0,1,2,3,4,0,1]. 
+        After that, in case of zeta-shift and fourier coefficients the periodic shift is applied as described.
+
+        Note, that this does not apply to the s-grid itself, as the Interpolator needs a strictly ascending or descending grid.
         """
         logging.info("Applying double periodic boundary condition")
         
         # number of grid points to extend in each direction (overlap)
         n = 4
 
-        # extend the s-grid out of bounds without wrapping periodically 
+        # extend the s-grid out of bounds without (!) wrapping periodically 
         # as `RegularGridInterpolator` needs a regular spaced, strictly ascending or descending grid without discontinuities
         s = extend_regular_array(dat.s, n)     # shape (ns+2n)
         x = dat.x                              # shape (nx)
@@ -862,21 +893,23 @@ def main(args = None):
         nx = len(x)   # nx
 
         if INTERPOLATOR == 'rgi':
-            # z(s0) = z(s0 ± 1) ± q = z(s1) ± q
-            zeta_s = periodic_wrap(zeta_s, n, 1)   # extend grid periodically in s
-            zeta_s[:, :n] += dat.q[:, None]        # apply boundary condition for zeta[s < -0.5]
-            zeta_s[:, -n:None] -= dat.q[:, None]   # apply boundary condition for zeta[s > 0.5]
+            # ζ(s) = ζ(s±1) ∓ q
+            # FIXME: mult s_B and s_j!
+            zeta_s = extend_periodically(zeta_s, n, 1)   # extend grid periodically in s
+            zeta_s[:, :n] -= dat.q[:, None]        # apply boundary condition for zeta[s < -0.5]
+            zeta_s[:, -n:None] += dat.q[:, None]   # apply boundary condition for zeta[s > 0.5]
             zeta_s = zeta_s % 1                    # map zeta back to [0,1]
 
             if dat.is_lin:
-                # fourier coefficients only used in linear simulations
+                # f(s) = f(s±1) * exp(±ikq)
+                fcoeffs = extend_periodically(fcoeffs, n, 1)    # extend grid periodically in s
+                fcoeffs[:, :n] *= np.exp(1j * k * dat.q[:, None])
+                fcoeffs[:, -n:None] *= np.exp(-1j * k * dat.q[:, None])
 
-                fcoeffs = periodic_wrap(fcoeffs, n, 1)  # extend grid periodically in s
-                # ff[:, :n] *= np.exp(1j * k * dat.q[:, None])
-                # ff[:, -n:None] *= np.exp(-1j * k * dat.q[:, None])
-
-        r_n = periodic_wrap(dat.r_n, overlap=n, axis=1)
-        z = periodic_wrap(dat.z, overlap=n, axis=1)
+        # R(s) = R(s±1)
+        r_n = extend_periodically(dat.r_n, overlap=n, axis=1)
+        # Z(s) = Z(s±1)
+        z = extend_periodically(dat.z, overlap=n, axis=1)
     else:
         # don't apply periodic boundary condition
         x = dat.x
@@ -928,10 +961,6 @@ def main(args = None):
     # --------------------------------------- CALCULATE POTENTIAL ------------------------------------------
 
     if dat.is_lin:  # linear simulation
-
-            # wave vector
-            k = 2 * np.pi * dat.n_mod * dat.n_spacing   # constant
-
             if INTERPOLATE:
                 if INTERPOLATOR == 'rgi':
                     logging.info(f'Interpolation geometry: Hamada')
@@ -957,7 +986,7 @@ def main(args = None):
                     rz_points_fine = np.column_stack((r_n_fine_flat, z_fine_flat))
 
                     # FIXME: add to argparse
-                    rbf_kwargs = {'neighbors':150, 'kernel': 'cubic', 'degree': 1}
+                    rbf_kwargs = {'neighbors':100, 'kernel': 'linear', 'degree': 0}
 
                     pot_rbfi = scipy.interpolate.RBFInterpolator(rz_points, np.ravel(pot), **rbf_kwargs)
                     pot_fine_flat = pot_rbfi(rz_points_fine)
