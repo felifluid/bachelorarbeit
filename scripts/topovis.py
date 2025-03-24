@@ -1114,8 +1114,6 @@ def main(args = None):
 
     # --------------------------------------------- PLOTTING ---------------------------------------------
 
-    triangles = None
-
     if TRIANG_METHOD == 'regular':
         logging.info('Creating regular triangle grid')
         is_plot_periodic = PERIODIC or FS == 1
@@ -1125,6 +1123,9 @@ def main(args = None):
         # NOTE: this ALWAYS creates periodic triangles
         # TODO: maybe it's possible to filter these out? then again it's unneccessary when extrapolation works 
         triangles = matplotlib.tri.Triangulation(r_fine_flat, z_fine_flat).triangles
+    else:
+        logging.fatal(f"No other triangulation method supported other than 'regular' and 'delaunay', got {TRIANG_METHOD}. Exiting")
+        sys.exit(1)
 
     logging.info('Creating plot')
 
