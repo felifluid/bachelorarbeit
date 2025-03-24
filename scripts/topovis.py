@@ -1162,9 +1162,9 @@ def main(args = None):
             f.create_dataset("zeta_s", dtype='f', data=zeta_s_fine_flat)
             f.create_dataset("q", dtype='f', data=dat.q)
 
-        if dat.is_lin:
-            f.create_dataset("fcoeffs_real", dtype='f', data=fcoeffs_fine_flat.real)
-            f.create_dataset("fcoeffs_imag", dtype='f', data=fcoeffs_fine_flat.imag)
+            if dat.is_lin:
+                f.create_dataset("fcoeffs_real", dtype='f', data=fcoeffs_fine_flat.real)
+                f.create_dataset("fcoeffs_imag", dtype='f', data=fcoeffs_fine_flat.imag)
 
 
     # --------------------------------------------- PLOTTING ---------------------------------------------
