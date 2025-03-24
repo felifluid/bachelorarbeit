@@ -956,6 +956,7 @@ def main(args = None):
                     rz_points = np.column_stack((np.ravel(dat.r_n), np.ravel(dat.z)))
                     rz_points_fine = np.column_stack((r_n_fine_flat, z_fine_flat))
 
+                    # FIXME: add to argparse
                     rbf_kwargs = {'neighbors':150, 'kernel': 'cubic', 'degree': 1}
 
                     pot_rbfi = scipy.interpolate.RBFInterpolator(rz_points, np.ravel(pot), **rbf_kwargs)
