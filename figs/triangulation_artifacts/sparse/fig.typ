@@ -4,19 +4,19 @@
 
 #subpar.grid(
     figure(
-        image("chease_numerical_artifacts.svg"),
+        image("delaunay_contour.svg"),
         caption: "delaunay contour plot",
     ), <fig:artifacts:contour_artifacts> ,
     figure(
-        image("chease_bad_triangles.svg"),
+        image("delaunay_grid.svg"),
         caption: "delaunay triangulation",
     ), <fig:artifacts:delaunay_triangles>,
     figure(
-        image("chease_no_artifacts.svg"),
+        image("regular_contour.svg"),
         caption: "regular contour plot",
     ), <fig:artifacts:contour_regular>,
     figure(
-        image("chease_regular_triangles.svg"),
+        image("regular_grid.svg"),
         caption: "regular triangulation",
     ), <fig:artifacts:regular_triangles>,
     columns: (1fr, 1fr),

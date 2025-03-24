@@ -8,7 +8,7 @@
         caption: "delaunay contour plot",
     ), <fig:sheared_triang:delaunay_contour> ,
     figure(
-        image("delaunay_triangles.svg"),
+        image("delaunay_grid.svg"),
         caption: "delaunay triangulation",
     ), <fig:sheared_triang:delaunay_triangles>,
     figure(
@@ -16,7 +16,7 @@
         caption: "regular contour plot",
     ), <fig:sheared_triang:regular_contour>,
     figure(
-        image("regular_triangles.svg"),
+        image("regular_grid.svg"),
         caption: "regular triangulation",
     ), <fig:sheared_triang:regular_triangles>,
     columns: (1fr, 1fr),
