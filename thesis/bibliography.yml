@@ -218,3 +218,25 @@ weiser1988interpolation:
     title: Mathematics of Computation
     issue: 181
     volume: 50
+
+skala2016rbf:
+  type: article
+  title: A practical use of radial basis functions interpolation and approximation
+  author: Skala, Vaclav
+  date: 2016
+  page-range: 137–144
+  parent:
+    type: periodical
+    title: Investigacion Operacional
+    issue: 2
+    volume: 37
+
+wendland2004scattered:
+  type: book
+  title: Scattered Data Approximation
+  author: Wendland, Holger
+  date: 2004
+  publisher: Cambridge University Press
+  parent:
+    type: book
+    title: Cambridge Monographs on Applied and Computational Mathematics

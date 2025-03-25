@@ -23,25 +23,7 @@ The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of 
 
 In the context of graph-theory or computational geometry _triangulation_ is the maximum set of edges for a given set of vertices so that no edges are intersecting @klein2005voronoi[p.233]. Given a set of points, there are many possible ways of performing a triangulation. However, not all triangles are created equal. // TODO: informal, is this okay?
 
-#subpar.grid(
-  figure(
-    image("../../figs/random_triangles.svg"), 
-    caption: [
-      arbitrary
-    ]
-  ), <arbitrary_triangulation>,
-  figure(
-    image("../../figs/delaunay_triangles.svg"), 
-    caption: [
-      delaunay
-    ]
-  ), <delaunay_triangulation>,
-  columns: (1fr, 1fr),
-  caption: [
-    Comparison of two triangulations of the same set of points
-  ],
-  label: <triangulation_comparison>,
-)
+#include "../../figs/triangulation/scattered/fig.typ"
 
 @arbitrary_triangulation above illustrates, that arbitrary triangulations can lead to many acute triangles. This is undesirable in many cases, as it can lead to numerical artifacts @klein2005voronoi[p.234]. 
 The triangles in @delaunay_triangulation on the other hand tend to be more equilateral leading to a more uniform representation of the grid @lucas2018delaunay. The _delaunay triangulation_ achieves this by maximizing the minimal interior angle of all triangles @klein2005voronoi[p.234]. // ??: add further information? e.g. the circumcircle criterion?
@@ -52,25 +34,7 @@ While delaunay triangulation works efficiently when the grid is more or less uni
 Moreover, different examples from #cite(<lo2013multigrid>,form: "prose", supplement: [p.21]), #cite(<peethambaran2015delaunay>, form: "prose", supplement: [p.166ff]) and #cite(<liu2008delaunay>, form: "prose", supplement: [p.1269]) show, that delaunay triangulation on non-uniform grids leads to many acute or big triangles. This can be illustrized well by examining the delaunay triangulation results of a spiral distrubution.
 
 // ??: are these images too small?
-#subpar.grid(
-  figure(
-    image("../../figs/triangulation/spiral_lin.svg"),
-    caption: [spiral]
-  ), <fig:spiral_linear>,
-  figure(
-    image("../../figs/triangulation/spiral_noisy.svg"),
-    caption: [noisy spiral],
-  ), <fig:spiral_noisy>,
-  figure(
-    image("../../figs/triangulation/spiral_interpolation.svg"),
-    caption: [two noisy spirals],
-  ), <fig:two_noisy_spirals>,
-  columns: (1fr, 1fr, 1fr),
-  caption: [
-    Comparison of delaunay triangulations for three spiral distrubutions.
-  ],
-  label: <fig:delaunay_spiral>,
-)
+#include "../../figs/triangulation/fig.typ"
 
 Even on a non-uniform grid like the spiral shown in @fig:spiral_linear, the delaunay triangulation results in a uniform representation of the grid. However, this triangulation is quiet sensitive to noise, as can be observed in @fig:spiral_noisy. This is caused by preffering tiny, but delaunay-conform triangles in high-density ares, instead of big but acute triangles in low-density areas. // TODO: what excactly is caused?
 A possible refinement of the triangulation is to add more data points in areas with low density, as being shown in @fig:two_noisy_spirals #footnote[#cite(<ruppert1995delaunay>, form: "prose") and further #cite(<shewchuk1996triangle>, form: "prose") present more elaborate ways of refining a triangulation. Both offer algorithmical approaches to add the least amount of extra vertices to the grid so that no resulting angles exceed a given angle. _Triangle_ is an implementation of this and is freely availiable at https://www.cs.cmu.edu/~quake/triangle.html @shewchuck2025triangle.]. // ??: maybe move this to outlook? 
@@ -96,8 +60,12 @@ When constructing splines, this involves solving a large sparse linear system @s
 // Bild maybe ??
 
 === RBFInterpolator
-Similar to the RGI, the `RBFInterpolator` (RBFI) is a class provided by `scipy.interpolate` and also works on N-dimensional data @scipy2025rbf. 
-Unlike the RGI, which only operates with data on a regular grid, the RBFI also works with unstructured data @scipy2025rbf.
+A lot of data sets from real world applications are not defined on a regular grid. 
+Examples of this include measurements from meteorological stations, which are scattered irregularly, images with corrupted pixels, as well as potential or vector data from physical experiments @skala2016rbf[p.6].
+Many interpolation methods such as multivariate splines, Clough-Tocher or finite element interpolators expect a regularly structured grid, or depend on the prior creation of a mesh (usually through expensive triangulation) @wendland2004scattered[p.ix]. Radial basis functions (RBF) provide a truly meshless alternative for interpolation on scattered data @wendland2004scattered[p.ix]. 
+
+The python package `scipy.interpolate` provides an implementation of a radial basis function interpolator, namely `RBFInterpolator` (RBFI) @scipy2025rbf.
+Similar to the RGI, the RBFI is a class provided by  and also works on N-dimensional data @scipy2025rbf. 
 A radial basis function (RBF) is a N-dimensional scalar function $f(r)$, that only depends on the distance $r=|x-c|$ between the evaluation point $x$ and the center $c$ of the RBF @scipy2025rbf.
 There are two main kinds of RBFs commonly used, also referred to as _kernels_. Firstly, infinitely smooth functions like the gaussian function $f(r)=e^(-(#sym.epsilon r)^2)$, an inverse quadratic $f(r)=frac(1, 1+(#sym.epsilon r)^2)$ or inverse multiquadric function $f(r)=frac(1,sqrt(1+(#sym.epsilon r)^2))$ @scipy2025rbf. 
 Note that these are scale variant and therefore require finding an appropriate smoothing parameter $#sym.epsilon$ (e.g. through cross validation, or machine learning) @scipy2025rbf.
@@ -106,6 +74,7 @@ The default kernel used by the RBFI is also a polyharmonic spline called _thin p
 The interpolant takes the form of a linear combination of RBFs centered at each data point respectively, which can then be evaluated at arbitrary points @scipy2025rbf.
 As memory required to solve the interpolation increases quadratically with the number of data points, the number of nearest neighbors to consider for each evaluation point can be specified @scipy2025rbf.
 
+// ??: enumerate kernels in list?
 // compare details in a table??
 
 == ToPoVis
