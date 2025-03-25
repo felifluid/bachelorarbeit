@@ -34,7 +34,7 @@ While delaunay triangulation works efficiently when the grid is more or less uni
 Moreover, different examples from #cite(<lo2013multigrid>,form: "prose", supplement: [p.21]), #cite(<peethambaran2015delaunay>, form: "prose", supplement: [p.166ff]) and #cite(<liu2008delaunay>, form: "prose", supplement: [p.1269]) show, that delaunay triangulation on non-uniform grids leads to many acute or big triangles. This can be illustrized well by examining the delaunay triangulation results of a spiral distrubution.
 
 // ??: are these images too small?
-#include "../../figs/triangulation/fig.typ"
+#include "../../figs/triangulation/spiral/fig.typ"
 
 Even on a non-uniform grid like the spiral shown in @fig:spiral_linear, the delaunay triangulation results in a uniform representation of the grid. However, this triangulation is quiet sensitive to noise, as can be observed in @fig:spiral_noisy. This is caused by preffering tiny, but delaunay-conform triangles in high-density ares, instead of big but acute triangles in low-density areas. // TODO: what excactly is caused?
 A possible refinement of the triangulation is to add more data points in areas with low density, as being shown in @fig:two_noisy_spirals #footnote[#cite(<ruppert1995delaunay>, form: "prose") and further #cite(<shewchuk1996triangle>, form: "prose") present more elaborate ways of refining a triangulation. Both offer algorithmical approaches to add the least amount of extra vertices to the grid so that no resulting angles exceed a given angle. _Triangle_ is an implementation of this and is freely availiable at https://www.cs.cmu.edu/~quake/triangle.html @shewchuck2025triangle.]. // ??: maybe move this to outlook? 
@@ -73,6 +73,10 @@ Secondly, a polyharmonic spline of form $f(r)=r^k$ with uneven $k$ or $f(r)=r^k 
 The default kernel used by the RBFI is also a polyharmonic spline called _thin plate spline_, which is defined as $f(r)=r^2 ln(r)$ @scipy2025rbf.
 The interpolant takes the form of a linear combination of RBFs centered at each data point respectively, which can then be evaluated at arbitrary points @scipy2025rbf.
 As memory required to solve the interpolation increases quadratically with the number of data points, the number of nearest neighbors to consider for each evaluation point can be specified @scipy2025rbf.
+
+// this is similar to blurring a pixelated low resolution image to generate a blurry but smooth image, just that it works with unstructured grid
+// maybe better example: corrupted grid data
+// our visual perception works similarly btw
 
 // ??: enumerate kernels in list?
 // compare details in a table??
