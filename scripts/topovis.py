@@ -251,7 +251,7 @@ def grid_to_points(grid):
     """
     return np.vstack(list(map(np.ravel, grid))).T
     
-def shift_zeta(g, s, phi, geom_type, sign_b=None, sign_j=None, q=None, r_n=None, r_ref=None, nx=None, ns=None):
+def shift_zeta(g, s, phi, geom_type, q=None, r_n=None, r_ref=None, nx=None, ns=None):
     """
     Generate the grid for zeta which preserves phi = const. 
 
@@ -303,7 +303,7 @@ def shift_zeta(g, s, phi, geom_type, sign_b=None, sign_j=None, q=None, r_n=None,
         zeta = -phi / (2*np.pi) + g
     elif geom_type == 's-alpha':
         #FIXME: equation for s-alpha is not right
-        zeta = (sign_b * sign_j) / (2*np.pi) * (2*np.pi * np.abs(q) * s - phi)
+        zeta = (phi) / (2*np.pi) * q * s
     elif geom_type == 'chease_global':
         zeta = -phi/(2*np.pi) + g * chease_integration(s, r_n, r_ref, nx, ns)
     else:
@@ -661,14 +661,17 @@ class GKWData:
             self.z_flat = file["geom/Z"][()]                                         # Z(psi,s) flattened as (NX*NS,) array
 
             # TODO: only load if needed
-            self.q = file["geom/q"][()]                                              # safety factor q(psi); shape (NX,)
             self.g_flat = file["geom/gmap"][()]                                      # gmap(psi,s); shape (NX*NS,)
             self.n_spacing = int(file["input/mode/n_spacing"][()][0])                # TODO
             self.n_mod = int(np.array(file['input/grid/nmod'])[()][0])               # TODO: np.array neccessary?
             #self.rhostar = file["input/spcgeneral/rhostar"][()][0]                  # normed Larmor radius
-            self.sign_b = file["input/geom/signB"][()][0]                            # TODO
-            self.sign_j = file["input/geom/signJ"][()][0]                            # TODO
+
             self.geom_type = file["input/geom/geom_type"][()][0].decode('utf-8')     # geometry type
+            
+            sign_b = file["input/geom/signB"][()][0]    # TODO
+            sign_j = file["input/geom/signJ"][()][0]    # TODO
+            q = file["geom/q"][()]                      # safety factor
+            self.q = sign_b * sign_j * np.abs(q)        # safety factor q(psi) with correct sign; shape(NX,)      
 
             self.non_lin = str(file["input/control/non_linear"][()][0].decode('utf-8'))   # non linear string
             self.is_lin : bool = self.non_lin== 'F'
@@ -830,9 +833,7 @@ def main(args = None):
 
     # perform zeta-shift
     logging.info(f'Performing zeta-shift')
-    zeta_s = shift_zeta(dat.g, dat.s, PHI, dat.geom_type, 
-                    sign_b=dat.sign_b, 
-                    sign_j=dat.sign_j, 
+    zeta_s = shift_zeta(dat.g, dat.s, PHI, dat.geom_type,
                     q=dat.q, 
                     r_n=dat.r_n,
                     r_ref=dat.r_ref, 
@@ -882,7 +883,7 @@ def main(args = None):
         logging.info("Applying double periodic boundary condition")
         
         # number of grid points to extend in each direction (overlap)
-        n = 4
+        n = 1
 
         # extend the s-grid out of bounds without (!) wrapping periodically 
         # as `RegularGridInterpolator` needs a regular spaced, strictly ascending or descending grid without discontinuities
@@ -962,6 +963,7 @@ def main(args = None):
 
     if dat.is_lin:  # linear simulation
             if INTERPOLATE:
+                logging.info(f'Interpolating potential')
                 if INTERPOLATOR == 'rgi':
                     logging.info(f'Interpolation geometry: Hamada')
 
@@ -975,21 +977,29 @@ def main(args = None):
                     fcoeffs_hgi = scipy.interpolate.RegularGridInterpolator((x, s), fcoeffs, method=METHOD)
                     fcoeffs_fine_flat = fcoeffs_hgi(xs_points_fine)   # shape (nx_fine*ns_fine,)
 
+                    logging.info(f'Calculating potential')
                     pot_fine_flat = calculate_potential(fcoeffs_fine_flat, zeta_s_fine_flat, k)
                 elif INTERPOLATOR == 'rbfi':
                     logging.info(f'Interpolation geometry: Poloidal')
 
-                    # calculate potential on sparse grid
-                    pot = calculate_potential(fcoeffs, zeta_s, k)
+                    # FIXME: add to argparse
+                    rbf_kwargs = {'neighbors':100, 'kernel': 'linear', 'degree': 0}
 
                     rz_points = np.column_stack((np.ravel(dat.r_n), np.ravel(dat.z)))
                     rz_points_fine = np.column_stack((r_n_fine_flat, z_fine_flat))
 
-                    # FIXME: add to argparse
-                    rbf_kwargs = {'neighbors':100, 'kernel': 'linear', 'degree': 0}
+                    logging.info(f'Interpolating zeta-shift')
+                    zeta_s_flat = np.ravel(zeta_s)
+                    zeta_s_rbfi = scipy.interpolate.RBFInterpolator(rz_points, zeta_s_flat, **rbf_kwargs)
+                    zeta_s_fine_flat = zeta_s_rbfi(rz_points_fine)   # shape (nx_fine*ns_fine,)
 
-                    pot_rbfi = scipy.interpolate.RBFInterpolator(rz_points, np.ravel(pot), **rbf_kwargs)
-                    pot_fine_flat = pot_rbfi(rz_points_fine)
+                    logging.info(f'Interpolating fcoeffs')
+                    fcoeffs_flat = np.ravel(fcoeffs)
+                    fcoeffs_rbfi = scipy.interpolate.RBFInterpolator(rz_points, fcoeffs_flat, **rbf_kwargs)
+                    fcoeffs_fine_flat = fcoeffs_rbfi(rz_points_fine)   # shape (nx_fine*ns_fine,)
+
+                    logging.info(f'Calculating potential')
+                    pot_fine_flat = calculate_potential(fcoeffs_fine_flat, zeta_s_fine_flat, k)
 
             else:   # do not interpolate
                 # use sparse values as "fine" values
@@ -1090,9 +1100,7 @@ def main(args = None):
         sxz_fine = np.meshgrid(s_ex_fine, x_ex_fine, )
 
         logging.info('Performing zeta-shift')
-        zz_s = shift_zeta(dat.g, dat.s, PHI, dat.geom_type, 
-                                sign_b=dat.sign_b, 
-                                sign_j=dat.sign_j, 
+        zz_s = shift_zeta(dat.g, dat.s, PHI, dat.geom_type,
                                 q=dat.q, 
                                 r_n=dat.r_n,
                                 r_ref=dat.r_ref, 
