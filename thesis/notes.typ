@@ -30,3 +30,19 @@ A: r/R
 
 Q: Fachbegriff für die "Verschraubung" mit zunehmendem #sym.psi
 A: Lokale Magnetische Scherung
+
+Q: Sollte man Bilder im Text zunächst beschreiben? (Was sieht man?)
+A: 
+
+Q: Wie übersetzt sich die parallele Randbedingung im linearen Fall für #sym.zeta?
+$ hat(f)(psi, k, s) = hat(f)(psi, k, s±1) exp(±i k q) $
+
+Das Potential berechnet sich wie folgt:
+
+$ Phi(psi, s, zeta) = hat(f)(psi, k, s) * exp(i k zeta) + hat(f)^*(psi, k, s) * exp(-i k zeta) $
+
+#sym.zeta ist diesem Fall #sym.zeta\-shift, also eine Funktion von #sym.psi und s. 
+
+Beim betrachten eines Punktes $s_1 > 0.5$ müsste das für #sym.Phi heißen:
+
+$ Phi(psi, s_1, zeta) = hat(f)(psi, k, s_1 - 1) * exp(i k zeta(psi, s_1 - 1) - q) + hat(f)^*(psi, k, s_1 -1) * exp(-i k zeta(psi, s_1 - 1) -q) $
