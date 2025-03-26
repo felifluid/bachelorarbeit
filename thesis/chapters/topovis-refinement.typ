@@ -63,14 +63,14 @@ Similarly to the triangulation, the interpolation of the grid can be done in bot
 ==== Interpolating in poloidal coordinates
 The challenge of interpolating in poloidal coordinates is caused by the scattered structure of the grid. 
 This applies especially to data in CHEASE geometry, which shows different non-uniform characteristics.
-Intuitively interpolation in poloidal coordinates seems like a good approach, as the coordinates describe real world euclidian space in the correct aspect ratio.
+Intuitively interpolation in poloidal coordinates seems like a good approach, as the coordinates describe the real world euclidian space.
 If two points are really close to each other in euclidian space, one can expect similar measurements at these points. // ??: gibts dafür ein Fachbegriff?
 As the electric potential is smooth and continuous inside the tokamak, this property also applies to it. // TODO: dont like this sentence
 Interpolating in hamada coordinates does not take the euclidian distance into account. 
 Due to the non-linear transformation between the two coordinate systems, two points can be close to each other in hamadian space, but have a large distance in euclidian space.
 
-Many interpolation methods including multivariate splines, finite element or Clough-Tocher rely on mesh generation through triangulation.
-This makes them unsuitable for this case, as triangulation algorithms fail to produce reliable results without numerical artifacts. 
+Many interpolation methods like multivariate splines, finite element or Clough-Tocher rely on mesh generation through triangulation.
+This makes them unsuitable for this purpose, as triangulation algorithms fail to produce reliable results on non-uniform grids. 
 Therefore meshfree methods like the `RBFInterpolator` are needed to create more uniform grids and be able to generate triangulations without numerical artifacts.
 
 
