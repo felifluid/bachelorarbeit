@@ -1,0 +1,40 @@
+{
+    // Verwendet IntelliSense zum Ermitteln möglicher Attribute.
+    // Zeigen Sie auf vorhandene Attribute, um die zugehörigen Beschreibungen anzuzeigen.
+    // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python-Debugger: Aktuelle Datei mit Argumenten",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        },
+        {
+            "name": "Periodic Boundary Circ",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "periodic_boundary.png", "--interpolator", "rgi", "--periodic", "--method", "quintic", "${workspaceFolder}/data/circ/ns32/gkwdata.h5", "1", "4"]
+        },
+        {
+            "name": "Circ FS8 Linear Poloidal",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "poloidal_interpolation.svg", "--interpolator", "rbfi", "--periodic", "--method", "linear", "${workspaceFolder}/data/circ/ns32/gkwdata.h5", "1", "8"]
+        },
+        {
+            "name": "Circ No Interpolation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "no_interpolation.svg", "${workspaceFolder}/data/circ/ns32/gkwdata.h5", "1", "1"]
+        }
+    ]
+}
