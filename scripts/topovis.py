@@ -937,11 +937,30 @@ def main(args = None):
                 fcoeffs_hgi = scipy.interpolate.RegularGridInterpolator((x, s), fcoeffs, method=METHOD)
                 fcoeffs_fine_flat = fcoeffs_hgi(xs_points_fine)   # shape (nx_fine*ns_fine,)
             elif INTERPOLATOR == 'rbfi':
+                """
+                This interpolates poloidally using radial basis functions.
+
+                However, as we define points only by their position on the poloidal slice (R,Z), it's not possible to apply parallel boundary conditions. To do that, we would need to add a new sets of points at the same poloidal position but with different (shifted) values. Due to the functionality of the RBF interpolation this is not possible. 
+                
+                For this reason, regular grid interpolation in hamada coordinates is almost always the preffered option and leads to better results. This is being kept in code mainly for demonstration purposes.
+                """
+
+                zeta_s = shift_zeta(dat.g, dat.s, PHI, dat.geom_type,
+                    q=dat.q, 
+                    r_n=dat.r_n,
+                    r_ref=dat.r_ref, 
+                    nx=dat.nx, 
+                    ns=dat.ns)
+                # shape (nx,ns)
+                zeta_s_flat = np.ravel(zeta_s)
+
+                fcoeffs = dat.fcoeffs
+                fcoeffs_flat = np.ravel(fcoeffs)
+
+                rz_points = np.column_stack((dat.r_n_flat, dat.z_flat))
 
                 # FIXME: add to argparse
                 rbf_kwargs = {'neighbors':100, 'kernel': 'linear', 'degree': 0}
-
-                rz_points = np.column_stack((dat.r_n_flat, dat.z_flat))
 
                 # interpolate zeta-shift
                 logging.info(f'Interpolating zeta-shift')
