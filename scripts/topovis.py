@@ -553,7 +553,6 @@ def parse_args(args):
     plot_group.add_argument('--plot-out',
                             dest='plot_out',
                             type=str,
-                            default='plot.pdf',
                             help="(optional) Specify a file to write the plot into WITH extension. Can either be a full path, or a filename. If it's a filename, it will save to the current directory. Default is 'plot.pdf'."
                             )
     plot_group.add_argument('--plot-grid',
@@ -836,7 +835,12 @@ def main(args = None):
     TRIANG_METHOD = args.triang_method
     LEVELS = int(args.levels)
     DPI = int(args.dpi)
-    PLOT_OUT = str(args.plot_out)
+
+    if args.plot_out is not None:
+        PLOT_OUT : str = str(args.plot_out).strip()
+    else:
+        PLOT_OUT = None
+
     OMIT_AXES = bool(args.omit_axes)
     PLOT_GRID = bool(args.plot_grid)
 
@@ -898,6 +902,18 @@ def main(args = None):
 
     if IS_LIN: # LINEAR SIMULATION
 
+        zeta_s = shift_zeta(dat.g, dat.s, PHI, dat.geom_type,
+                            q=dat.q, 
+                            r_n=dat.r_n,
+                            r_ref=dat.r_ref, 
+                            nx=dat.nx, 
+                            ns=dat.ns)
+        # shape (nx,ns)
+        zeta_s_flat = np.ravel(zeta_s)
+
+        fcoeffs = dat.fcoeffs
+        fcoeffs_flat = np.ravel(fcoeffs)
+
         # wave vector
         k = 2 * np.pi * dat.n_mod * dat.n_spacing   # constant
 
@@ -944,18 +960,6 @@ def main(args = None):
                 
                 For this reason, regular grid interpolation in hamada coordinates is almost always the preffered option and leads to better results. This is being kept in code mainly for demonstration purposes.
                 """
-
-                zeta_s = shift_zeta(dat.g, dat.s, PHI, dat.geom_type,
-                    q=dat.q, 
-                    r_n=dat.r_n,
-                    r_ref=dat.r_ref, 
-                    nx=dat.nx, 
-                    ns=dat.ns)
-                # shape (nx,ns)
-                zeta_s_flat = np.ravel(zeta_s)
-
-                fcoeffs = dat.fcoeffs
-                fcoeffs_flat = np.ravel(fcoeffs)
 
                 rz_points = np.column_stack((dat.r_n_flat, dat.z_flat))
 
@@ -1107,56 +1111,58 @@ def main(args = None):
 
     # --------------------------------------------- PLOTTING ---------------------------------------------
 
-    if TRIANG_METHOD == 'regular':
-        logging.info('Creating regular triangle grid')
-        is_plot_periodic = PERIODIC or FS == 1
-        triangles = make_regular_triangles(out.nx, out.ns, periodic=is_plot_periodic)
-    elif TRIANG_METHOD == 'delaunay':
-        logging.info('Performing delaunay triangulation')
-        # NOTE: this ALWAYS creates periodic triangles
-        # TODO: maybe it's possible to filter these out? then again it's unneccessary when periodic interpolation works
-        triangles = matplotlib.tri.Triangulation(out.r_flat, out.z_flat).triangles
-    else:
-        logging.fatal(f"No other triangulation method supported other than 'regular' and 'delaunay', got {TRIANG_METHOD}. Exiting")
-        sys.exit(1)
+    if PLOT_OUT:
+        if TRIANG_METHOD == 'regular':
+            logging.info('Creating regular triangle grid')
+            is_plot_periodic = PERIODIC or FS == 1
+            triangles = make_regular_triangles(out.nx, out.ns, periodic=is_plot_periodic)
+        elif TRIANG_METHOD == 'delaunay':
+            logging.info('Performing delaunay triangulation')
+            # NOTE: this ALWAYS creates periodic triangles
+            # TODO: maybe it's possible to filter these out? then again it's unneccessary when periodic interpolation works
+            triangles = matplotlib.tri.Triangulation(out.r_flat, out.z_flat).triangles
+        else:
+            logging.fatal(f"No other triangulation method supported other than 'regular' and 'delaunay', got {TRIANG_METHOD}. Exiting")
+            sys.exit(1)
 
-    logging.info('Creating plot')
+        logging.info('Creating plot')
 
-    plot_args = {}
-    plot_args['vmin'] = np.min(out.pot)
-    plot_args['vmax'] = np.max(out.pot)
-    plot_args['levels'] = LEVELS
+        plot_args = {}
+        plot_args['vmin'] = np.min(out.pot)
+        plot_args['vmax'] = np.max(out.pot)
+        plot_args['levels'] = LEVELS
 
-    fig, ax = plt.subplots()
+        fig, ax = plt.subplots()
 
-    if OMIT_AXES:
-        ax.set_xticks([])
-        ax.set_yticks([])
+        if OMIT_AXES:
+            ax.set_xticks([])
+            ax.set_yticks([])
 
-    if PLOT_HAMADA: # hamada coordinates
-        # NOTE: this has to be set to order='F'
-        xx, ss = np.meshgrid(out.x, out.s, indexing='ij')
-        xx_flat, ss_flat = np.ravel(xx, order='F'), np.ravel(ss, order='F')
-        triangulation = matplotlib.tri.Triangulation(xx_flat, ss_flat, triangles=triangles)
-    else:   # polodial coordinates
-        triangulation = matplotlib.tri.Triangulation(out.r_flat, out.z_flat, triangles=triangles)
+        if PLOT_HAMADA: # hamada coordinates
+            # NOTE: this has to be set to order='F'
+            xx, ss = np.meshgrid(out.x, out.s, indexing='ij')
+            xx_flat, ss_flat = np.ravel(xx, order='F'), np.ravel(ss, order='F')
+            triangulation = matplotlib.tri.Triangulation(xx_flat, ss_flat, triangles=triangles)
+        else:   # polodial coordinates
+            triangulation = matplotlib.tri.Triangulation(out.r_flat, out.z_flat, triangles=triangles)
 
-        # plot closed line at x=0 and x=-1 (inner and outer radial border of data)
-        ax.plot(np.append(out.r[0, :], out.r[0,0]), np.append(out.z[0, :], out.z[0,0]), ls='-', c=(0,0,0, 0.8), lw=0.2, zorder=11)
-        ax.plot(np.append(out.r[-1, :], out.r[-1,0]), np.append(out.z[-1, :], out.z[-1,0]), ls='-', c=(0,0,0, 0.8), lw=0.2, zorder=11)
+            # plot closed line at x=0 and x=-1 (inner and outer radial border of data)
+            ax.plot(np.append(out.r[0, :], out.r[0,0]), np.append(out.z[0, :], out.z[0,0]), ls='-', c=(0,0,0, 0.8), lw=0.2, zorder=11)
+            ax.plot(np.append(out.r[-1, :], out.r[-1,0]), np.append(out.z[-1, :], out.z[-1,0]), ls='-', c=(0,0,0, 0.8), lw=0.2, zorder=11)
 
-        # fill inner empty circle with white area, this is only neccessary in case of delaunay triangulation
-        ax.fill(out.r[0, :], out.z[0, :], color='white', zorder=10)
-        ax.set_aspect('equal')
+            # fill inner empty circle with white area, this is only neccessary in case of delaunay triangulation
+            ax.fill(out.r[0, :], out.z[0, :], color='white', zorder=10)
+            ax.set_aspect('equal')
 
-    if PLOT_GRID:    
-        plot_grid(ax, triangulation, pot_fine_flat, **plot_args)
-    else:
-        my_tricontourf(ax, triangulation, pot_fine_flat, show_grid=False, cmap='seismic', **plot_args)
+        if PLOT_GRID:    
+            plot_grid(ax, triangulation, pot_fine_flat, **plot_args)
+        else:
+            my_tricontourf(ax, triangulation, pot_fine_flat, show_grid=False, cmap='seismic', **plot_args)
 
-    logging.info(f'Saving plot to {PLOT_OUT}')
-    plt.savefig(PLOT_OUT, dpi=DPI)
+        logging.info(f'Saving plot to {PLOT_OUT}')
+        plt.savefig(PLOT_OUT, dpi=DPI)
 
+    
     logging.info('Done')
 
 if __name__ == "__main__":
