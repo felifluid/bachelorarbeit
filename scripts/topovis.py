@@ -768,7 +768,18 @@ class GKWData:
         return fcoeff_real + 1j * fcoeff_im
 
 class ToPoVisData:
-    def __init__(self, x, s, r, z, pot, zeta_s, fcoeffs = None):
+
+
+    def __init__(self, phi, poten_timestep, method, fx, fs, interpolator, triang_method):
+        self.phi = phi
+        self.poten_timestep = poten_timestep
+        self.method = method
+        self.fx = fx
+        self.fs = fs
+        self.interpolator = interpolator
+        self.triang_method = triang_method
+    
+    def save_results(self, x, s, r, z, pot, zeta_s, fcoeffs):
         self.nx = len(x)
         self.ns = len(s)
         self.x = x
@@ -844,6 +855,8 @@ def main(args = None):
     OMIT_AXES = bool(args.omit_axes)
     PLOT_GRID = bool(args.plot_grid)
 
+    out = ToPoVisData(PHI, POTEN_TIMESTEP, METHOD, FX, FS, INTERPOLATOR, TRIANG_METHOD)
+
     # ----------------------------------------- GKWDATA ----------------------------------------------
 
     logging.info(f'Reading file {HDF5_PATH}')
@@ -884,6 +897,11 @@ def main(args = None):
             x = dat.x                                    # shape (nx)
             r_n = extend_periodically(dat.r_n, OVERLAP, axis=1)
             z = extend_periodically(dat.z, OVERLAP, axis=1)
+        else:
+            s = dat.s
+            x = dat.x
+            r_n = dat.r_n
+            z = dat.z
 
         # NOTE: The poloidal coordinates ALWAYS get interpolated using RGI
 
@@ -979,7 +997,7 @@ def main(args = None):
             logging.info('Calculating potential')
             pot_fine_flat = calculate_potential(fcoeffs_fine_flat, zeta_s_fine_flat, k)
 
-            out = ToPoVisData(x_fine, s_fine, r_n_fine_flat, z_fine_flat, pot_fine_flat, zeta_s_fine_flat, fcoeffs_fine_flat)
+            out.save_results(x_fine, s_fine, r_n_fine_flat, z_fine_flat, pot_fine_flat, zeta_s_fine_flat, fcoeffs_fine_flat)
         else:
             logging.info('Calculating potential')
             pot = calculate_potential(fcoeffs, zeta_s, k)
@@ -987,7 +1005,7 @@ def main(args = None):
             zeta_s_flat = np.ravel(zeta_s)
             fcoeffs_flat = np.ravel(dat.fcoeffs)
 
-            out = ToPoVisData(dat.x, dat.s, dat.r_n_flat, dat.z_flat, pot_flat, zeta_s_flat, fcoeffs_flat)
+            out.save_results(dat.x, dat.s, dat.r_n_flat, dat.z_flat, pot_flat, zeta_s_flat, fcoeffs_flat)          
 
 
     else: # --------------------- NON LINEAR SIMULATION ---------------------
@@ -1078,7 +1096,7 @@ def main(args = None):
                 pot_fine = pot3d_fine[:,:,0]
                 pot_fine_flat = np.ravel(pot_fine)
 
-                out = ToPoVisData(x_fine, s_fine, r_n_fine_flat, z_fine_flat, pot_fine_flat, zeta_s_fine_flat)
+                out.save_results(x_fine, s_fine, r_n_fine_flat, z_fine_flat, pot_fine_flat, zeta_s_fine_flat)
             else:
                 pass
 
@@ -1164,6 +1182,7 @@ def main(args = None):
 
     
     logging.info('Done')
+    return out
 
 if __name__ == "__main__":
     main(sys.argv[1:])
