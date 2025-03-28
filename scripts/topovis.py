@@ -865,7 +865,7 @@ def main(args = None):
     # --------------------- PREPARE GRID ---------------------
 
     if INTERPOLATE:
-        # CREATE FINE GRID
+        # CREATE FINE HAMADA GRID
         x_fine, s_fine = interpolate_hamada_grid(dat.x, dat.s, FX, FS, extrapolate_s=PERIODIC)
         
         nx_fine = len(x_fine)
@@ -877,22 +877,12 @@ def main(args = None):
         if PERIODIC:
             # extend s-grid (not wrap!)
             s = extend_regular_array(dat.s, OVERLAP)     # shape (ns+2n)
-            x = dat.x                              # shape (nx)
-            # R(s) = R(s±1)
-            r_n = extend_periodically(dat.r_n, overlap=OVERLAP, axis=1)
-            # Z(s) = Z(s±1)
-            z = extend_periodically(dat.z, overlap=OVERLAP, axis=1)
-        else:
-            s = dat.s
-            x = dat.x
-            r_n = dat.r_n
-            z = dat.z
-
-        r_n_flat = np.ravel(r_n)
-        z_flat = np.ravel(z)
-        rz_points = np.column_stack((r_n_flat, z_flat))
+            x = dat.x                                    # shape (nx)
+            r_n = extend_periodically(dat.r_n, OVERLAP, axis=1)
+            z = extend_periodically(dat.z, OVERLAP, axis=1)
 
         # NOTE: The poloidal coordinates ALWAYS get interpolated using RGI
+
         logging.info(f'Interpolating poloidal grid')
         r_rgi = scipy.interpolate.RegularGridInterpolator((x, s), r_n, method=METHOD)
         r_n_fine_flat = r_rgi(xs_points_fine)
@@ -911,10 +901,6 @@ def main(args = None):
         # wave vector
         k = 2 * np.pi * dat.n_mod * dat.n_spacing   # constant
 
-        # complex fourier coefficients
-        fcoeffs = dat.fcoeffs                       # shape (nx,ns)
-        np.ravel(fcoeffs)
-
         if INTERPOLATE:
             # INTERPOLATE DATA
 
@@ -922,16 +908,24 @@ def main(args = None):
                 if PERIODIC:
                     # APPLY PERIODIC BOUNDARY CONDITIONS
 
+                    # extend s-grid (not wrap!)
+                    s = extend_regular_array(dat.s, OVERLAP)     # shape (ns+2n)
+                    x = dat.x                                    # shape (nx)
+
                     # ζ(s) = ζ(s±1) ∓ q
                     zeta_s = extend_periodically(zeta_s, OVERLAP, 1)    # extend grid periodically in s
                     zeta_s[:, :OVERLAP] -= dat.q[:, None]               # apply boundary condition for zeta[s < -0.5]
                     zeta_s[:, -OVERLAP:None] += dat.q[:, None]          # apply boundary condition for zeta[s > 0.5]
-                    # zeta_s = zeta_s % 1                           # map zeta back to [0,1]
+                    # zeta_s = zeta_s % 1                               # map zeta back to [0,1]
 
                     # f(s) = f(s±1) * exp(±ikq)
                     fcoeffs = extend_periodically(fcoeffs, OVERLAP, 1)              # extend grid periodically in s
                     fcoeffs[:, :OVERLAP] *= np.exp(1j * k * dat.q[:, None])
                     fcoeffs[:, -OVERLAP:None] *= np.exp(-1j * k * dat.q[:, None])
+                else:
+                    x = dat.x
+                    s = dat.s
+                    fcoeffs = dat.fcoeffs
 
                 # interpolate zeta-shift
                 logging.info(f'Interpolating zeta-shift')
@@ -946,6 +940,8 @@ def main(args = None):
 
                 # FIXME: add to argparse
                 rbf_kwargs = {'neighbors':100, 'kernel': 'linear', 'degree': 0}
+
+                rz_points = np.column_stack((dat.r_n_flat, dat.z_flat))
 
                 # interpolate zeta-shift
                 logging.info(f'Interpolating zeta-shift')
