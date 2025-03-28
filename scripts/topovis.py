@@ -1155,9 +1155,9 @@ def main(args = None):
             ax.set_aspect('equal')
 
         if PLOT_GRID:    
-            plot_grid(ax, triangulation, pot_fine_flat, **plot_args)
+            plot_grid(ax, triangulation, out.pot, **plot_args)
         else:
-            my_tricontourf(ax, triangulation, pot_fine_flat, show_grid=False, cmap='seismic', **plot_args)
+            my_tricontourf(ax, triangulation, out.pot, show_grid=False, cmap='seismic', **plot_args)
 
         logging.info(f'Saving plot to {PLOT_OUT}')
         plt.savefig(PLOT_OUT, dpi=DPI)
