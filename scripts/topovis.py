@@ -1086,7 +1086,7 @@ def main(args = None):
     # -------------------------------------- SAVING RESULTS TO FILE -----------------------------------------
 
     if DATA_OUT:
-        logging.info(f'Saving interpolation results to file: {DATA_OUT}')
+        logging.info(f'Saving data to file: {DATA_OUT}')
         with h5py.File(DATA_OUT, 'w') as f:
             # TODO: categorize these in subset structure
             # save params
