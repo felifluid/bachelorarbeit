@@ -56,12 +56,35 @@ A more and refined way to improve triangulations is to avoid the causes of unfav
 
 // of course simulations with higher density in s would help. but those are really heavy to compute. for convergence of the simulation only relatively few s grid points are needed.
 
-=== Refining the grid through interpolation
+=== Refining the Grid through Interpolation
 
 Similarly to the triangulation, the interpolation of the grid can be done in both poloidal coordinates and hamada coordinates. In this chapter, each approach is tested on circular simulations with a low density s-grid ($N_s=32$) and compared with a simulation with four times the amount of s-grid points ($N_s=128$). The technical functionality of the two interpolation methods is discussed in detail in !!. //@sec:background:interpolation
 
-==== Interpolating in poloidal coordinates
-The challenge of interpolating in poloidal coordinates is caused by the scattered structure of the grid. 
+// TODO: adjust this outlook
+
+==== Linear Simulation
+The potential on a poloidal slice in the linear case is calculated by first shifting #sym.zeta for $phi = #text("const")$ and then calculating the potential using the #sym.zeta\-shift and the complex fourier coefficients. 
+This leaves open two different strategies for interpolating the potential:
+
+#set enum(numbering: "A)")
++ Calculate the potential on the sparse grid and interpolate it.
++ First interpolate #sym.zeta\-shift and $hat(f)$ and then calculate the potential on the fine grid.
+
+While option A) is the simpler approach, it also generates worse results. 
+This is presumably due to the potential being a real number.
+So before interpolation the imaginary part of the complex fourier coefficients gets discarted.
+Additionaly, $hat(f)$ and #sym.zeta\-shift each represent smoother surfaces than the potential, which makes interpolation less prone to numerical errors.
+This makes option B) the preffered approach, while option A) will not be discussed or used further in this thesis.
+
+// The main issue that comes with interpolating #sym.zeta and $hat(f)$ is, that both quantities are not continous at $s=±0.5$. 
+// Meaning we cannot simply interpolate between this boundary, but instead have to apply certain boundary conditions to extend the grid out of bounds. 
+// This topic is discussed in detail in section !!.
+
+There is still the choice of the coordinate system to interpolate in. 
+Both poloidal and hamadian interpolation will be discussed in the next sections.
+
+===== Poloidal Interpolation
+The challenge of interpolating in poloidal coordinates lies in the scattered structure of the grid. // TODO: ist das gutes Englisch?
 This applies especially to data in CHEASE geometry, which shows different non-uniform characteristics.
 Intuitively interpolation in poloidal coordinates seems like a good approach, as the coordinates describe the real world euclidian space.
 If two points are really close to each other in euclidian space, one can expect similar measurements at these points. // ??: gibts dafür ein Fachbegriff?
@@ -71,13 +94,16 @@ Due to the non-linear transformation between the two coordinate systems, two poi
 
 Many interpolation methods like multivariate splines, finite element or Clough-Tocher rely on mesh generation through triangulation.
 This makes them unsuitable for this purpose, as triangulation algorithms fail to produce reliable results on non-uniform grids. 
-Therefore meshfree methods like the `RBFInterpolator` are needed to create more uniform grids and be able to generate triangulations without numerical artifacts.
+Therefore meshfree methods like the `RBFInterpolator` are can be used to create more uniform grids and be able to generate triangulations without numerical artifacts.
+
+#include "../../figs/compare_interpolation/circ/fig.typ"
 
 
+// parallel periodic boundary conditions can NOT be used 
 
 // nice bonus: interpolating between first and last grid points is trivial → interpolation domain is not limited
 
-==== Interpolating in hamada coordinates
+===== Interpolating in hamada coordinates
 
 
 
