@@ -1,26 +1,90 @@
 import sys
 sys.path.append('./scripts')
 import topovis
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import matplotlib.colors as colors
+import h5py
+import numpy as np
+import pathlib
 
-figs_path = './figs/compare_interpolation/'
-data_path = './data/circ/'
+figs_dir = './figs/compare_interpolation/'
 ext = '.png'
+DPI = 200
 
-topovis.main(['-vv', '--triang-method', 'regular', '--plot-out', figs_path+'circ_ns32/ns32'+ext, '--omit-axes', data_path+'ns32/gkwdata.h5', '1', '1'])
+def figpath(filename):
+    return figs_dir+filename+ext
 
-topovis.main(['-vv', '--triang-method', 'regular', '--plot-out', figs_path+'circ_ns32/rgi'+ext, '--omit-axes', '--periodic', '--interpolator', 'rgi', data_path+'ns32/gkwdata.h5', '1', '4'])
+args_list = [
+    {'geom': 'circ', 'ns': '32', 'fs': '1', 'fx': '1'},
+    {'geom': 'circ', 'ns': '32', 'fs': '4', 'fx': '1', 'method': 'rbfi'},
+    {'geom': 'circ', 'ns': '32', 'fs': '4', 'fx': '1', 'method': 'rgi'},
+    {'geom': 'circ', 'ns': '128', 'fs': '1', 'fx': '1'},
+]
 
-topovis.main(['-vv', '--triang-method', 'regular', '--plot-out', figs_path+'circ_ns32/ns128'+ext, '--omit-axes', data_path+'ns128/gkwdata.h5', '1', '1'])
+results : list[topovis.ToPoVisData] = []
+names = []
 
-topovis.main(['-vv', '--triang-method', 'regular', '--plot-out', figs_path+'/circ_ns32/rbfi'+ext, '--omit-axes', '--periodic', '--interpolator', 'rbfi', data_path+'ns32/gkwdata.h5', '1', '4'])
+vmin = np.inf
+vmax = -np.inf
 
-data_path = './data/chease/'
-figs_path = './figs/compare_interpolation/chease_ns128/'
+for args in args_list:
+    data_dir = './data/'+args['geom']+'/ns'+args['ns']+'/'
+    in_path = data_dir+'gkwdata.h5'
 
-topovis.main(['-vv', '--triang-method', 'regular', '--plot-out', figs_path+'ns128'+ext, '--omit-axes', data_path+'ns128/gkwdata.h5', '1', '1'])
+    if 'method' in args:
+        res = topovis.main(['-vv', '--omit-axes', '--periodic', '--interpolator', args['method'], in_path, args['fx'], args['fs']])
+    else:
+        res = topovis.main(['-vv', '--omit-axes', in_path, args['fx'], args['fs']])
 
-topovis.main(['-vv', '--triang-method', 'regular', '--plot-out', figs_path+'fs4_rgi'+ext, '--omit-axes', '--periodic', '--interpolator', 'rgi', data_path+'ns128/gkwdata.h5', '1', '4'])
+    results.append(res)
 
-topovis.main(['-vv', '--triang-method', 'regular', '--plot-out', figs_path+'ns512'+ext, '--omit-axes', data_path+'ns512/gkwdata.h5', '1', '1'])
+    min = float(np.min(res.pot))
+    max = float(np.max(res.pot))
+    if min < vmin: vmin = min
+    if max > vmax: vmax = max
 
-topovis.main(['-vv', '--triang-method', 'regular', '--plot-out', figs_path+'fs4_rbfi'+ext, '--omit-axes', '--periodic', '--interpolator', 'rbfi', data_path+'ns128/gkwdata.h5', '1', '4'])
+for res in results:
+    kwargs = {'vmin': vmin, 'vmax': vmax}
+
+    fig, ax = plt.subplots()
+    fig.tight_layout()
+
+    res.plot(fig, ax, **kwargs)
+
+    path = figs_dir + 'circ/ns' + str(res.ns) + '-fs' + str(res.fs) + '-' + str(res.interpolator) + ext
+    plt.savefig(path, dpi=DPI)
+
+# plots diffs
+
+exact = results[3]
+rbfi = results[2]
+rgi = results[1]
+
+diff_rgi = np.abs(rgi.pot - exact.pot)
+vmin_rgi = np.min(diff_rgi)
+vmax_rgi = np.max(diff_rgi)
+
+diff_rbfi = np.abs(rbfi.pot - exact.pot)
+vmin_rbfi = np.min(diff_rbfi)
+vmax_rbfi = np.max(diff_rbfi)
+
+vmin = np.min([vmin_rbfi, vmin_rgi])
+vmax = np.max([vmax_rbfi, vmax_rgi])
+
+kwargs = {'cmap':'Reds','vmin': vmin, 'vmax': vmax}
+
+fig, ax = plt.subplots()
+fig.tight_layout()
+
+topovis.plot(rgi.r, rgi.z, diff_rgi, fig, ax, omit_axes=True, **kwargs)
+
+path = figs_dir + 'circ/ns' + str(rgi.ns) + '-fs' + str(rgi.fs) + '-' + str(rgi.interpolator) + '-diff' + ext
+plt.savefig(path, dpi=DPI)
+
+fig, ax = plt.subplots()
+fig.tight_layout()
+topovis.plot(rbfi.r, rbfi.z, diff_rbfi, omit_axes=True, **kwargs)
+
+path = figs_dir + 'circ/ns' + str(rbfi.ns) + '-fs' + str(rbfi.fs) + '-' + str(rbfi.interpolator) + '-diff' + ext
+plt.savefig(path, dpi=DPI)

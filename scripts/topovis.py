@@ -3,13 +3,18 @@
 import logging
 import argparse
 import sys
+import matplotlib.cm
 import numpy as np
 import h5py
 import enum
 import scipy.integrate
 import scipy.interpolate
 import matplotlib.tri
+import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.axes
+import matplotlib.colors
+import matplotlib.figure
 import pathlib
 
 ################################################## FUNCTIONS #################################################
@@ -495,16 +500,17 @@ def make_regular_triangles(nx, ns, dir='r', periodic=False):
 
     return triangles
 
-def my_tricontourf(ax, triangulation, z, show_grid=False, **kwargs):
+def _plot_contourf(ax, triangulation, z, show_grid=False, **kwargs):
     x = triangulation.x
     y = triangulation.y
     cmap = kwargs.pop('cmap', 'seismic')
-    levels = kwargs.pop('levels', 100)
+    levels = kwargs.pop('levels', 200)
 
     ax.tricontourf(triangulation, z, levels=levels, zorder=0, cmap=cmap, **kwargs)
-    if show_grid : plot_grid(ax, triangulation, z, **kwargs)
+    if show_grid : _plot_grid(ax, triangulation, z, **kwargs)
+    return ax
 
-def plot_grid(ax, triangulation, z, **kwargs):
+def _plot_grid(ax, triangulation, z, **kwargs):
     ax.triplot(triangulation, c=(0,0,0,0.2), lw=0.01)
     ax.scatter(triangulation.x, triangulation.y, 
                marker='.', 
@@ -516,6 +522,61 @@ def plot_grid(ax, triangulation, z, **kwargs):
                vmin=kwargs.pop('vmin'),
                vmax=kwargs.pop('vmax')
             )
+
+def plot(r, z, pot, fig=None, ax=None, triang_method='regular', omit_axes=False, omit_cbar=False, **kwargs):
+    if fig is None:
+        fig = plt.gcf()
+    if ax is None:
+        ax = plt.gca()
+
+    if 'vmin' not in kwargs:
+        kwargs['vmin'] = np.min(pot)
+    if 'vmax' not in kwargs:
+        kwargs['vmax'] = np.max(pot)
+    if 'cmap' not in kwargs:
+        kwargs['cmap'] = 'seismic'
+    
+    nx, ns = np.shape(r)
+
+    r_flat = np.ravel(r)
+    z_flat = np.ravel(z)
+
+    if triang_method == 'regular':
+        triangles = make_regular_triangles(nx, ns, periodic=True)
+    elif triang_method == 'delaunay':
+        # NOTE: this ALWAYS creates periodic triangles
+        # TODO: maybe it's possible to filter these out? then again it's unneccessary when periodic interpolation works
+        triangles = matplotlib.tri.Triangulation(r_flat, z_flat).triangles
+    else:
+        raise ValueError(f"No other triangulation method supported other than 'regular' and 'delaunay', got {triang_method}")
+
+    if omit_axes:
+        ax.set_xticks([])
+        ax.set_yticks([])
+    else:
+        ax.set_xlabel(r'$R$')
+        ax.set_ylabel(r'$Z$')
+
+
+    ax.set_aspect('equal')
+    
+    triangulation = matplotlib.tri.Triangulation(r_flat, z_flat, triangles=triangles)
+
+    # plot closed line at x=0 and x=-1 (inner and outer radial border of data)
+    ax.plot(np.append(r[0, :], r[0,0]), np.append(z[0, :], z[0,0]), ls='-', c=(0,0,0, 0.8), lw=0.2, zorder=11)
+    ax.plot(np.append(r[-1, :], r[-1,0]), np.append(z[-1, :], z[-1,0]), ls='-', c=(0,0,0, 0.8), lw=0.2, zorder=11)
+
+    # fill inner empty circle with white area, this is only neccessary in case of delaunay triangulation
+    ax.fill(r[0, :], z[0, :], color='white', zorder=10)
+    
+    _plot_contourf(ax, triangulation, pot, show_grid=False, **kwargs)
+
+    if not omit_cbar:
+        cmap = plt.get_cmap(kwargs['cmap'])
+        norm = matplotlib.colors.Normalize(vmin=kwargs['vmin'], vmax=kwargs['vmax'])
+        fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, label=r'$\Phi$')
+
+    return fig, ax
 
 def parse_args(args):
     parser = argparse.ArgumentParser(description='Interpolation of a poloidal cross section for given toroidal angle phi and time step for potential data. Zonal or non-zonal potential is displayed.')
@@ -768,16 +829,20 @@ class GKWData:
         return fcoeff_real + 1j * fcoeff_im
 
 class ToPoVisData:
-
-
-    def __init__(self, phi, poten_timestep, method, fx, fs, interpolator, triang_method):
+    # TODO: Make this the class around basically everything
+    def __init__(self, phi, poten_timestep, method, fx, fs, interpolator):
         self.phi = phi
         self.poten_timestep = poten_timestep
         self.method = method
         self.fx = fx
         self.fs = fs
         self.interpolator = interpolator
+
+    def set_plot_args(self, triang_method, levels, omit_axes, dpi):
         self.triang_method = triang_method
+        self.levels = levels
+        self.omit_axes = omit_axes
+        self.dpi = dpi
     
     def save_results(self, x, s, r, z, pot, zeta_s, fcoeffs):
         self.nx = len(x)
@@ -791,6 +856,9 @@ class ToPoVisData:
         self.pot = pot
         self.zeta_s = zeta_s
         self.fcoeffs = fcoeffs
+
+    def plot(self, fig=None, ax=None, **kwargs):
+        return plot(self.r, self.z, self.pot, fig, ax, self.triang_method, self.omit_axes, **kwargs)
 
 ################################################## MAIN ##################################################
 
@@ -855,7 +923,8 @@ def main(args = None):
     OMIT_AXES = bool(args.omit_axes)
     PLOT_GRID = bool(args.plot_grid)
 
-    out = ToPoVisData(PHI, POTEN_TIMESTEP, METHOD, FX, FS, INTERPOLATOR, TRIANG_METHOD)
+    out = ToPoVisData(PHI, POTEN_TIMESTEP, METHOD, FX, FS, INTERPOLATOR)
+    out.set_plot_args(TRIANG_METHOD, LEVELS, OMIT_AXES, DPI)
 
     # ----------------------------------------- GKWDATA ----------------------------------------------
 
@@ -1130,55 +1199,11 @@ def main(args = None):
     # --------------------------------------------- PLOTTING ---------------------------------------------
 
     if PLOT_OUT:
-        if TRIANG_METHOD == 'regular':
-            logging.info('Creating regular triangle grid')
-            is_plot_periodic = PERIODIC or FS == 1
-            triangles = make_regular_triangles(out.nx, out.ns, periodic=is_plot_periodic)
-        elif TRIANG_METHOD == 'delaunay':
-            logging.info('Performing delaunay triangulation')
-            # NOTE: this ALWAYS creates periodic triangles
-            # TODO: maybe it's possible to filter these out? then again it's unneccessary when periodic interpolation works
-            triangles = matplotlib.tri.Triangulation(out.r_flat, out.z_flat).triangles
-        else:
-            logging.fatal(f"No other triangulation method supported other than 'regular' and 'delaunay', got {TRIANG_METHOD}. Exiting")
-            sys.exit(1)
-
-        logging.info('Creating plot')
-
-        plot_args = {}
-        plot_args['vmin'] = np.min(out.pot)
-        plot_args['vmax'] = np.max(out.pot)
-        plot_args['levels'] = LEVELS
-
-        fig, ax = plt.subplots()
-
-        if OMIT_AXES:
-            ax.set_xticks([])
-            ax.set_yticks([])
-
-        if PLOT_HAMADA: # hamada coordinates
-            # NOTE: this has to be set to order='F'
-            xx, ss = np.meshgrid(out.x, out.s, indexing='ij')
-            xx_flat, ss_flat = np.ravel(xx, order='F'), np.ravel(ss, order='F')
-            triangulation = matplotlib.tri.Triangulation(xx_flat, ss_flat, triangles=triangles)
-        else:   # polodial coordinates
-            triangulation = matplotlib.tri.Triangulation(out.r_flat, out.z_flat, triangles=triangles)
-
-            # plot closed line at x=0 and x=-1 (inner and outer radial border of data)
-            ax.plot(np.append(out.r[0, :], out.r[0,0]), np.append(out.z[0, :], out.z[0,0]), ls='-', c=(0,0,0, 0.8), lw=0.2, zorder=11)
-            ax.plot(np.append(out.r[-1, :], out.r[-1,0]), np.append(out.z[-1, :], out.z[-1,0]), ls='-', c=(0,0,0, 0.8), lw=0.2, zorder=11)
-
-            # fill inner empty circle with white area, this is only neccessary in case of delaunay triangulation
-            ax.fill(out.r[0, :], out.z[0, :], color='white', zorder=10)
-            ax.set_aspect('equal')
-
-        if PLOT_GRID:    
-            plot_grid(ax, triangulation, out.pot, **plot_args)
-        else:
-            my_tricontourf(ax, triangulation, out.pot, show_grid=False, cmap='seismic', **plot_args)
+        logging.info(f'Preparing plot')
+        fig, ax = out.plot()
 
         logging.info(f'Saving plot to {PLOT_OUT}')
-        plt.savefig(PLOT_OUT, dpi=DPI)
+        fig.savefig(PLOT_OUT, dpi=DPI)
 
     
     logging.info('Done')
