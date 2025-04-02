@@ -73,6 +73,7 @@ This leaves open two different strategies for interpolating the potential:
 While option A) is the simpler approach, it also generates worse results. 
 This is presumably due to the potential being a real number.
 So before interpolation the imaginary part of the complex fourier coefficients gets discarted.
+Whereas the imaginary part is being kept and interpolated in option B).
 Additionaly, $hat(f)$ and #sym.zeta\-shift each represent smoother surfaces than the potential, which makes interpolation less prone to numerical errors.
 This makes option B) the preffered approach, while option A) will not be discussed or used further in this thesis.
 
@@ -83,9 +84,28 @@ This makes option B) the preffered approach, while option A) will not be discuss
 There is still the choice of the coordinate system to interpolate in. 
 Both poloidal and hamadian interpolation will be discussed in the next sections.
 
+===== Hamadian Interpolation
+Interpolation in hamada coordinates is done using `RegularGridInterpolator`, which functionality is discussed in Section !!. 
+Both #sym.zeta\-shift and the fourier coefficients $hat(f)$ are defined as 2d-arrays as functions of #sym.psi and $s$.
+Therefore interpolation is a simple act of first initializing the interpolator with the sparse grid and data and then calling it to evaluate on the fine grid.
+
+```py
+rgi = RegularGridInterpolator((x, s), data, **kwargs)
+data_fine = rgi(xs_points_fine)
+```
+
+The main restriction with this method is, that the RGI can only _interpolate_. 
+
+// TODO: add infos here? or reference previous sections?
+
+// main intuitive argument for this: the data is generated in hamada, so it might as well be similar
+
 ===== Poloidal Interpolation
+Interpolation in poloidal coordinates works quiet similar as interpolation is hamada coordinates.
+But instead of initializing the interpolator with the grid in hamada coordinates, the data points are paired with the corresponding scattered R-Z-points.
+
 The challenge of interpolating in poloidal coordinates lies in the scattered structure of the grid. // TODO: ist das gutes Englisch?
-This applies especially to data in CHEASE geometry, which shows different non-uniform characteristics.
+This applies especially to data in CHEASE geometry, which shows multiple different non-uniform characteristics.
 Intuitively interpolation in poloidal coordinates seems like a good approach, as the coordinates describe the real world euclidian space.
 If two points are really close to each other in euclidian space, one can expect similar measurements at these points. // ??: gibts dafür ein Fachbegriff?
 As the electric potential is smooth and continuous inside the tokamak, this property also applies to it. // TODO: dont like this sentence
@@ -96,16 +116,47 @@ Many interpolation methods like multivariate splines, finite element or Clough-T
 This makes them unsuitable for this purpose, as triangulation algorithms fail to produce reliable results on non-uniform grids. 
 Therefore meshfree methods like the `RBFInterpolator` are can be used to create more uniform grids and be able to generate triangulations without numerical artifacts.
 
+Using the RBFI, interpolating in poloidal coordinates becomes really similar as using the RGI as the following code example shows.
+
+```py
+rbfi = RBFInterpolator(rz_points, data, **kwargs)
+data_fine = rgi(rz_points_fine)
+```
+
+In the following test examples the arguments for the RBFI were set as presented in the table.
+
+#table(
+  columns: 2,
+  align: left,
+  [*keyword*], [*value*],
+  [kernel], [linear],
+  [degree], [0],
+  [neighbors], [100]
+)
+
+
+===== Results and Comparison
+To check whether the two interpolations methods give accurate results, the same GKW simulation was conducted with $N_s = 32$ and $N_s = 128$. 
+The low resolution data was then upscaled by each interpolator to match the fine grid.
+
 #include "../../figs/compare_interpolation/circ/fig.typ"
 
+// TODO: add text here for visual seperation
+ 
+#include "../../figs/compare_interpolation/circ/rbfi/fig.typ"
 
-// parallel periodic boundary conditions can NOT be used 
+#include "../../figs/compare_interpolation/circ/rgi/fig.typ"
 
-// nice bonus: interpolating between first and last grid points is trivial → interpolation domain is not limited
+One can immediately notice the strong deviation at the left side of the plot in the RBFI results (#ref(<fig:interp:circ:rbfi>)).
+It's located more precisely between the first $s_0=-0.5+(Delta s)/2$ and last $s_(-1)=0.5-(Delta s)/2$ constant-$s$ lines.
+The reason for this, is because neither #sym.zeta\-shift nor $hat(f)$ are continuous at this boundary.
+As the data is structured in poloidal coordinates, no new point can be added that would coincide with the existing grid, which is excactly how the current implementation of the parallel periodic boundary conditions are implemented.
 
-===== Interpolating in hamada coordinates
+It can be observed, that the RGI overall performs better than the RBFI.
 
+// TODO: 1D graph with mean in psi?
 
+=== Extending the grid through double-periodic boundary conditions // !! move to background 
 
 // problem: regular grid interpolator can only interpolate
 
@@ -119,13 +170,12 @@ Therefore meshfree methods like the `RBFInterpolator` are can be used to create 
 
 // However, there is an option to generate additional gridpoints *outside* the domain. This is being done through _double-periodic boundary conditions_.
 
-=== Extending the grid through double-periodic boundary conditions
-
 == Miscellaneous
 
 // more efficient as calculations got more vectorized instead of through for loops
 
 // more arguments to modify plot
 
+// made importable and callable as a local package
 
 #load-bib()
