@@ -63,7 +63,11 @@ Similarly to the triangulation, the interpolation of the grid can be done in bot
 // TODO: adjust this outlook
 
 ==== Linear Simulation
-The potential on a poloidal slice in the linear case is calculated by first shifting #sym.zeta for $phi = #text("const")$ and then calculating the potential using the #sym.zeta\-shift and the complex fourier coefficients. 
+The potential on a poloidal slice in the linear case is calculated by first calculating #sym.zeta for $phi = #text("const")$ - known as #sym.zeta\-shift. 
+The potential is then calculated using the #sym.zeta\-shift and the complex fourier coefficients using the following formula:
+
+$ Phi(hat(f), zeta, k) = hat(f) * e^(i k zeta) + hat(f)^* * e^(-i k zeta)$
+
 This leaves open two different strategies for interpolating the potential:
 
 #set enum(numbering: "A)")
