@@ -7,7 +7,7 @@
         caption: "upscaled",
     ), <fig:interp:circ:rbfi:interp>,
     figure(
-        image("ns128-fs4-rbfi-diff.png"),
+        image("ns128-fs4-diff.png"),
         caption: "difference (absolute)",
     ), <fig:interp:circ:rbfi:diffs>,
     caption: [ 
