@@ -3,8 +3,8 @@
 
 = Improving the ToPoVis Code
 
-== Numerical artifacts
-=== Cause of the Artifacts
+== Dealing with Numerical Artifacts
+
 With the original version of ToPoVis some numerical artifacts could be observed in the contour plots as can be seen in @fig:artifacts:contour_artifacts. 
 The artifacts are particularly severe at the edges of plots in CHEASE geometry. 
 This made it harder to study small scale turbulences in these areas.
@@ -27,7 +27,10 @@ Note that the axes aren't scaled equally to help visualize this effect.
 Furthermore only every fourth point in the #sym.psi - direction is used to make the triangles distinguishable. 
 This has very little influence on the delaunay triangulation in this specific section.
 
+// TODO: split this into 2 figures
 #include "../../figs/triangulation_artifacts/sparse/fig.typ"
+
+=== An alternative Triangulation
 
 A possible solution to this is presented in the bottom two figures. Instead of relying on delaunay triangulation, a custom regular triangle grid is used. This is achieved by a new method called `make_regular_triangles`. 
 
@@ -59,9 +62,11 @@ A more and refined way to improve triangulations is to avoid the causes of unfav
 
 === Refining the Grid through Interpolation
 
-Similarly to the triangulation, the interpolation of the grid can be done in both poloidal coordinates and hamada coordinates. In this chapter, each approach is tested on circular simulations with a low density s-grid ($N_s=32$) and compared with a simulation with four times the amount of s-grid points ($N_s=128$). The technical functionality of the two interpolation methods is discussed in detail in !!. //@sec:background:interpolation
-
-// TODO: adjust this outlook
+Similarly to the triangulation, the interpolation of the grid can be done in both poloidal coordinates and hamada coordinates. 
+For now poloidal interpolation is only implemented for linear simulations, as interpolation in hamada coordinates currently yields more promising results.
+In this section, it will be explained in detail, how interpolation is achieved both for linear and non-linear simulations.
+For validation and benchmarking the interpolators are tested on simulations with a low-density s-grid in both circular and CHEASE geometry.
+The results will then be compared to simulation data with a s-grid resolution. 
 
 ==== Linear Simulation
 The potential on a poloidal slice in the linear case is calculated by first calculating #sym.zeta for $phi = #text("const")$ - known as #sym.zeta\-shift. 
@@ -171,6 +176,10 @@ The low resolution data was then upscaled by each interpolator to match the fine
 
 #include "../../figs/compare_interpolation/circ/fig.typ"
  
+For an intuitive comparison of the interpolated potential $Phi'$ versus the potential of the accurate simulation $Phi$, the relative (normalized) difference of the two is plotted via the following formula:
+
+$ Delta = frac(abs(Phi' - Phi), max(Phi)) $
+
 #include "../../figs/compare_interpolation/circ/rbfi/fig.typ"
 
 #include "../../figs/compare_interpolation/circ/rgi/fig.typ"
@@ -182,6 +191,10 @@ It's located more precisely between the first $s_0=-0.5+(Delta s)/2$ and last $s
 It can be observed, that the RGI overall performs better than the RBFI.
 
 // TODO: 1D graph with mean in psi?
+
+=== Non-linear Simulations
+
+
 
 === Extending the grid through double-periodic boundary conditions // !! move to background 
 

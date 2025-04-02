@@ -8,7 +8,7 @@
     ), <fig:interp:circ:rgi:upscaled>,
     figure(
         image("ns128-fs4-diff.png"),
-        caption: "difference (absolute)",
+        caption: "relative difference",
     ), <fig:interp:circ:rgi:diffs>,
     caption: [ 
         RGI interpolation results.

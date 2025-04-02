@@ -8,7 +8,7 @@
     ), <fig:interp:circ:rbfi:interp>,
     figure(
         image("ns128-fs4-diff.png"),
-        caption: "difference (absolute)",
+        caption: "relative difference",
     ), <fig:interp:circ:rbfi:diffs>,
     caption: [ 
         RBF interpolation results.
