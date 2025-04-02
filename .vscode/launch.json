@@ -21,12 +21,21 @@
             "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "periodic_boundary.png", "--interpolator", "rgi", "--periodic", "--method", "quintic", "${workspaceFolder}/data/circ/ns32/gkwdata.h5", "1", "4"]
         },
         {
-            "name": "Circ FS8 Linear Poloidal",
+            "name": "Test",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "poloidal_interpolation.svg", "--interpolator", "rbfi", "--periodic", "--method", "linear", "${workspaceFolder}/data/circ/ns32/gkwdata.h5", "1", "8"]
+            "args": ["-vv", "--plot-out", "plot.pdf", "--interpolator", "rgi", "--periodic", "--method", "linear", "${workspaceFolder}/data/circ/ns32/gkwdata.h5", "1", "4"]
+        },
+        {
+            "name": "Circ FS4 Linear Poloidal",
+            "justMyCode": false,
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "poloidal_interpolation.svg", "--interpolator", "rbfi", "--periodic", "--method", "linear", "${workspaceFolder}/data/circ/ns32/gkwdata.h5", "1", "4"]
         },
         {
             "name": "Circ No Interpolation",
@@ -35,6 +44,22 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "no_interpolation.svg", "${workspaceFolder}/data/circ/ns32/gkwdata.h5", "1", "1"]
+        },
+        {
+            "name": "Nonlin Circ Periodic",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "nonlin_circ.png", "--method", "cubic", "--periodic", "${workspaceFolder}/data/nonlin/circ/gkwdata.h5", "1", "4"]
+        },
+        {
+            "name": "Nonlin Circ Periodic",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "nonlin_circ_original.png", "--method", "linear", "--periodic", "${workspaceFolder}/data/nonlin/circ/gkwdata.h5", "2", "1"]
         }
     ]
 }

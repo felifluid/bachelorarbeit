@@ -32,7 +32,7 @@ Q: Fachbegriff für die "Verschraubung" mit zunehmendem #sym.psi
 A: Lokale Magnetische Scherung
 
 Q: Sollte man Bilder im Text zunächst beschreiben? (Was sieht man?)
-A: 
+A: Yes!
 
 Q: Wie übersetzt sich die parallele Randbedingung im linearen Fall für #sym.zeta?
 $ hat(f)(psi, k, s) = hat(f)(psi, k, s±1) exp(±i k q) $
@@ -46,3 +46,12 @@ $ Phi(psi, s, zeta) = hat(f)(psi, k, s) * exp(i k zeta) + hat(f)^*(psi, k, s) * 
 Beim betrachten eines Punktes $s_1 > 0.5$ müsste das für #sym.Phi heißen:
 
 $ Phi(psi, s_1, zeta) = hat(f)(psi, k, s_1 - 1) * exp(i k zeta(psi, s_1 - 1) - q) + hat(f)^*(psi, k, s_1 -1) * exp(-i k zeta(psi, s_1 - 1) -q) $
+
+Q: $s$-constant Linien zu Plots hinzufügen?
+A:
+
+Q: Ähnlich wie Sophia: Kling-Gupta Efficiency für Interpolation Ergebnisse? (oder ähnliche Form von durchschnittlicher Fehler (#sym.psi) in Abhängigkeit von $s$?)
+A:
+
+Q: CHEASE Zentrum in hoher s-Auflösung
+A:

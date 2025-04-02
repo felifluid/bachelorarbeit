@@ -304,7 +304,7 @@ def shift_zeta(g, s, phi, geom_type, q=None, r_n=None, r_ref=None, nx=None, ns=N
     #   G = gmap * chease_factor - qs
     # s-alpha:
     #   G = 0
-    if geom_type == 'circ':
+    if geom_type == 'circ' or geom_type == 'universal':
         zeta = -phi / (2*np.pi) + g
     elif geom_type == 's-alpha':
         #FIXME: equation for s-alpha is not right
@@ -600,6 +600,11 @@ def parse_args(args):
                         action='store_true',
                         dest='zonal',
                         help="(optional) If set plots zonal potential. This is only being used in nonlinear simulations.")
+    parser.add_argument('--legacy-gmap',
+                        action='store_true',
+                        dest='legacy_gmap',
+                        help="Calculates the G-factor numerically, instead of just importing from GKW." #TODO: Better description
+                        )
     plot_group = parser.add_argument_group('plot', description='Parameters for the plot')
     plot_group.add_argument('--triang-method', 
                             type=str,
@@ -885,6 +890,8 @@ def main(args = None):
 
     PHI = float(args.phi) % (2*np.pi)
 
+    LEGACY_GMAP = args.legacy_gmap
+
     FX = int(args.fx)
     FS = int(args.fs)
 
@@ -935,11 +942,16 @@ def main(args = None):
 
     IS_LIN = dat.is_lin
 
+    if LEGACY_GMAP:
+        GEOM = dat.geom_type
+    else:
+        GEOM = 'universal'
+    
     OVERLAP = 4
 
     # perform zeta-shift
     logging.info(f'Performing zeta-shift')
-    zeta_s = shift_zeta(dat.g, dat.s, PHI, dat.geom_type,
+    zeta_s = shift_zeta(dat.g, dat.s, PHI, GEOM,
                     q=dat.q, 
                     r_n=dat.r_n,
                     r_ref=dat.r_ref, 
@@ -989,7 +1001,7 @@ def main(args = None):
 
     if IS_LIN: # LINEAR SIMULATION
 
-        zeta_s = shift_zeta(dat.g, dat.s, PHI, dat.geom_type,
+        zeta_s = shift_zeta(dat.g, dat.s, PHI, GEOM,
                             q=dat.q, 
                             r_n=dat.r_n,
                             r_ref=dat.r_ref, 

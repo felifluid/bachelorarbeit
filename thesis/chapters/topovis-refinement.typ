@@ -165,26 +165,11 @@ The RBFI cannot handle this and will throw a `SingularMatrix` Error.
 Because the grid is discrete its also not possible to add new points at the half-way point between $0.5-(Delta s)/2 < s < 0.5$, as the periodic points would be out of bounds as well. 
 Therefore the interpolation results at the boundary will show numerical artifacts for poloidal interpolation.
 
-In the following test examples the arguments for the RBFI were set as presented in the table.
-
-#align(center)[
-  #table(
-    columns: 2,
-    align: left,
-    [*keyword*], [*value*],
-    [kernel], [linear],
-    [degree], [0],
-    [neighbors], [100]
-  )
-]
-
 ===== Results and Comparison
 To check whether the two interpolations methods give accurate results, the same GKW simulation was conducted with $N_s = 32$ and $N_s = 128$. 
 The low resolution data was then upscaled by each interpolator to match the fine grid.
 
 #include "../../figs/compare_interpolation/circ/fig.typ"
-
-// TODO: add text here for visual seperation
  
 #include "../../figs/compare_interpolation/circ/rbfi/fig.typ"
 

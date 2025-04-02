@@ -11,51 +11,67 @@
     meth = 99
     dtim = 0.002
     ntime = 10000
-    naverage = 200
-    nlapar = .false.
+    naverage = 500
+    nlapar = .true.
     nlbpar = .false.
-    collisions = .false.
-    disp_par = 2.0
-    disp_vp = 0.4
+    collisions = .true.
+    disp_par = 1.0
+    disp_vp = 0.0
     disp_x = 1.0
-    disp_y = 0.1
+    disp_y = 0.0
     spectral_radius = .false.
     flux_tube = .false.
     min_gr = -0.5
     max_gr = 1000000.0
     normalized = .true.
+    max_sec = 82800	! 23 h
+    fac_dtim_est = 0.5
+    gamatol = 1e-9
 /
 
 &gridsize
     nx = 128
-    n_s_grid = 64
+    n_s_grid = 256
     n_mu_grid = 16
     n_vpar_grid = 64
     nmod = 1
     nperiod = 1
-    number_of_species = 1
-    psil = 0.05724427921189108
-    psih = 0.2585048871235323
+    number_of_species = 2
+    psil = 0.2902051333687009
+    psih = 0.30294963291183935
     vpmax = 5.0
     mumax = 8.0
+
+    n_procs_sp = 2
+    n_procs_s = 32
+    n_procs_mu = 4
+    n_procs_vpar = 1
 /
 
 &mode
     mode_box = .true.
-    n_spacing = 50
+    n_spacing = 8
 /
 
 &geom
     geom_type = 'chease_global'
     eqfile = '../hamada.dat'
+
+    signj = -1
 /
 
 &spcgeneral
-    beta = 0.016634666700316433
-    adiabatic_electrons = .true.
-    rhostar = 0.0036454354037501998
+    beta_type = 'ref'
+    beta = 0.0022044935916891426
+    
+    betaprime_type = 'sp'
+    
+    adiabatic_electrons = .false.
+    rhostar = 0.0018239889618696023
     finit = 'cosine5'
     amp_init = 0.0001
+    
+    drift_gradp_type = 'curv_only'
 /
 
 &species
@@ -70,7 +86,7 @@
 &species
     mass = 0.0002723
     z = -1.0
-    temp = 0.875587567674339
+    temp = 0.6545694590509076
     dens = 1.0
     dens_prof_type = 'file'
     temp_prof_type = 'file'
@@ -83,21 +99,29 @@
 &diagnostic
     lradial_profile = .true.
     lrad_moment = .true.
-    lrad_field = .true.
     lphi_diagnostics = .true.
 /
 
 &gyroaverage
-    n_points_ga = 32
-    n_gav_bound_ex = 3
-    gyro_average_electrons = .true.
-    orb_polarize = .false.
+    n_points_ga = 113
+    n_gav_bound_ex = 31
     use_conj = .true.
-    consistent_long_wave = .false.
 /
 
 &krook
     nlbound = .true.
-    gammab = 0.3
-    bwidth = 3.75
+    gammab = 10.0
+    bwidth = 12.8
+/
+
+&collisions
+ rref = 1.708835602
+ nref = 2.3526846282501116
+ tref = 0.7257639036168157
+ zeff = 1.0
+ pitch_angle = .true.
+ en_scatter = .true.
+ mom_conservation = .true.
+ ene_conservation = .true.
+ friction_coll = .true.
 /

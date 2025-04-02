@@ -2,11 +2,7 @@ import sys
 sys.path.append('./scripts')
 import topovis
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import matplotlib.colors as colors
-import h5py
 import numpy as np
-import pathlib
 
 figs_dir = './figs/compare_interpolation/'
 ext = '.png'
@@ -57,15 +53,18 @@ def plot(res):
 
 # plots diffs
 
-exact = results[3]
-rbfi = results[2]
-rgi = results[1]
+def diff(a,b):
+    return np.abs((a-b)/np.max(b))
 
-diff_rgi = np.abs(rgi.pot - exact.pot)
+exact = results[3]
+rbfi = results[1]
+rgi = results[2]
+
+diff_rgi = diff(rgi.pot, exact.pot)
 vmin_rgi = np.min(diff_rgi)
 vmax_rgi = np.max(diff_rgi)
 
-diff_rbfi = np.abs(rbfi.pot - exact.pot)
+diff_rbfi = diff(rbfi.pot, exact.pot)
 vmin_rbfi = np.min(diff_rbfi)
 vmax_rbfi = np.max(diff_rbfi)
 
