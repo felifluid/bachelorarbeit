@@ -4,6 +4,7 @@
 = Improving the ToPoVis Code
 
 == Numerical artifacts
+=== Cause of the Artifacts
 With the original version of ToPoVis some numerical artifacts could be observed in the contour plots as can be seen in @fig:artifacts:contour_artifacts. 
 The artifacts are particularly severe at the edges of plots in CHEASE geometry. 
 This made it harder to study small scale turbulences in these areas.
@@ -99,12 +100,17 @@ data_fine = rgi(xs_points_fine)
 ```
 The main restriction with this method is, that the RGI can only _interpolate_. 
 This wouldn't be an issue, if the s-grid is defined as $s=[-0.5, 0.5]$. 
-However, because the s-grid has a equal spacing of $Delta s$, it is defined from $s_0=-0.5 + (Delta s) / 2$ to $s_(-1) = 0.5 - (Delta s)/2$. 
+But due to the functionality of GKW, it is defined from $s_0=-0.5 + (Delta s) / 2$ to $s_(-1) = 0.5 - (Delta s)/2$. 
 This leads to a gap of exactly $Delta s$ between $s_0$ and $s_(-1)$.
 In order to make interpolation work in this gap, the grid has to be extended outside the bounds of $-0.5 < s < 0.5$. 
 This is done by applying parallel periodic boundary conditions to the grid and the data arrays #sym.zeta\-shift and $hat(f)$.
 
-In itself $s$ is perfectly periodic, meaning $s=s±1$. However, the RGI depends on a strictly ascending or descending grid. So instead of wrapping the s-grid periodically, it needs to be extended out of bounds with regular spacing. In code this is achieved by the method `extend_regular_array(a: arr, n: int)`, which first checks if the given array is equally spaced, and then extends it by `n` in both directions. The extended s-grid is defined from $s_0=-0.5-n dot (Delta s)/2$ to $s_(-1) = 0.5 + n dot (Delta s)/2$. It is only used to define the _virtual_ position of the periodically extended data points for the RGI.
+In itself $s$ is perfectly periodic, meaning $s=s±1$. 
+However, the RGI depends on a strictly ascending or descending grid. 
+So instead of wrapping the s-grid periodically, it needs to be extended out of bounds with regular spacing. 
+In code this is achieved by the method `extend_regular_array(a: arr, n: int)`, which first checks if the given array is equally spaced, and then extends it by `n` in both directions. 
+The extended s-grid is defined from $s_0=-0.5-n dot (Delta s)/2$ to $s_(-1) = 0.5 + n dot (Delta s)/2$. 
+It is only used to define the _virtual_ position of the periodically extended data points for the RGI.
 
 The parallel periodic boundary condition for #sym.zeta is defined as
 
@@ -146,17 +152,31 @@ rbfi = RBFInterpolator(rz_points, data, **kwargs)
 data_fine = rgi(rz_points_fine)
 ```
 
+The only difference is, that the data points are mapped to their corresponding poloidal coordinates and also are evaluated at the fine R-Z positions.
+
+Normally, extrapolating is really simple with the RBFI, as the generated functions can be evaluated at any point, even outside the grid. 
+However, neither the fourier coefficients nor the #sym.zeta\-shift are periodic in $s$.
+
+Extending the grid as done with interpolation in hamada coordinates is also not an option.
+In hamada interpolation the s-grid is extended regularly outside of $-0.5<s<0.5$.
+But, because of $s$ is periodic ($s=s±1$), corresponding extended poloidal points would be coincide precisely poloidally.
+This causes ambigous data as different values are defined on the same poloidal points.
+The RBFI cannot handle this and will throw a `SingularMatrix` Error.
+Because the grid is discrete its also not possible to add new points at the half-way point between $0.5-(Delta s)/2 < s < 0.5$, as the periodic points would be out of bounds as well. 
+Therefore the interpolation results at the boundary will show numerical artifacts for poloidal interpolation.
+
 In the following test examples the arguments for the RBFI were set as presented in the table.
 
-#table(
-  columns: 2,
-  align: left,
-  [*keyword*], [*value*],
-  [kernel], [linear],
-  [degree], [0],
-  [neighbors], [100]
-)
-
+#align(center)[
+  #table(
+    columns: 2,
+    align: left,
+    [*keyword*], [*value*],
+    [kernel], [linear],
+    [degree], [0],
+    [neighbors], [100]
+  )
+]
 
 ===== Results and Comparison
 To check whether the two interpolations methods give accurate results, the same GKW simulation was conducted with $N_s = 32$ and $N_s = 128$. 
@@ -172,8 +192,7 @@ The low resolution data was then upscaled by each interpolator to match the fine
 
 One can immediately notice the strong deviation at the left side of the plot in the RBFI results (#ref(<fig:interp:circ:rbfi>)).
 It's located more precisely between the first $s_0=-0.5+(Delta s)/2$ and last $s_(-1)=0.5-(Delta s)/2$ constant-$s$ lines.
-The reason for this, is because neither #sym.zeta\-shift nor $hat(f)$ are continuous at this boundary.
-As the data is structured in poloidal coordinates, no new point can be added that would coincide with the existing grid, which is excactly how the current implementation of the parallel periodic boundary conditions are implemented.
+
 
 It can be observed, that the RGI overall performs better than the RBFI.
 
