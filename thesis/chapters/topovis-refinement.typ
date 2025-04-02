@@ -64,9 +64,9 @@ Similarly to the triangulation, the interpolation of the grid can be done in bot
 
 ==== Linear Simulation
 The potential on a poloidal slice in the linear case is calculated by first calculating #sym.zeta for $phi = #text("const")$ - known as #sym.zeta\-shift. 
-The potential is then calculated using the #sym.zeta\-shift and the complex fourier coefficients using the following formula:
+The potential is then calculated using the #sym.zeta\-shift and the complex fourier coefficients using the formula
 
-$ Phi(hat(f), zeta, k) = hat(f) * e^(i k zeta) + hat(f)^* * e^(-i k zeta)$
+$ Phi(hat(f), zeta, k) = hat(f) dot e^(i k zeta) + hat(f)^* dot e^(-i k zeta) $
 
 This leaves open two different strategies for interpolating the potential:
 
@@ -97,12 +97,31 @@ Therefore interpolation is a simple act of first initializing the interpolator w
 rgi = RegularGridInterpolator((x, s), data, **kwargs)
 data_fine = rgi(xs_points_fine)
 ```
-
 The main restriction with this method is, that the RGI can only _interpolate_. 
+This wouldn't be an issue, if the s-grid is defined as $s=[-0.5, 0.5]$. 
+However, because the s-grid has a equal spacing of $Delta s$, it is defined from $s_0=-0.5 + (Delta s) / 2$ to $s_(-1) = 0.5 - (Delta s)/2$. 
+This leads to a gap of exactly $Delta s$ between $s_0$ and $s_(-1)$.
+In order to make interpolation work in this gap, the grid has to be extended outside the bounds of $-0.5 < s < 0.5$. 
+This is done by applying parallel periodic boundary conditions to the grid and the data arrays #sym.zeta\-shift and $hat(f)$.
 
-// TODO: add infos here? or reference previous sections?
+In itself $s$ is perfectly periodic, meaning $s=s±1$. However, the RGI depends on a strictly ascending or descending grid. So instead of wrapping the s-grid periodically, it needs to be extended out of bounds with regular spacing. In code this is achieved by the method `extend_regular_array(a: arr, n: int)`, which first checks if the given array is equally spaced, and then extends it by `n` in both directions. The extended s-grid is defined from $s_0=-0.5-n dot (Delta s)/2$ to $s_(-1) = 0.5 + n dot (Delta s)/2$. It is only used to define the _virtual_ position of the periodically extended data points for the RGI.
 
-// main intuitive argument for this: the data is generated in hamada, so it might as well be similar
+The parallel periodic boundary condition for #sym.zeta is defined as
+
+$ zeta(s) = zeta(s±1) ∓ q $
+
+and for the fourier coefficient $hat(f)$ a phase shift has to be applied
+
+$ hat(f)(s) = hat(f)(s±1) dot e^(±i k q) $
+
+with $q=q(psi)$ being the safety factor. 
+
+// Add code examples??
+
+After applying these parallel periodic boundary conditions, both #sym.zeta\-shift and $hat(f)$ are continuous across $s=±0.5$.
+This makes interpolation possible across the extended s-grid, which enables interpolating in the gap.
+Note that for interpolation of order 3 or higher, the grid has to be extended by more than one point. 
+In code this is controlled by the constant `OVERLAP`.
 
 ===== Poloidal Interpolation
 Interpolation in poloidal coordinates works quiet similar as interpolation is hamada coordinates.
