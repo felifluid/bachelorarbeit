@@ -39,7 +39,7 @@ def plot_subsection(r, z, pot, xlim, ylim, grid: bool, method):
 
 figs_dir = './figs/triangulation_artifacts/'
 data_dir = './data/chease/ns128/'
-ext = '.svg'
+ext = '.png'
 
 def figpath(filename):
     return figs_dir+filename+ext

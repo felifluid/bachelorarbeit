@@ -3,19 +3,15 @@
 #subpar.grid(
   columns: 3,
     figure(
-        image("ns128-fs4-rbfi.png"),
-        caption: "NS=32; FS=4; RBFI",
-    ), <fig:interp:circ:rbfi:interp>,
+        image("ns32-fs1-rgi.png"),
+        caption: $N_s=32$,
+    ), <fig:interp:circ:ns32>,
     figure(
         image("ns128-fs1-rgi.png"),
-        caption: "NS=128; original",
-    ), <fig:interp:circ:rbfi:original>,
-    figure(
-        image("ns128-fs4-rbfi-diff.png"),
-        caption: "difference (absolute)",
-    ), <fig:interp:circ:rbfi:diffs>,
+        caption: $N_s=128$,
+    ), <fig:interp:circ:ns128>,
     caption: [ 
-        RBF interpolation results. Upscaling from NS=32 to NS=128.
+        Original plots without interpolation.
     ],
-    label: <fig:interp:circ:rbfi>,
+    label: <fig:interp:circ>,
 )

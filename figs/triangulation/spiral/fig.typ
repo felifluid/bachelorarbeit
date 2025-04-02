@@ -2,15 +2,15 @@
 
 #subpar.grid(
   figure(
-    image("spiral_lin.svg"),
+    image("../../placeholder.svg"),
     caption: [spiral]
   ), <fig:spiral_linear>,
   figure(
-    image("spiral_noisy.svg"),
+    image("../../placeholder.svg"),
     caption: [noisy spiral],
   ), <fig:spiral_noisy>,
   figure(
-    image("spiral_interpolation.svg"),
+    image("../../placeholder.svg"),
     caption: [two noisy spirals],
   ), <fig:two_noisy_spirals>,
   columns: (1fr, 1fr, 1fr),

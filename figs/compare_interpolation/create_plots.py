@@ -44,7 +44,7 @@ for args in args_list:
     if min < vmin: vmin = min
     if max > vmax: vmax = max
 
-for res in results:
+def plot(res):
     kwargs = {'vmin': vmin, 'vmax': vmax}
 
     fig, ax = plt.subplots()
@@ -52,7 +52,7 @@ for res in results:
 
     res.plot(fig, ax, **kwargs)
 
-    path = figs_dir + 'circ/ns' + str(res.ns) + '-fs' + str(res.fs) + '-' + str(res.interpolator) + ext
+    path = figs_dir + 'circ/' + str(res.interpolator) + 'ns' + str(res.ns) + '-fs' + str(res.fs) + ext
     plt.savefig(path, dpi=DPI)
 
 # plots diffs
@@ -79,12 +79,12 @@ fig.tight_layout()
 
 topovis.plot(rgi.r, rgi.z, diff_rgi, fig, ax, omit_axes=True, **kwargs)
 
-path = figs_dir + 'circ/ns' + str(rgi.ns) + '-fs' + str(rgi.fs) + '-' + str(rgi.interpolator) + '-diff' + ext
+path = figs_dir + 'circ/rgi/ns' + str(rgi.ns) + '-fs' + str(rgi.fs) + '-diff' + ext
 plt.savefig(path, dpi=DPI)
 
 fig, ax = plt.subplots()
 fig.tight_layout()
 topovis.plot(rbfi.r, rbfi.z, diff_rbfi, omit_axes=True, **kwargs)
 
-path = figs_dir + 'circ/ns' + str(rbfi.ns) + '-fs' + str(rbfi.fs) + '-' + str(rbfi.interpolator) + '-diff' + ext
+path = figs_dir + 'circ/rbfi/ns' + str(rbfi.ns) + '-fs' + str(rbfi.fs) + '-diff' + ext
 plt.savefig(path, dpi=DPI)

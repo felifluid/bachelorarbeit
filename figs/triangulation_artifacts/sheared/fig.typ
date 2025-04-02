@@ -4,7 +4,7 @@
 
 #subpar.grid(
     figure(
-        image("delaunay_contour.svg"),
+        image("delaunay_contour.png"),
         caption: "delaunay contour plot",
     ), <fig:sheared_triang:delaunay_contour> ,
     figure(
@@ -12,7 +12,7 @@
         caption: "delaunay triangulation",
     ), <fig:sheared_triang:delaunay_triangles>,
     figure(
-        image("regular_contour.svg"),
+        image("regular_contour.png"),
         caption: "regular contour plot",
     ), <fig:sheared_triang:regular_contour>,
     figure(
