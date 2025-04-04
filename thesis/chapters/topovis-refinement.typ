@@ -68,7 +68,7 @@ In this section, it will be explained in detail, how interpolation is achieved b
 For validation and benchmarking the interpolators are tested on simulations with a low-density s-grid in both circular and CHEASE geometry.
 The results will then be compared to simulation data with a s-grid resolution. 
 
-==== Linear Simulation
+==== Linear Simulations
 The potential on a poloidal slice in the linear case is calculated by first calculating #sym.zeta for $phi = #text("const")$ - known as #sym.zeta\-shift. 
 The potential is then calculated using the #sym.zeta\-shift and the complex fourier coefficients using the formula
 
@@ -167,7 +167,7 @@ In hamada interpolation the s-grid is extended regularly outside of $-0.5<s<0.5$
 But, because of $s$ is periodic ($s=s±1$), corresponding extended poloidal points would be coincide precisely poloidally.
 This causes ambigous data as different values are defined on the same poloidal points.
 The RBFI cannot handle this and will throw a `SingularMatrix` Error.
-Because the grid is discrete its also not possible to add new points at the half-way point between $0.5-(Delta s)/2 < s < 0.5$, as the periodic points would be out of bounds as well. 
+Because the grid is discrete, its also not possible to add new points at the half-way point between $0.5-(Delta s)/2 < s < 0.5$, as the periodic points would be out of bounds as well. 
 Therefore the interpolation results at the boundary will show numerical artifacts for poloidal interpolation.
 
 ===== Results and Comparison
@@ -193,22 +193,112 @@ It can be observed, that the RGI overall performs better than the RBFI.
 // TODO: 1D graph with mean in psi?
 
 === Non-linear Simulations
+==== Functionality // TODO: Überschrift
+The general process of calculating the potential on a poloidal slice in the linear case can be subsumized as follows.
 
+#set enum(numbering: "1.")
++ Repeat #sym.zeta and 3d-potential #sym.Phi to the whole torus
++ Calculate #sym.zeta\-shift
++ Construct splines for #sym.Phi
++ Evaluate potential #sym.Phi at #sym.zeta\-shift
 
+The process of upscaling #sym.Phi, would be no more than evaluating the splines it on a fine s-#sym.psi\-#sym.zeta\-grid.
+But doing so, a gap arises between $s_0 = -0.5+(Delta s)/2$ and $s_(-1) = 0.5 - (Delta s)/2$ where interpolation is not possible.
+To circumvent this, the grid has to be extended considering parallel periodic boundary conditions. 
+Both #sym.zeta\-shift and the potential $Phi(s,psi,zeta)$ have to be extended that way.
 
-=== Extending the grid through double-periodic boundary conditions // !! move to background 
+For #sym.zeta\-shift, the safety factor $q(psi)$ has to be added or substracted.
 
-// problem: regular grid interpolator can only interpolate
+$ zeta(s) = zeta(s±1) ∓ q(psi) $
 
-// s-grid is defined from $s=0.5-Delta s/2$ to $s=-0.5+Delta s/2$. Note how this gap increases with lower s-grid resolution.
+This translates to the potential as follows:
 
-// therefore we are left with a blank space without interpolated data between the first and last s.
+$ Phi(s,psi,zeta(s)) = Phi(s±1, psi, zeta(s±1) ∓ q(psi)) $
 
-// of course this gap could be filled otherwise, e.g. through linear interpolation. However, this would give a false confidence of how the potential looks like in that area.
+===== 1. Extend the grid
+As the RGI demands a strictly ascending or descending grid, the sparse s-grid has to be extended regularly without accounting for boundary conditions, while #sym.psi and #sym.zeta are not modified. 
+This extended grid is used to define the _virtual_ positions of the periodically extended potential.
+The term 'virtual' is chosen, because the points lie outside of domain $-0.5 < s < 0.5$.
 
-// instead, when the flag '--periodic' is not supplied and the triangulation method is set to 'regular', ToPoVis will neither interpolate nor triangulate between $s=0.5-Delta s/2$ to $s=-0.5+Delta s/2$. This will lead to a white, blank space in that area.
+Additionaly, the sparse s-#sym.psi\-#sym.zeta\-grid needs to be extended periodically in regard of the parallel periodic boundary conditions. 
+The s-grid is perfectly periodic, as
 
-// However, there is an option to generate additional gridpoints *outside* the domain. This is being done through _double-periodic boundary conditions_.
+$ s = s±1 $
+
+and is therefore extended by wrapping the array periodically.
+The periodic $zeta_p$\-grid has to account for the parallel periodic boundary condition
+
+$ zeta(s) = zeta(s±1) ∓ q $
+
+In code this is done by selectively adding or subtracting $q$ based on its $s$-coordinate.
+
+```py
+    sss_p, xxx_p, zzz_p = np.meshgrid(s_p, x_p, z_p, indexing='ij')
+    zzz_p[-OVERLAP:None, :, :] -= dat.q[None, :, None]  # s > 0.5
+    zzz_p[:OVERLAP, :, :] += dat.q[None, :, None]       # s < -0.5
+    zzz_p = zzz_p % np.max(z)                           # inaccurate!
+```
+
+Where `s_p` denotes the periodically extended s-grid. 
+To avoid mix-ups the `x_p` (#sym.psi) and `z_p` (#sym.zeta) arrays are also denoted that way, even though they are not extended in any way. 
+The dimensionality of the safety factor `q` is extended to correctly add or substract it from #sym.zeta depending on its #sym.psi value.
+Note that instead of mapping $zeta_p$ back to $[0,1]$, it gets mapped to $[0,max(zeta)]$.
+This is currently a workaround to avoid out-of-bounds errors when evaluating the potential, which is only defined in the range of #sym.zeta. 
+The error for this is small as $max(zeta) approx 1$, but it's something that should be worked on in future iterations of ToPoVis.
+
+===== 2. Extend the potential #sym.Phi
+
+The potential #sym.Phi must fulfill the following parallel periodic boundary condition:
+
+$ Phi(s,psi,zeta(s)) = Phi(s±1, psi, zeta(s±1) ∓ q(psi)) $
+
+Doing so requires prior interpolation.
+This is because #sym.Phi needs to be evaluated at the parallely wrapped $zeta_p$ (not #sym.zeta\-shift!) positions, which in general do not conincide with the original #sym.zeta positions.
+In code this is done by initializing the interpolator with the sparse potential and grid and then calling it multiple times to evaluate on the extended grids.
+
+```py
+    pot3d_rgi = RegularGridInterpolator((s, x, z), whole_pot, **kwargs)
+    # initialize extended periodic potential
+    pot3d_p = np.zeros((len(s_e), len(x_e), len(z_e)))
+
+    # s > 0.5
+    slc = np.s_[-OVERLAP:None, :, :]
+    points = grid_to_points((sss_p[slc], xxx_p[slc], zzz_p[slc]))
+    p = pot3d_rgi(points)
+    pot3d_p[slc] = np.reshape(p, shape=(np.shape(pot3d_p[slc])))
+
+```
+
+The exact same is done again for $s < -0.5$ by setting `slc = np.s_[:OVERLAP, :, :]`.
+The preperation for this step is already done constructing the periodic s-#sym.psi\-#sym.zeta\-grid, as the potential is just evaluated at these coordinates and inserted in the corresponding position into the `pot3d_p` array.
+As the RGI proofed successful in linear simulations its the only interpolator used in the non-linear cases.
+
+===== 3. Extending #sym.zeta\-shift
+For #sym.zeta\-shift the same boundary condition applies as for #sym.zeta:
+
+$ zeta_s (s) = zeta_s (s±1) ∓ q $
+
+===== 4. Interpolating extended #sym.zeta'\-shift
+After #sym.zeta\-shift is extended using its parallel periodic boundary condition, it needs to be interpolated to the fine #sym.psi\-s-grid.
+This is done using the RGI.
+
+===== 5. Interpolating extended potential #sym.Phi'
+Most arrays in ToPoVis like $hat(f)$, $zeta_s$, $R$ and $Z$ are in the shape $(N_psi, N_s)$. 
+Following this, the fine #sym.psi\-s-grid is also defined after the scheme.
+The 3-dimensional potential, however, is defined as $Phi(s, psi, zeta)$. 
+So before interpolation can be done, the fine grid has to be put into the same shape as the potential.
+In code this is done by expanding the #sym.psi\-s-grid in the #sym.zeta dimension and combining it with #sym.zeta\-shift as the third dimension.
+
+```py
+    sss_fine = np.expand_dims(ss_fine, -1)
+    xxx_fine = np.expand_dims(xx_fine, -1)
+    zzzeta_s_fine = np.expand_dims(zeta_s_fine, -1)
+    sxz_fine = sss_fine, xxx_fine, zzzeta_s_fine
+```
+
+After evaluating #sym.Phi' on the fine s-#sym.psi\-#sym.zeta\-grid, the #sym.zeta dimension gets discarted and the potential gets transposed to be of shape $(N_(psi,text("fine")), N_(s,text("fine")))$ for consistency.
+
+==== Results
 
 == Miscellaneous
 
