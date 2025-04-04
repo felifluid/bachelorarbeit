@@ -19,6 +19,20 @@ The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of 
 
 // image of a tokamak torus with hamada coordinates
 
+=== Parallel Periodic Boundary Conditions
+
+// problem: regular grid interpolator can only interpolate
+
+// s-grid is defined from $s=0.5-Delta s/2$ to $s=-0.5+Delta s/2$. Note how this gap increases with lower s-grid resolution.
+
+// therefore we are left with a blank space without interpolated data between the first and last s.
+
+// of course this gap could be filled otherwise, e.g. through linear interpolation. However, this would give a false confidence of how the potential looks like in that area.
+
+// instead, when the flag '--periodic' is not supplied and the triangulation method is set to 'regular', ToPoVis will neither interpolate nor triangulate between $s=0.5-Delta s/2$ to $s=-0.5+Delta s/2$. This will lead to a white, blank space in that area.
+
+// However, there is an option to generate additional gridpoints *outside* the domain. This is being done through _double-periodic boundary conditions_.
+
 == Triangulation <sec:triang>
 
 In the context of graph-theory or computational geometry _triangulation_ is the maximum set of edges for a given set of vertices so that no edges are intersecting @klein2005voronoi[p.233]. Given a set of points, there are many possible ways of performing a triangulation. However, not all triangles are created equal. // TODO: informal, is this okay?
