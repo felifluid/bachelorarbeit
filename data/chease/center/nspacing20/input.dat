@@ -1,0 +1,103 @@
+&control
+    silent = .true.
+    matrix_format = 'complex'
+    order_of_the_scheme = 'fourth_order'
+    radial_boundary_conditions = 'Dirichlet'
+    parallel_boundary_conditions = 'open'
+    read_file = .true.
+    non_linear = .false.
+    zonal_adiabatic = .true.
+    method = 'EXP'
+    meth = 99
+    dtim = 0.002
+    ntime = 10000
+    naverage = 200
+    nlapar = .false.
+    nlbpar = .false.
+    collisions = .false.
+    disp_par = 2.0
+    disp_vp = 0.4
+    disp_x = 1.0
+    disp_y = 0.1
+    spectral_radius = .false.
+    flux_tube = .false.
+    min_gr = -0.5
+    max_gr = 1000000.0
+    normalized = .true.
+/
+
+&gridsize
+    nx = 128
+    n_s_grid = 64
+    n_mu_grid = 16
+    n_vpar_grid = 64
+    nmod = 1
+    nperiod = 1
+    number_of_species = 1
+    psil = 0.05724427921189108
+    psih = 0.2585048871235323
+    vpmax = 5.0
+    mumax = 8.0
+/
+
+&mode
+    mode_box = .true.
+    n_spacing = 20
+/
+
+&geom
+    geom_type = 'chease_global'
+    eqfile = '../hamada.dat'
+/
+
+&spcgeneral
+    beta = 0.016634666700316433
+    adiabatic_electrons = .true.
+    rhostar = 0.0036454354037501998
+    finit = 'cosine5'
+    amp_init = 0.0001
+/
+
+&species
+    mass = 1.0
+    z = 1.0
+    temp = 1.0
+    dens = 1.0
+    dens_prof_type = 'file'
+    temp_prof_type = 'file'
+/
+
+&species
+    mass = 0.0002723
+    z = -1.0
+    temp = 0.875587567674339
+    dens = 1.0
+    dens_prof_type = 'file'
+    temp_prof_type = 'file'
+/
+
+&rotation
+    vcor = 0.0
+/
+
+&diagnostic
+    lradial_profile = .true.
+    lrad_moment = .true.
+    lrad_field = .true.
+    lphi_diagnostics = .true.
+/
+
+&gyroaverage
+    n_points_ga = 32
+    n_gav_bound_ex = 3
+    gyro_average_electrons = .true.
+    orb_polarize = .false.
+    use_conj = .true.
+    consistent_long_wave = .false.
+/
+
+&krook
+    nlbound = .true.
+    gammab = 0.3
+    bwidth = 3.75
+/
