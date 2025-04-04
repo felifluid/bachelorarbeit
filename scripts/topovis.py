@@ -1115,6 +1115,7 @@ def main(args = None):
                 x_e = x
                 z_e = z
 
+                #
                 s_p = extend_periodically(s, OVERLAP, 0)
                 x_p = x
                 z_p = z
@@ -1140,7 +1141,6 @@ def main(args = None):
                 pot3d_p[OVERLAP:-OVERLAP, :, :] = whole_pot
 
                 slc = np.s_[-OVERLAP:None, :, :]
-
                 points = grid_to_points((sss_p[slc], xxx_p[slc], zzz_p[slc]))
                 p = pot3d_rgi(points)
                 pot3d_p[slc] = np.reshape(p, shape=(np.shape(pot3d_p[slc])))
@@ -1160,7 +1160,8 @@ def main(args = None):
                 # interpolate zeta-shift
                 logging.info(f'Interpolating zeta-shift')
                 zeta_s_rgi = scipy.interpolate.RegularGridInterpolator((x_e, s_e), zeta_s_p, method=METHOD)
-                zeta_s_fine_flat = zeta_s_rgi(xs_points_fine) % np.max(z_e)     # FIXME: this is inaccurate!
+                zeta_s_fine_flat = zeta_s_rgi(xs_points_fine) 
+                zeta_s_fine_flat = zeta_s_fine_flat % np.max(z_e)     # FIXME: this is inaccurate!
                 zeta_s_fine = np.reshape(zeta_s_fine_flat, (nx_fine, ns_fine))
 
                 sss_fine = np.expand_dims(ss_fine, -1)
