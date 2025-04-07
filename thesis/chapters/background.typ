@@ -20,6 +20,39 @@ The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of 
 // image of a tokamak torus with hamada coordinates
 
 === Parallel Periodic Boundary Conditions
+The s-grid is periodic across its boundary at $±0.5$ under the boundary condition // quelle !!
+
+$ s = s±1 $
+
+The regular spacing of the s-grid also extends across this periodic boundary condition.
+To be precise the s-grid is defined as
+
+#align(center)[
+#table(
+  columns: 2, align: horizon, stroke: none, gutter: 1em,
+  [$ s_i = -0.5 + (Delta s)/2 + i dot Delta s$], [$ #text("with") 0 <= i <= N_s -1 $]
+)]
+
+The first value is $s_0 = -0.5 + (Delta s)/2$, while the last s-value will be denoted as $s_(-1) = 0.5 - (Delta s)/2$ for simplicity and in reference to advance array indexing.
+This will create a gap between $s_0$ and $s_(-1)$ of exactly $Delta s$ across the periodic boundary.
+
+A similar condition applies to #sym.zeta. If #sym.psi and s are held constant, #sym.zeta is perfectly periodic along the boundaries [0,1], meaing
+
+$ zeta = zeta ± 1 $
+
+Likewise, the #sym.zeta\-spacing is regular across its boundary, which leads to the discrete #sym.zeta\-grid being defined as follows.
+
+#align(center)[
+#table(
+  columns: 3, align: horizon, stroke: none, gutter: 1em,
+  [$ zeta_i = i dot Delta zeta$], [$Delta zeta = 1/N_zeta$], [$0 <= i <= N_zeta -1 $]
+)]
+
+The last #sym.zeta\-value is therefore $zeta_(-1) = 1-Delta zeta$.
+
+However, if both #sym.zeta _and_ s are allowed to vary simultaneously other boundary conditions apply.
+
+// TODO: Herleitung
 
 // problem: regular grid interpolator can only interpolate
 
