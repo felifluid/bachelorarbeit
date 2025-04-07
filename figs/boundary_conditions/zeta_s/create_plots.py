@@ -12,8 +12,8 @@ zeta_s = topovis.shift_zeta(g=dat.g, s=dat.s, phi=0, geom_type='circ')
 
 fig, ax = plt.subplots(1,1, figsize=(5,5))
 
-ax.set_xlabel("s")
-ax.set_ylabel(r"$\zeta$")
+ax.set_ylabel("s")
+ax.set_xlabel(r"$\zeta$")
 
 n = 64
 
@@ -26,43 +26,45 @@ in_args = {'c': 'C1'}
 
 slc = np.s_[:n]
 zeta_s_p[-1, slc] -= dat.q[-1, None]
-ax.plot(s_e[slc], zeta_s_p[-1, slc,], **out_args)
+ax.plot(zeta_s_p[-1, slc,], s_e[slc], **out_args)
 
 slc = np.s_[n:-n]
-ax.plot(s_e[slc], zeta_s_p[-1, slc], **in_args)
+ax.plot(zeta_s_p[-1, slc], s_e[slc], label=r"$\zeta$-shift",**in_args)
 
 slc = np.s_[-n:]
 zeta_s_p[-1, slc] += dat.q[-1, None]
-ax.plot(s_e[slc], zeta_s_p[-1, slc], **out_args)
+ax.plot(zeta_s_p[-1, slc], s_e[slc], **out_args)
 
-ax.set_xlim((-1, 1))
-ax.set_ylim((-q, q))
-ax.set_xticks([-1, -0.5, 0, 0.5, 1])
-ax.set_yticks([-q, -q/2, 0, q/2, q])
-ax.set_yticklabels(["-q", "-q/2", "0", "q/2", "q"])
+ax.set_ylim((-1, 1))
+ax.set_xlim((-q, q))
+ax.set_yticks([-1, -0.5, 0, 0.5, 1])
+ax.set_xticks([-q, -q/2, 0, q/2, q])
+ax.set_xticklabels(["-q", "-q/2", "0", "q/2", "q"])
 
-ax.axhline(-q/2, color='0', linestyle='dashed')
-ax.axhline(q/2, color='0', linestyle='dashed')
-ax.axvline(-0.5, color='0', linestyle='dashed')
-ax.axvline(0.5, color='0', linestyle='dashed')
+ax.axvline(-q/2, color='0', linestyle='dashed')
+ax.axvline(q/2, color='0', linestyle='dashed')
+ax.axhline(-0.5, color='0', linestyle='dashed')
+ax.axhline(0.5, color='0', linestyle='dashed')
 ax.grid()
+
+ax.legend()
 
 plt.savefig(figs_dir + 'q-scale' + ext)
 
 fig, ax = plt.subplots(figsize=(5,5))
 
-ax.set_xlabel("s")
-ax.set_ylabel(r"$\zeta$")
+ax.set_ylabel("s")
+ax.set_xlabel(r"$\zeta$")
 
-ax.set_xlim((-1, 1))
-ax.set_ylim((-0.1, 1.1))
-ax.set_xticks([-1, -0.5, 0, 0.5, 1])
-ax.set_yticks([0, 0.25, 0.5, 0.75, 1])
+ax.set_ylim((-1, 1))
+ax.set_xlim((-0.1, 1.1))
+ax.set_yticks([-1, -0.5, 0, 0.5, 1])
+ax.set_xticks([0, 0.25, 0.5, 0.75, 1])
 
-ax.axhline(1, color='0', linestyle='dashed')
-ax.axhline(0, color='0', linestyle='dashed')
-ax.axvline(-0.5, color='0', linestyle='dashed')
-ax.axvline(0.5, color='0', linestyle='dashed')
+ax.axvline(1, color='0', linestyle='dashed')
+ax.axvline(0, color='0', linestyle='dashed')
+ax.axhline(-0.5, color='0', linestyle='dashed')
+ax.axhline(0.5, color='0', linestyle='dashed')
 ax.grid()
 
 zeta_s_p = zeta_s_p % 1
@@ -74,9 +76,11 @@ zeta_s_p_cut = np.insert(zeta_s_p[-1,:], jumps, np.nan)
 s_e_cut = np.insert(s_e, jumps, np.nan)
 
 
-ax.plot(s_e_cut[n:-n], zeta_s_p_cut[n:-n], c='C1')
-ax.plot(s_e_cut[-n:], zeta_s_p_cut[-n:], c='C1', alpha=0.5)
-ax.plot(s_e_cut[:n], zeta_s_p_cut[:n], c='C1', alpha=0.5)
+ax.plot(zeta_s_p_cut[n:-n], s_e_cut[n:-n], c='C1', label=r"$\zeta$-shift")
+ax.plot(zeta_s_p_cut[-n:], s_e_cut[-n:], c='C1', alpha=0.5)
+ax.plot(zeta_s_p_cut[:n], s_e_cut[:n], c='C1', alpha=0.5)
+
+ax.legend()
 
 plt.savefig(figs_dir + 'zeta-scale' + ext)
 
