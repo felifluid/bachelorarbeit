@@ -6,7 +6,7 @@
 
 = Background
 == GKW
-The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of a confined plasma, usually inside of a tokamak @peeters2015[p.1]. It is written in Fortran 95 and was initially developed at the University of Warwick in 2007 @peeters2015[p.1]. The code is freely availiable and currently being hosted at https://bitbucket.org/gkw/gkw. It works in both linear and non-linear regimes @peeters2015[p.1]
+The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of a confined plasma, usually inside of a tokamak @peeters2015[1]. It is written in Fortran 95 and was initially developed at the University of Warwick in 2007 @peeters2015[1]. The code is freely availiable and currently being hosted at https://bitbucket.org/gkw/gkw. It works in both linear and non-linear regimes @peeters2015[1]
 
 // linear case
 // GKW solves eigenvalues k_zeta (fourier eigenmodes)
@@ -17,19 +17,18 @@ The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of 
 
 // nonlinear run
 
+// ?? add section for toroidal coordinates
 
 == Hamada coordinates
-To efficiently solve the gyrokinetic equation, GKW makes use of so called _Hamada Coordinates_.
+To efficiently solve the gyrokinetic equation, GKW makes use of so called _hamada coordinates_.
 Hamada coordinates are retrieved by transforming the toroidal coordinates in such a way that
 
 + field lines become straight and
 + one of the coordinates is aligned with the magnetic field. // Formatierung??
 
-For further reading on how this is achieved in detail, see @peeters2015[A1].
+For further reading on how this is achieved in detail, see @peeters2015[23ff].
 
-// TODO: explain toroidal coordinates
-
-In circular geometry the coordinate transformation is defined by the following equations:
+In circular geometry the coordinate transformation is defined by the following equations (see @peeters2015[A1]):
 
 $
   &psi(r) = r/R_text("ref") \ 
@@ -47,25 +46,23 @@ Varying $zeta$, while keeping $psi$ and $s$ constant will result in a screw like
 
 Both pictures in @fig:hamda:x do not represent the whole torus, but just its mantle.
 The coordinate #sym.zeta has two discontinuities, as can be seen in @fig:hamada:x:t.
-The toroidal discontinuity is at $phi = 0$, while the poloidal discontinuity is at $s=±0.5$ or $theta=±180°$.
+The toroidal discontinuity is at $phi = 0$, while the poloidal discontinuity is at $s=±0.5$ or $theta=±180°$ respectively.
 This can be seen more clearly in the constant $phi$ case, which is visualized in @fig:hamda:phi.
 
 Constant $phi$ visualization is of special interest in this thesis, as the purpose of ToPoVis and therefore this thesis is to create poloidal slices of the torus. // TODO: don't like this sentence
 
 #include "../../figs/hamada/phi_const/fig.typ"
 
-In hamada coordinates the poloidal slice is represented as a curved surface in 3d-space as can be seen in @fig:hamada:phi:h.
-The surface can be described as a two dimensional function $zeta(psi,s)$, which is referred to as _#sym.zeta\-shift_ on the basis of #cite(<samaniego2024topovis>, form: "prose").
-Note that a wide continous range of #sym.zeta values is needed to plot a poloidal slice, as the color spectrum emphasizes. // TODO: Satz?
-One can also recognise the unique shape of the curve in the #sym.zeta\-s-plane from @fig:hamda:x, which flattens out when approaching $psi=0$.
-@sec:background:topovis:zeta-shift will discuss details on how #sym.zeta\-shift is defined and calculated using data from GKW.
-
-@fig:hamada:phi:t shows the poloidal slice in a polar coordinates with constant-s-lines added for reference.
+@fig:hamada:phi:t shows the poloidal slice in a polar coordinates with $s=text("const")$ lines added for reference.
 The discontinuity of the #sym.zeta\-grid at $s=±0.5$ is visible clearly.
 Also note that the s-grid is more dense on the left side (inner radius) than on the right side (outer radius).
-This is cause because there is a discrepency between the regularly spaced s-grid and the non-uniform geometry of the torus. // passt das??
+This is caused by a discrepency between the regularly spaced s-grid and the non-uniform geometry of the torus. // passt das??
 
-
+In hamada coordinates the poloidal slice is represented as a curved surface in 3d-space as can be seen in @fig:hamada:phi:h.
+The surface can be described as a two dimensional function $zeta(psi,s)$, which is referred to as _#sym.zeta\-shift_ on the basis of #cite(<samaniego2024topovis>, form: "prose").
+It spans across nearly the whole domain of the hamada coordinates.
+One can recognise the unique shape of the curve in the #sym.zeta\-s-plane from @fig:hamda:x, which flattens out to a straight line when approaching $psi=0$.
+@sec:background:topovis:zeta-shift discusses details on how #sym.zeta\-shift is defined and calculated using data from GKW.
 
 === Parallel Periodic Boundary Conditions
 The s-grid is periodic across its boundary at $±0.5$ under the boundary condition // quelle !!
