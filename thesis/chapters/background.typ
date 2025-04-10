@@ -1,6 +1,9 @@
 #import "@preview/subpar:0.2.1"
 #import "../functions.typ" : load-bib,  enum_numbering
 
+// FIXME: this should be in preamble
+#set heading(numbering: "1.")
+
 = Background
 == GKW
 The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of a confined plasma, usually inside of a tokamak @peeters2015[p.1]. It is written in Fortran 95 and was initially developed at the University of Warwick in 2007 @peeters2015[p.1]. The code is freely availiable and currently being hosted at https://bitbucket.org/gkw/gkw. It works in both linear and non-linear regimes @peeters2015[p.1]
@@ -16,8 +19,53 @@ The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of 
 
 
 == Hamada coordinates
+To efficiently solve the gyrokinetic equation, GKW makes use of so called _Hamada Coordinates_.
+Hamada coordinates are retrieved by transforming the toroidal coordinates in such a way that
 
-// image of a tokamak torus with hamada coordinates
++ field lines become straight and
++ one of the coordinates is aligned with the magnetic field. // Formatierung??
+
+For further reading on how this is achieved in detail, see @peeters2015[A1].
+
+// TODO: explain toroidal coordinates
+
+In circular geometry the coordinate transformation is defined by the following equations:
+
+$
+  &psi(r) = r/R_text("ref") \ 
+  &s(r, theta) = 1/(2 pi) (theta + psi sin(theta)) \
+  &zeta (r, theta, phi) = - phi/(2 pi) + s_B s_j abs(q)/pi arctan((1-psi)/(1+psi) tan theta/2)
+$
+
+This makes $psi$ the normalized minor radius. 
+Sometimes, $zeta$ is called "toroidal" coordinate, while s is referred to as "poloidal" coordinate. 
+However, this can be misleading. 
+Varying $zeta$, while keeping $psi$ and $s$ constant will result in a screw like motion along both toroidally along $phi$ and poloidally along $theta$. // stimmt das überhaupt??
+@fig:hamda:x visualizes how toroidal data is represented in hamada coordinates.
+
+#include "../../figs/hamada/psi_const/fig.typ"
+
+Both pictures in @fig:hamda:x do not represent the whole torus, but just its mantle.
+The coordinate #sym.zeta has two discontinuities, as can be seen in @fig:hamada:x:t.
+The toroidal discontinuity is at $phi = 0$, while the poloidal discontinuity is at $s=±0.5$ or $theta=±180°$.
+This can be seen more clearly in the constant $phi$ case, which is visualized in @fig:hamda:phi.
+
+Constant $phi$ visualization is of special interest in this thesis, as the purpose of ToPoVis and therefore this thesis is to create poloidal slices of the torus. // TODO: don't like this sentence
+
+#include "../../figs/hamada/phi_const/fig.typ"
+
+In hamada coordinates the poloidal slice is represented as a curved surface in 3d-space as can be seen in @fig:hamada:phi:h.
+The surface can be described as a two dimensional function $zeta(psi,s)$, which is referred to as _#sym.zeta\-shift_ on the basis of #cite(<samaniego2024topovis>, form: "prose").
+Note that a wide continous range of #sym.zeta values is needed to plot a poloidal slice, as the color spectrum emphasizes. // TODO: Satz?
+One can also recognise the unique shape of the curve in the #sym.zeta\-s-plane from @fig:hamda:x, which flattens out when approaching $psi=0$.
+@sec:background:topovis:zeta-shift will discuss details on how #sym.zeta\-shift is defined and calculated using data from GKW.
+
+@fig:hamada:phi:t shows the poloidal slice in a polar coordinates with constant-s-lines added for reference.
+The discontinuity of the #sym.zeta\-grid at $s=±0.5$ is visible clearly.
+Also note that the s-grid is more dense on the left side (inner radius) than on the right side (outer radius).
+This is cause because there is a discrepency between the regularly spaced s-grid and the non-uniform geometry of the torus. // passt das??
+
+
 
 === Parallel Periodic Boundary Conditions
 The s-grid is periodic across its boundary at $±0.5$ under the boundary condition // quelle !!
@@ -152,7 +200,7 @@ The program can be subdivided into the following sequences: //TODO: not happy wi
 
 // TODO: maybe add flow chart?
 
-==== Calculating the #sym.zeta\-shift
+==== Calculating the #sym.zeta\-shift <sec:background:topovis:zeta-shift>
 A poloidal slice implies satisfying the condition $#sym.phi = #text("const")$. The way the #sym.zeta\-shift is calculated is different for the kind of geometry being used for the simulation. ToPoVis works for three different geometries: 1) circular, 2) CHEASE and 3) s-#sym.alpha. In each geometry the transformations between toroidal and hamada coordinates are different @samaniego2024topovis[p.20ff].
 
 In all geometries #sym.zeta is the only coordinate that is dependend on #sym.phi and can be defined generally as follows:
