@@ -21,6 +21,10 @@ r = np.linspace(0, 1, 32)
 theta = np.linspace(-np.pi, np.pi, 16)
 phi = np.linspace(0, 2*np.pi, 64)
 
+n_r = len(r)
+n_theta = len(theta)
+r_phi = len(phi)
+
 r, theta, phi = np.meshgrid(r, theta, phi, indexing='ij')
 
 # construct torus in cartesian geometry
@@ -164,10 +168,28 @@ save_plot('phi_const/toroidal')
 # hamada 3d plot
 fig, ax = plt.subplots(1, 1, figsize=figsize, edgecolor='0', subplot_kw={'projection': '3d'})
 
-surf = ax.plot_surface(psi[cond], s[cond], zeta[cond], facecolors=colors, linewidth=1, edgecolor=(0,0,0,0.2), cmap=cmap)
+psi_ticks = np.linspace(np.min(psi[cond]), np.max(psi[cond]), 5)
+s_ticks = np.linspace(np.min(s[cond]), np.max(s[cond]), 5)
+zeta_ticks = np.linspace(np.min(zeta[cond]), np.max(zeta[cond]), 5)
+
+surf = ax.plot_surface(psi[cond], s[cond], zeta[cond], facecolors=colors, linewidth=1, edgecolor=(0,0,0,0.2), cmap=cmap, rstride=1, cstride=1)
+
+# ax.set_xlim(0, psi_ticks[-1])
+# ax.set_ylim(s_ticks[0], s_ticks[-1])
+# ax.set_zlim(zeta_ticks[0], zeta_ticks[-1])
+
+ax.set_xticks(psi_ticks)
+ax.set_yticks(s_ticks)
+ax.set_zticks(zeta_ticks)
+
+ax.set_xticklabels(list(map(str, np.round(psi_ticks, 2))))
+ax.set_yticklabels(list(map(str, np.round(s_ticks, 2))))
+ax.set_zticklabels(list(map(str, np.round(zeta_ticks, 2))))
 
 ax.set_xlabel(r"$\psi$")
 ax.set_ylabel(r"$s$")
 ax.set_zlabel(r"$\zeta$")
+
+ax.view_init(30,-40)
 
 save_plot('phi_const/hamada')
