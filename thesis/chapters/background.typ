@@ -28,32 +28,48 @@ Hamada coordinates are retrieved by transforming the toroidal coordinates in suc
 
 For further reading on how this is achieved in detail, see @peeters2015[23ff].
 
-In circular geometry the coordinate transformation is defined by the following equations (see @peeters2015[A1]):
+In circular geometry the coordinate transformation is defined by the following equations (see @peeters2015[A1])
 
 $
   &psi(r) = r/R_text("ref") \ 
-  &s(r, theta) = 1/(2 pi) (theta + psi sin(theta)) \
+  &s(r, theta) = 1/(2 pi) (theta + psi sin theta) \
   &zeta (r, theta, phi) = - phi/(2 pi) + s_B s_j abs(q)/pi arctan((1-psi)/(1+psi) tan theta/2)
 $
 
-This makes $psi$ the normalized minor radius. 
-Sometimes, $zeta$ is called "toroidal" coordinate, while s is referred to as "poloidal" coordinate. 
-However, this can be misleading. 
-Varying $zeta$, while keeping $psi$ and $s$ constant will result in a screw like motion along both toroidally along $phi$ and poloidally along $theta$. // stimmt das überhaupt??
-@fig:hamda:x visualizes how toroidal data is represented in hamada coordinates.
+where $s_B = ±1$ and $s_j = ±1$ represent the sign of the magnetic field and the plasma current, while $q=B^gamma/B^s$ is the safety factor @peeters2015[p.21].
+Sometimes, $zeta$ is called the "toroidal" coordinate, while s is referred to as the "poloidal" coordinate. 
+However, this can be misleading as varying $zeta$ at constant $psi$ and $s$, will result in a screw like motion along both toroidally along $phi$ and poloidally along $theta$.
+
+Using above transformation the coordinates are normalized and made unitless. 
+The radial coordinate $psi$ is retrieved by normalizing the minor radius $r$ to the major radius $R_text("ref")$, while the $s$-grid is normalized to the interval $[-0.5, 0.5]$.
+
+Assuming $s_B s_j = +1$ the $zeta$-grid can range from 
+
+$ zeta_text("min") = -1-abs(q)/2 $ 
+
+for $phi=2pi$ to 
+
+$ zeta_text("max") = abs(q)/2 $ 
+
+in the case of $phi=0$. 
+The $zeta$-grid is oftentimes normalized to $[0,1]$, however this mapping is not generally continuous, as will be explained in @sec:background:hamada:periodicity.
+
+For easier understanding of how toroidal and hamadian coordinates are transformed, Figure @fig:hamda:x[] & @fig:hamda:phi[] show side by side comparisons of $psi="const"$ and $phi="const"$ surfaces.
 
 #include "../../figs/hamada/psi_const/fig.typ"
 
-Both pictures in @fig:hamda:x do not represent the whole torus, but just its mantle.
-The coordinate #sym.zeta has two discontinuities, as can be seen in @fig:hamada:x:t.
-The toroidal discontinuity is at $phi = 0$, while the poloidal discontinuity is at $s=±0.5$ or $theta=±180°$ respectively.
+@fig:hamada:x:t shows the torus in cartesian coordinates, as seen in ref!!.
+Both plots do not represent the whole torus, but just its outest mantle ($psi=psi_"max"$).
+The grid in @fig:hamada:x:h has been adjusted, to emphasize the relationship of $zeta$ and $q$.
+The top line is $zeta(s, phi=0)$, while the bottom line represents $zeta(s, phi=2pi)$ with all other toroidal angles lying in between. // TODO: umformulieren
+This leads to a constant width of $Delta zeta=1$.
+Mapped to a torus $zeta$ has two discontinuities, as can be seen in @fig:hamada:x:t.
+The toroidal discontinuity is at $phi = 0$, while the poloidal discontinuity is positioned at $s=±0.5$ or $theta=±pi$ respectively.
 This can be seen more clearly in the constant $phi$ case, which is visualized in @fig:hamda:phi.
-
-Constant $phi$ visualization is of special interest in this thesis, as the purpose of ToPoVis and therefore this thesis is to create poloidal slices of the torus. // TODO: don't like this sentence
 
 #include "../../figs/hamada/phi_const/fig.typ"
 
-@fig:hamada:phi:t shows the poloidal slice in a polar coordinates with $s=text("const")$ lines added for reference.
+@fig:hamada:phi:t shows the poloidal slice in polar coordinates with $s=text("const")$ lines added for reference.
 The discontinuity of the #sym.zeta\-grid at $s=±0.5$ is visible clearly.
 Also note that the s-grid is more dense on the left side (inner radius) than on the right side (outer radius).
 This is caused by a discrepency between the regularly spaced s-grid and the non-uniform geometry of the torus. // passt das??
@@ -64,10 +80,10 @@ It spans across nearly the whole domain of the hamada coordinates.
 One can recognise the unique shape of the curve in the #sym.zeta\-s-plane from @fig:hamda:x, which flattens out to a straight line when approaching $psi=0$.
 @sec:background:topovis:zeta-shift discusses details on how #sym.zeta\-shift is defined and calculated using data from GKW.
 
-=== Parallel Periodic Boundary Conditions
-The s-grid is periodic across its boundary at $±0.5$ under the boundary condition // quelle !!
+=== Specifications in GKW
+GKW 
 
-$ s = s±1 $
+The s-grid is defined  between 
 
 The regular spacing of the s-grid also extends across this periodic boundary condition.
 To be precise the s-grid is defined as
@@ -80,6 +96,18 @@ To be precise the s-grid is defined as
 
 The first value is $s_0 = -0.5 + (Delta s)/2$, while the last s-value will be denoted as $s_(-1) = 0.5 - (Delta s)/2$ for simplicity and in reference to advance array indexing.
 This will create a gap between $s_0$ and $s_(-1)$ of exactly $Delta s$ across the periodic boundary.
+
+=== Periodicity <sec:background:hamada:periodicity>
+
+Trivially the toroidal angle $phi$ is periodic, meaning
+
+$ phi = phi ± 2pi $
+
+This translates to the $zeta$-grid as
+
+$ zeta = zeta ± 1 $
+
+for fixed $psi$ and $s$ @peeters2015[A3].
 
 A similar condition applies to #sym.zeta. If #sym.psi and s are held constant, #sym.zeta is perfectly periodic along the boundaries [0,1], meaing
 

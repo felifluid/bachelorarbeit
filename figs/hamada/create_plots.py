@@ -105,13 +105,21 @@ triangles = topovis.make_regular_triangles(xlen, ylen)
 
 surf = ax.tricontourf(np.ravel(s[cond]), np.ravel(zeta[cond]), np.ravel(normed_data), triangles=triangles, cmap=cmap, levels=100, zorder=-5)
 
-# plot grid
-# ax.plot(s[-1, :, ::10], zeta[-1, :, ::10], c=(0,0,0,0.2))
+ax.set_xticks(np.linspace(-0.5, 0.5, 5))
 
-ax.set_xlim(-0.6, 0.6)
+q_val = np.max(q[cond])
+
+yticks = [-1-q_val/2, -q_val/2, -1, 0, q_val/2-1, q_val/2]
+ax.set_yticks(yticks)
+ax.set_yticklabels([r'-q/2-1', r'q/2','-1', '0', r'q/2-1', r'q/2'])
+
+ax.set_xlim(-0.5, 0.5)
 ax.set_xlabel("s")
-ax.set_ylim(-2.8, 1.8)
+ax.set_ylim(-q_val/2-1, q_val/2)
 ax.set_ylabel(r"$\zeta$")
+
+ax.grid(True)
+
 save_plot('psi_const/hamada')
 
 
@@ -140,21 +148,23 @@ for i in range(xlen):
 fig, ax = plt.subplots(subplot_kw={'projection': 'polar'}, figsize=figsize)
 
 a = np.ravel(theta[cond])
-b = np.ravel(r[cond])
+b = np.ravel(psi[cond])
 c = np.ravel(normed_data)
 
 triangles = topovis.make_regular_triangles(xlen, ylen, periodic=False)
 
 ax.tricontourf(a, b, c, triangles=triangles, cmap=cmap, levels=100)
 
-
-ax.set_yticks([])
-
-ax.grid(False)
-
 slc = np.s_[:, :]
 
-ax.plot(s[cond][slc][:, 1:]*2*np.pi, r[cond][slc][:, 1:], c=(0,0, 0, 0.4), zorder=5)
+psi_ticks = psi[cond][4::7, 0]
+ax.set_yticks(psi_ticks)
+ax.set_yticklabels(list(map(str, np.round(psi_ticks, 2))))
+
+ax.grid(False, axis='x')
+ax.grid(True, axis='y', c=(0,0,0,0.4))
+
+ax.plot(s[cond][slc][:, 1:]*2*np.pi, psi[cond][slc][:, 1:], c=(0,0, 0, 0.6), zorder=5)
 
 s_ticks = s[cond][slc][-1, 1:]
 ax.set_xticks(s_ticks * 2*np.pi)

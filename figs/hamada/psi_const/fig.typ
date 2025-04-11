@@ -11,7 +11,7 @@
     caption: [hamada]
   ), <fig:hamada:x:h>,
   caption: [
-    Hamada and toroidal surfaces for $psi=text("const")$. The color gradient represents the #sym.zeta coordinate.
+    Toroidal and hamada surfaces for $psi=psi_"max"$. The color gradient represents $zeta$.
   ],
   label: <fig:hamda:x>,
 )
