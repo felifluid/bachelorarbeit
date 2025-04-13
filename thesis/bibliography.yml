@@ -240,3 +240,9 @@ wendland2004scattered:
   parent:
     type: book
     title: Cambridge Monographs on Applied and Computational Mathematics
+
+rath2025boundary:
+  type: report
+  title: Parallel Boundary Conditions [internal document]
+  date: 2025
+  author: Rath, Florian

@@ -1,6 +1,8 @@
 #import "../functions.typ" : load-bib
 #import "@preview/subpar:0.2.1"
 
+#set heading(numbering: "1.")
+
 = Improving the ToPoVis Code
 
 == Dealing with Numerical Artifacts
@@ -60,7 +62,7 @@ A more and refined way to improve triangulations is to avoid the causes of unfav
 
 // of course simulations with higher density in s would help. but those are really heavy to compute. for convergence of the simulation only relatively few s grid points are needed.
 
-=== Refining the Grid through Interpolation
+=== Refining the Grid through Interpolation <sec:topovis:interpolation>
 
 Similarly to the triangulation, the interpolation of the grid can be done in both poloidal coordinates and hamada coordinates. 
 For now poloidal interpolation is only implemented for linear simulations, as interpolation in hamada coordinates currently yields more promising results.

@@ -11,7 +11,7 @@
     caption: [hamada]
   ), <fig:hamada:phi:h>,
   caption: [
-    Hamada and toroidal surfaces for $phi=text("const")$. The color gradient represents the #sym.zeta coordinate.
+    Hamada and toroidal surfaces for $phi=text("const")$. The color gradient represents $zeta$.
   ],
   label: <fig:hamda:phi>,
 )

@@ -1,16 +1,12 @@
 #import "functions.typ": load-bib
 
-#set heading(
-    numbering: "1."
-)
+
 
 // TODO: Deckblatt
 
-#outline(
-    indent: 1em,
-)
-
 #pagebreak()
+
+#include "preamble.typ"
 
 #include "chapters/abstract.typ"
 

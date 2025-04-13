@@ -3,6 +3,7 @@
 
 // FIXME: this should be in preamble
 #set heading(numbering: "1.")
+#set math.equation(numbering: "(1)")
 
 = Background
 == GKW
@@ -26,8 +27,35 @@ Hamada coordinates are retrieved by transforming the toroidal coordinates in suc
 + field lines become straight and
 + one of the coordinates is aligned with the magnetic field. // Formatierung??
 
-For further reading on how this is achieved in detail, see @peeters2015[23ff].
+For further reading on how this is achieved in detail, see @peeters2015[20ff] and @peeters2015[Appen. A].
 
+This leads to the following fairly complex generalized equations
+
+$
+  &psi(r) = r/R_"ref" \
+  &s(theta, psi) = integral_0^theta ("d"theta')/(bold(B) dot nabla theta') slash.big integral.cont ("d"theta')/(bold(B) dot nabla theta') \
+  &zeta(psi, theta) = q s - phi/(2pi) - g(theta, psi) 
+$ <eq:zeta>
+
+Sometimes, $zeta$ is called the "toroidal" coordinate, while s is referred to as the "poloidal" coordinate. 
+However, this can be misleading as varying $zeta$ at constant $psi$ and $s$, will result in a screw like motion along both toroidally along $phi$ and poloidally along $theta$.
+The so called _safety factor_
+
+$ q(psi) = B^gamma/B^s $
+
+describes how many toroidal turns a magnetic field line takes before returning to its starting poloidal angle.
+A safety factor of $q=5/4$ would mean, the magnetic field line reaches its starting position after excactly one and a fourth toroidal turn.
+Generally, higher values of $q$ result in better plasma stability.
+In GKW the sign of the safety factor is oftentimes normalized to 
+
+$ q = s_B s_j abs(q) $
+
+where $s_B = ±1$ and $s_j = ±1$ represent the sign of the magnetic field and the plasma current @peeters2015[p.21].
+
+Using above transformation the coordinates are normalized and made unitless. 
+The radial coordinate $psi$ is retrieved by normalizing the minor radius $r$ to the major radius $R_text("ref")$, while the $s$-grid is normalized to the interval $[-0.5, 0.5]$.
+
+// TODO: Überleitung
 In circular geometry the coordinate transformation is defined by the following equations (see @peeters2015[A1])
 
 $
@@ -35,13 +63,6 @@ $
   &s(r, theta) = 1/(2 pi) (theta + psi sin theta) \
   &zeta (r, theta, phi) = - phi/(2 pi) + s_B s_j abs(q)/pi arctan((1-psi)/(1+psi) tan theta/2)
 $
-
-where $s_B = ±1$ and $s_j = ±1$ represent the sign of the magnetic field and the plasma current, while $q=B^gamma/B^s$ is the safety factor @peeters2015[p.21].
-Sometimes, $zeta$ is called the "toroidal" coordinate, while s is referred to as the "poloidal" coordinate. 
-However, this can be misleading as varying $zeta$ at constant $psi$ and $s$, will result in a screw like motion along both toroidally along $phi$ and poloidally along $theta$.
-
-Using above transformation the coordinates are normalized and made unitless. 
-The radial coordinate $psi$ is retrieved by normalizing the minor radius $r$ to the major radius $R_text("ref")$, while the $s$-grid is normalized to the interval $[-0.5, 0.5]$.
 
 Assuming $s_B s_j = +1$ the $zeta$-grid can range from 
 
@@ -80,64 +101,156 @@ It spans across nearly the whole domain of the hamada coordinates.
 One can recognise the unique shape of the curve in the #sym.zeta\-s-plane from @fig:hamda:x, which flattens out to a straight line when approaching $psi=0$.
 @sec:background:topovis:zeta-shift discusses details on how #sym.zeta\-shift is defined and calculated using data from GKW.
 
-=== Specifications in GKW
-GKW 
-
-The s-grid is defined  between 
-
-The regular spacing of the s-grid also extends across this periodic boundary condition.
-To be precise the s-grid is defined as
-
-#align(center)[
-#table(
-  columns: 2, align: horizon, stroke: none, gutter: 1em,
-  [$ s_i = -0.5 + (Delta s)/2 + i dot Delta s$], [$ #text("with") 0 <= i <= N_s -1 $]
-)]
-
-The first value is $s_0 = -0.5 + (Delta s)/2$, while the last s-value will be denoted as $s_(-1) = 0.5 - (Delta s)/2$ for simplicity and in reference to advance array indexing.
-This will create a gap between $s_0$ and $s_(-1)$ of exactly $Delta s$ across the periodic boundary.
-
 === Periodicity <sec:background:hamada:periodicity>
-
-Trivially the toroidal angle $phi$ is periodic, meaning
+Trivially the toroidal angle $phi$ is periodic:
 
 $ phi = phi ± 2pi $
 
-This translates to the $zeta$-grid as
+Using a generalized definition of $zeta$ 
+
+$ zeta = -phi/(2pi) + G(psi, s) $ <eq:zeta_general>
+
+the periodicity of $phi$ translates to the $zeta$-grid as
 
 $ zeta = zeta ± 1 $
 
-for fixed $psi$ and $s$ @peeters2015[A3].
+as long as both $psi$ and $s$ are held constant. 
+The toroidal boundary condition can be generalized for any function $f(psi, zeta, s)$
 
-A similar condition applies to #sym.zeta. If #sym.psi and s are held constant, #sym.zeta is perfectly periodic along the boundaries [0,1], meaing
+$ f(psi, zeta, s) = f(psi, zeta ± 1, s) $ <eq:toroidal_periodicity>
 
-$ zeta = zeta ± 1 $
+The spectral representation stays unaffected by this @peeters2015[p.44].
 
-Likewise, the #sym.zeta\-spacing is regular across its boundary, which leads to the discrete #sym.zeta\-grid being defined as follows.
+#v(0.5cm)
+For the torus poloidal periodicity is simply expressed as
 
-#align(center)[
-#table(
-  columns: 3, align: horizon, stroke: none, gutter: 1em,
-  [$ zeta_i = i dot Delta zeta$], [$Delta zeta = 1/N_zeta$], [$0 <= i <= N_zeta -1 $]
-)]
+$ theta = theta ± 2pi $
 
-The last #sym.zeta\-value is therefore $zeta_(-1) = 1-Delta zeta$.
+If both $psi$ and $zeta$ are held constant, this periodicity translates directly to 
 
-However, if both #sym.zeta _and_ s are allowed to vary simultaneously other boundary conditions apply.
+$ s = s±1 $
 
-// TODO: Herleitung
+But since in hamada coordinates $s(theta, psi)$ and therefore also $zeta(phi, psi, s(theta, psi))$ are functions of $theta$, in general something called _double periodicity_ or _parallel periodicity_ occurs.
 
-// problem: regular grid interpolator can only interpolate
+The quantity $G(psi, s)$ in the general definition of $zeta$ in #ref(<eq:zeta_general>) is not periodic in general. 
+However, we can combine this with @eq:zeta to find the definition
 
-// s-grid is defined from $s=0.5-Delta s/2$ to $s=-0.5+Delta s/2$. Note how this gap increases with lower s-grid resolution.
+$ G(psi, s, theta) = q(psi) s - g(psi, theta) $
 
-// therefore we are left with a blank space without interpolated data between the first and last s.
+Note, that this is now a function of $theta$ instead of $s$. 
+However, at constant $psi$, every poloidal position is uniquely defined by either its angle $theta$ or its $s$ coordinate. // Stimmt das?? also... ist s(theta,psi) bilinear für psi const?
+Hence, $g(psi,theta)$ can be expressed as $g(psi, s)$ for constant $psi$.
 
-// of course this gap could be filled otherwise, e.g. through linear interpolation. However, this would give a false confidence of how the potential looks like in that area.
+One can also find, that for $psi="const"$ the function $g(psi, s)$ must be periodic in $s$.
+When following a field line $zeta$ one poloidal turn at a constant $psi$ from $theta_A = 0$ to $theta_B = ±2pi$, this corresponds to a change in $s$ from $s_A = 0$ to $s_B = ±1$.
+Due to poloidal periodicity, point $A$ and $B$ must be at the same poloidal position, meaning
 
-// instead, when the flag '--periodic' is not supplied and the triangulation method is set to 'regular', ToPoVis will neither interpolate nor triangulate between $s=0.5-Delta s/2$ to $s=-0.5+Delta s/2$. This will lead to a white, blank space in that area.
+$ Delta theta = theta_B - theta_A = 0 $
 
-// However, there is an option to generate additional gridpoints *outside* the domain. This is being done through _double-periodic boundary conditions_.
+and therefore
+
+$ 
+  &g(psi, theta) = g(psi, theta±2pi) \
+  &g(psi,s) = g(psi, s±1)
+$
+
+Hence, and the quantity $G(psi, theta)$ can be written as
+
+$ G(psi, s) = q s - g(psi, s) $
+
+Again, consider following a field line one poloidal turn and evaluate
+
+$
+  G(psi, s±1) &= q (s±1) - g(psi, s±1) \
+              &= q s ± q - g(psi, s) \
+              &= G(psi, s) ± q
+$
+
+by using @eq:zeta.
+With this a function for $zeta$ can be derived like
+
+$ 
+  zeta(psi, s±1) &= -phi/(2pi) + G(psi, s±1) \
+                 &= -phi/(2pi) + G(psi, s) ± q \
+                 &= zeta(psi, s) ± q
+$
+
+Poloidal double periodicity can be generalized for any given function $f(psi, zeta, s)$
+
+// TODO: add box
+$ f(psi, zeta, s) = f(psi, zeta ∓ q, s±1) $
+
+In the case of a function $f(psi, s)$ that is not depended on $zeta$, the above equation simplifies to
+
+$ f(psi, s) = f(psi, s±1) $
+
+while toroidal periodicity (see @eq:toroidal_periodicity) is trivially satisfied.
+
+Considering the spectral representation
+
+$ f(psi, zeta, s) = sum_(k_zeta) hat(f)(psi,k_zeta,s) exp(i k_zeta zeta) $
+
+the poloidal double periodic boundary condition translates to
+
+// TODO: add box
+$ f(psi,k_zeta,s) = hat(f)(psi,k_zeta,s±1) exp(∓i k_zeta q) $
+
+=== Specifications of the discrete grid
+As GKW solves the gyrokinetic equation numerically, it does so on a discrete hamada grid
+
+$ {(psi_i, s_j, zeta_k) in RR^3 | i,j,k in NN | i in [0, N_psi -1] , #h(0.5em) j in [0, N_s -1], #h(0.5em) k in [0, N_zeta -1]} $
+
+The grid is equally spaced. The radial component $psi$ is defined as
+
+$ psi_i = i dot Delta psi, #h(2em) Delta psi = 1/N_psi  $ 
+// psi-spacing??
+// was ist der letzte psi Wert??
+
+starting at the center $psi_0 = 0$ extending outwards.
+
+The $zeta$-grid is defined by the following equations:
+
+$
+  zeta_k = k dot Delta zeta \
+  Delta zeta = L_zeta/N_zeta 
+$
+
+with // ?? what is this?
+
+$ L_zeta = 2pi rho_* / k_(zeta, "min") = 1/n_"min" $
+
+using
+
+$ k_(zeta,"min") = 2pi n_"min" rho_* $ // das überhaupt erwähnen??
+
+where $rho_*$ is the normalized Larmor radius.
+In this $n_"min"$ denotes the the fraction of the torus data that was simulated @samaniego2024topovis[p.19].
+Therefore the discrete $zeta$-grid is defined between $zeta_0 = 0$ and 
+$zeta_(-1) = L_zeta - Delta zeta$.
+This means, that even if $L_zeta=1$ the grid will have a spacing of $Delta zeta$ between the first and last grid point accounting for the periodic boundary condition $zeta = zeta±1$.
+
+Similarly such a gap is also present for the $s$-grid. The grid is defined as
+
+$ s_j = s_0 + j dot Delta s $
+
+with
+
+$ &s_0 = -0.5 + (Delta s)/2 $
+$ &Delta s = 1/N_s $
+
+which makes $s_(-1) = 0.5 - (Delta s)/2$ the maximum $s$ value.
+This again leaves a gap of $Delta s$ across the periodic boundary because of $s=s±1$. 
+
+// why is this done like this??
+
+Normally, this wouldn't be a problem. // TODO: ehh 🤷
+However, in the context of interpolation this gaps lead to complications.
+Using conventional methods interpolation is only possible between the first the last grid point. 
+This would leave a blank gap with the width of the grid-spacing, where no data can be generated.
+To circumvent this, the grid has to be extended using periodic boundary conditions.
+Details on how this is dealt with will be discussed in @sec:topovis:interpolation.
+
+
 
 == Triangulation <sec:triang>
 
@@ -267,7 +380,7 @@ For linear simulations the calculation of the poloidal potential is simple, as a
 
 $ sum_k_#sym.zeta hat(f)(#sym.psi, k_#sym.zeta, s) exp(i k_#sym.zeta #sym.zeta) $
 
-$ f(#sym.psi, #sym.zeta, s) = hat(f)(#sym.psi, #sym.zeta, s) exp(i k_#sym.zeta #sym.zeta) + hat(f^*)(#sym.psi, #sym.zeta, s) exp(-i k_#sym.zeta #sym.zeta) $
+$ f(#sym.psi, #sym.zeta, s) = hat(f)(#sym.psi, #sym.zeta, s) exp(i k_zeta #sym.zeta) + hat(f^*)(psi, #sym.zeta, s) exp(-i k_zeta zeta) $
 
 
 ==== Non-linear simulations
