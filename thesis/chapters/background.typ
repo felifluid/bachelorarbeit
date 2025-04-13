@@ -91,15 +91,15 @@ This can be seen more clearly in the constant $phi$ case, which is visualized in
 #include "../../figs/hamada/phi_const/fig.typ"
 
 @fig:hamada:phi:t shows the poloidal slice in polar coordinates with $s=text("const")$ lines added for reference.
-The discontinuity of the #sym.zeta\-grid at $s=±0.5$ is visible clearly.
+The discontinuity of the $zeta$\-grid at $s=±0.5$ is visible clearly.
 Also note that the s-grid is more dense on the left side (inner radius) than on the right side (outer radius).
 This is caused by a discrepency between the regularly spaced s-grid and the non-uniform geometry of the torus. // passt das??
 
 In hamada coordinates the poloidal slice is represented as a curved surface in 3d-space as can be seen in @fig:hamada:phi:h.
-The surface can be described as a two dimensional function $zeta(psi,s)$, which is referred to as _#sym.zeta\-shift_ on the basis of #cite(<samaniego2024topovis>, form: "prose").
+The surface can be described as a two dimensional function $zeta(psi,s)$, which is referred to as _$zeta$-shift_ on the basis of #cite(<samaniego2024topovis>, form: "prose").
 It spans across nearly the whole domain of the hamada coordinates.
-One can recognise the unique shape of the curve in the #sym.zeta\-s-plane from @fig:hamda:x, which flattens out to a straight line when approaching $psi=0$.
-@sec:background:topovis:zeta-shift discusses details on how #sym.zeta\-shift is defined and calculated using data from GKW.
+One can recognise the unique shape of the curve in the $zeta$-$s$-plane from @fig:hamda:x, which flattens out to a straight line when approaching $psi=0$.
+@sec:background:topovis:zeta-shift discusses details on how $zeta$shift is defined and calculated using data from GKW.
 
 === Periodicity <sec:background:hamada:periodicity>
 Trivially the toroidal angle $phi$ is periodic:
@@ -243,14 +243,13 @@ This again leaves a gap of $Delta s$ across the periodic boundary because of $s=
 
 // why is this done like this??
 
+// Will ich diesesn Teil hier drin haben als Teaser??
 Normally, this wouldn't be a problem. // TODO: ehh 🤷
 However, in the context of interpolation this gaps lead to complications.
 Using conventional methods interpolation is only possible between the first the last grid point. 
 This would leave a blank gap with the width of the grid-spacing, where no data can be generated.
 To circumvent this, the grid has to be extended using periodic boundary conditions.
 Details on how this is dealt with will be discussed in @sec:topovis:interpolation.
-
-
 
 == Triangulation <sec:triang>
 
@@ -315,48 +314,46 @@ As memory required to solve the interpolation increases quadratically with the n
 // compare details in a table??
 
 == ToPoVis
-=== What is ToPoVis?
-_ToPoVis_ is a python script developed by Sofia Samaniego in 2024 @samaniego2024topovis. It aims to compute and visualize poloidal cross sections of eletrostatic potential #sym.Phi inside a tokamak, hence the name "ToPoVis" (#strong[To]kamak #strong[Po]loidal cross section #strong[Vis]ualisation) @samaniego2024topovis[p.10,72]. ToPoVis works with the simulation data outputted by GKW.
-
+_ToPoVis_ is a python script developed by Sofia Samaniego in 2024 @samaniego2024topovis. It aims to compute and visualize poloidal cross sections of eletrostatic potential $Phi$ inside a tokamak, hence the name "ToPoVis" (#strong[To]kamak #strong[Po]loidal cross section #strong[Vis]ualisation) @samaniego2024topovis[p.10,72]. ToPoVis works with the simulation data outputted by GKW.
 
 // TODO: Output Bild von ToPoVis einfügen
 
 // both linear and non-linear simulations
 // geometries: circular, s-alpha, chease-global
 
-=== How does ToPoVis work?
-
 The program can be subdivided into the following sequences: //TODO: not happy with this
 
 #set enum(numbering: "1.", full: true)
-1. Reading values from `gkwdata.h5` file.
-2. Calculating #sym.zeta for a given #sym.phi, also known as #sym.zeta\-shift
-3. Evaluating potential #sym.Phi
-  1. Linear case: Calculating potential #sym.Phi using fourier eigenmodes $hat(f)$
-  2. Non-linear case: Interpolating 3D-potential and evaluating it at #sym.zeta\-shift
+1. Retrieving data from `gkwdata.h5` file.
+2. Calculating $zeta$ for a given $phi$, also known as $zeta$-shift
+3. Evaluating potential $Phi$
+  1. Linear case: Calculating potential $Phi$ using fourier eigenmodes $hat(f)$
+  2. Non-linear case: Interpolating 3D-potential and evaluating it at $zeta$-shift
 4. Plotting the potential on poloidal slice
 
 // TODO: maybe add flow chart?
 
-==== Calculating the #sym.zeta\-shift <sec:background:topovis:zeta-shift>
-A poloidal slice implies satisfying the condition $#sym.phi = #text("const")$. The way the #sym.zeta\-shift is calculated is different for the kind of geometry being used for the simulation. ToPoVis works for three different geometries: 1) circular, 2) CHEASE and 3) s-#sym.alpha. In each geometry the transformations between toroidal and hamada coordinates are different @samaniego2024topovis[p.20ff].
+=== Calculating the $zeta$\-shift <sec:background:topovis:zeta-shift>
+A poloidal slice implies satisfying the condition $#sym.phi = #text("const")$. The way the $zeta$\-shift is calculated is different for the kind of geometry being used for the simulation. ToPoVis works for three different geometries: 1) circular, 2) CHEASE and 3) s-#sym.alpha. In each geometry the transformations between toroidal and hamada coordinates are different @samaniego2024topovis[p.20ff].
 
-In all geometries #sym.zeta is the only coordinate that is dependend on #sym.phi and can be defined generally as follows:
+In all geometries $zeta$ is the only coordinate that is dependend on #sym.phi and can be defined generally as follows:
 
-$ #sym.zeta = -frac(#sym.phi, 2#sym.pi) + G(psi, s) $
+$ zeta = -frac(#sym.phi, 2#sym.pi) + G(psi, s) $
 
 With each geometry having its own definition of $G$. // TODO: formulation 
 
-===== Circular geometry
+==== Circular geometry
 // #sym.psi\(r) &= frac(r, R_#text("ref")) \
 // s(r, #sym.theta) &= frac(1, 2#sym.pi) [#sym.theta + #sym.psi\(r) sin(#sym.theta)] \
 In circular geometry, the factor $G$ is defined like follows @peeters2015[p.25].
+
 $ 
   G(psi, s) = frac(1,#sym.pi) s_B s_j abs(q(#sym.psi)) arctan[sqrt(frac(1-#sym.psi, 1+#sym.psi)) tan frac(#sym.theta, 2)] = #text("gmap")\(psi, s)
 $ 
-It is outputted directly by GKW and can be found under `geom/gmap` as a discrete function of #sym.psi and $s$ @samaniego2024topovis[p.21]. // TODO: don't call the discrete function
 
-===== CHEASE geometry
+It is outputted directly by GKW and can be found under `geom/gmap` @samaniego2024topovis[p.21].
+
+==== CHEASE geometry
 For general geometries GKW interfaces the CHEASE code @peeters2015[p.2]. CHEASE (Cubic Hermite Element Axisymmetric Static Equilibrium) is a solver for toroidal magnetohydrodynamic equilibria developed by #cite(<lutjens1996chease>, form: "prose"). Unlike GKW, it treats the plasma as a fluid rather then a many-particle system. CHEASE can deal with general geometries, e.g. geometries with up-down-asymmetric cross sections as present in tokamaks like JET (Joint European Torus) and the planned ITER (International Thermonuclear Experimental Reactor) @lutjens1996chease[p.221f]. Hence, these general geometries are named CHEASE or CHEASE-global in GKW @peeters2015[p.42].
 The resulting geometry factor can be expressed as @samaniego2024topovis[p.21]:
 
@@ -368,21 +365,26 @@ The prefactor of the integral is calculated by GKW and is outputted to `geom/gma
 
 // ?? weiter ausführen?
 
-===== s-#sym.alpha geometry
-The s-#sym.alpha geometry is the first order approximation of the circular geometry. Flux surfaces are circular and having a small inverse aspect ratio $psi = r/R << 1$ @peeters2015[p.23]. Because of the heavily simplified nature of this, it can lead to numerical instability for non-linear simulations @peeters2015[p.23]. In this geometry the geometry factor $G$ is defined like this @peeters2015[p.23] #footnote[In previous versions of @peeters2015 #sym.zeta was falsely defined as $zeta = frac(s_B s_j, 2pi) [abs(q) theta - phi]$.]:
+==== s-#sym.alpha geometry
+The s-#sym.alpha geometry is the first order approximation of the circular geometry. Flux surfaces are circular and having a small inverse aspect ratio $psi = r/R << 1$ @peeters2015[p.23]. Because of the heavily simplified nature of this, it can lead to numerical instability for non-linear simulations @peeters2015[p.23]. In this geometry the geometry factor $G$ is defined like this @peeters2015[p.23] #footnote[In previous versions of @peeters2015 $zeta$ was falsely defined as $zeta = frac(s_B s_j, 2pi) [abs(q) theta - phi]$.]:
 
 $ G(psi, s) = s_B s_j abs(q(psi)) s $
 
-This time, `geom/gmap` is not being used. Instead $G$ is calculated in ToPoVis through the geometry factors `input/geom/signB`, `input/geom/signJ` and `geom/q` exported by GKW.
+This time, `geom/gmap` is not being used. Instead $G$ is calculated in ToPoVis.
 
 ==== Linear simulations
-For linear simulations the calculation of the poloidal potential is simple, as a function in hamada coordinates $f(#sym.psi, #sym.zeta, s)$ can be expressed as a Fourier series.
+For linear simulations the calculation of the poloidal potential is trivial, as a function in hamada coordinates $f(psi, zeta, s)$ can be expressed as a fourier series.
 
-$ sum_k_#sym.zeta hat(f)(#sym.psi, k_#sym.zeta, s) exp(i k_#sym.zeta #sym.zeta) $
+$ sum_k_zeta hat(f)(psi, k_zeta, s) exp(i k_zeta zeta) $
 
-$ f(#sym.psi, #sym.zeta, s) = hat(f)(#sym.psi, #sym.zeta, s) exp(i k_zeta #sym.zeta) + hat(f^*)(psi, #sym.zeta, s) exp(-i k_zeta zeta) $
+$ f(psi, zeta, s) = hat(f)(psi, zeta, s) exp(i k_zeta zeta) + "C.C." $
 
+// TODO: additions
 
+// parallel.dat? > reshape
+// k_zeta is constant
+
+=== Calculating the potential
 ==== Non-linear simulations
 
 
