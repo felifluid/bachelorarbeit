@@ -1,7 +1,4 @@
-#import "../functions.typ" : load-bib
 #import "@preview/subpar:0.2.1"
-
-#set heading(numbering: "1.")
 
 = Improving the ToPoVis Code
 
@@ -310,4 +307,3 @@ After evaluating #sym.Phi' on the fine s-#sym.psi\-#sym.zeta\-grid, the #sym.zet
 
 // made importable and callable as a local package
 
-#load-bib()

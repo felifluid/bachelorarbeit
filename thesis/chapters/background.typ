@@ -1,9 +1,5 @@
 #import "@preview/subpar:0.2.1"
-#import "../functions.typ" : load-bib,  enum_numbering
-
-// FIXME: this should be in preamble
-#set heading(numbering: "1.")
-#set math.equation(numbering: "(1)")
+#import "../functions.typ" : enum_numbering
 
 = Background
 == GKW
@@ -32,10 +28,10 @@ For further reading on how this is achieved in detail, see @peeters2015[20ff] an
 This leads to the following fairly complex generalized equations
 
 $
-  &psi(r) = r/R_"ref" \
-  &s(theta, psi) = integral_0^theta ("d"theta')/(bold(B) dot nabla theta') slash.big integral.cont ("d"theta')/(bold(B) dot nabla theta') \
-  &zeta(psi, theta) = q s - phi/(2pi) - g(theta, psi) 
-$ <eq:zeta>
+  &psi(r) = r/R_"ref" #<eq:psi> \
+  &s(theta, psi) = integral_0^theta ("d"theta')/(bold(B) dot nabla theta') slash.big integral.cont ("d"theta')/(bold(B) dot nabla theta') #<eq:s> \
+  &zeta(psi, theta) = q s - phi/(2pi) - g(theta, psi) #<eq:zeta>
+$ <eq:hamada>
 
 Sometimes, $zeta$ is called the "toroidal" coordinate, while s is referred to as the "poloidal" coordinate. 
 However, this can be misleading as varying $zeta$ at constant $psi$ and $s$, will result in a screw like motion along both toroidally along $phi$ and poloidally along $theta$.
@@ -48,7 +44,7 @@ A safety factor of $q=5/4$ would mean, the magnetic field line reaches its start
 Generally, higher values of $q$ result in better plasma stability.
 In GKW the sign of the safety factor is oftentimes normalized to 
 
-$ q = s_B s_j abs(q) $
+$ q = s_B s_j abs(q) $ <eq:q>
 
 where $s_B = ±1$ and $s_j = ±1$ represent the sign of the magnetic field and the plasma current @peeters2015[p.21].
 
@@ -112,7 +108,7 @@ $ zeta = -phi/(2pi) + G(psi, s) $ <eq:zeta_general>
 
 the periodicity of $phi$ translates to the $zeta$-grid as
 
-$ zeta = zeta ± 1 $
+$ zeta = zeta ± 1 $ <eq:periodic:zeta>
 
 as long as both $psi$ and $s$ are held constant. 
 The toroidal boundary condition can be generalized for any function $f(psi, zeta, s)$
@@ -128,7 +124,7 @@ $ theta = theta ± 2pi $
 
 If both $psi$ and $zeta$ are held constant, this periodicity translates directly to 
 
-$ s = s±1 $
+$ s = s±1 $ <eq:periodic:s>
 
 But since in hamada coordinates $s(theta, psi)$ and therefore also $zeta(phi, psi, s(theta, psi))$ are functions of $theta$, in general something called _double periodicity_ or _parallel periodicity_ occurs.
 
@@ -395,6 +391,3 @@ $ f(psi, zeta, s) = hat(f)(psi, zeta, s) exp(i k_zeta zeta) + "C.C." $
 // readability of the code
 
 // vectorize / optimize some calculations
-
-
-#load-bib()

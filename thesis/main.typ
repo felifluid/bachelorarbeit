@@ -1,12 +1,6 @@
-#import "functions.typ": load-bib
+#import "template.typ": apply-template
 
-
-
-// TODO: Deckblatt
-
-#pagebreak()
-
-#include "preamble.typ"
+#show: apply-template
 
 #include "chapters/abstract.typ"
 
@@ -21,5 +15,3 @@
 #include "chapters/conclusion.typ"
 
 #include "chapters/outlook.typ"
-
-#load-bib(main: true)
