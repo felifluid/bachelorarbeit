@@ -366,7 +366,7 @@ The s-#sym.alpha geometry is the first order approximation of the circular geome
 
 $ G(psi, s) = s_B s_j abs(q(psi)) s $
 
-This time, `geom/gmap` is not being used. Instead $G$ is calculated in ToPoVis.
+This time, `geom/gmap` is not being used. Instead quantity $G$ is calculated in ToPoVis.
 
 ==== Linear simulations
 For linear simulations the calculation of the poloidal potential is trivial, as a function in hamada coordinates $f(psi, zeta, s)$ can be expressed as a fourier series.
@@ -375,7 +375,7 @@ $ sum_k_zeta hat(f)(psi, k_zeta, s) exp(i k_zeta zeta) $
 
 $ f(psi, zeta, s) = hat(f)(psi, zeta, s) exp(i k_zeta zeta) + "C.C." $
 
-// TODO: additions
+
 
 // parallel.dat? > reshape
 // k_zeta is constant
