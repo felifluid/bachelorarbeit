@@ -2,20 +2,20 @@
 
 #subpar.grid(
   figure(
-    image("../../placeholder.svg"), 
+    image("arbitrary.svg"), 
     caption: [
       arbitrary
     ]
-  ), <arbitrary_triangulation>,
+  ), <fig:triangulation:scattered:arbitrary>,
   figure(
-    image("../../placeholder.svg"), 
+    image("delaunay.svg"), 
     caption: [
       delaunay
     ]
-  ), <delaunay_triangulation>,
+  ), <fig:triangulation:scattered:delaunay>,
   columns: (1fr, 1fr),
   caption: [
-    Comparison of two triangulations of the same set of points
+    Comparison of two triangulations of the same set of vertices
   ],
-  label: <triangulation_comparison>,
+  label: <fig:triangulation:scattered>,
 )

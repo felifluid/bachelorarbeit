@@ -201,15 +201,17 @@ $ <eq:discrete_hamada>
 
 with $i,j,k in NN$.
 
-The grid is equally spaced. The radial component $psi$ is defined as
+The grid is equally spaced, specified by the following equations. The implementation of this can be found in the GKW code in the module `geom.f90` in the subroutine `geom_init_grids` @peeters2015code. 
 
-$ psi_i = i dot Delta psi, #h(2em) Delta psi = 1/N_psi  $ 
-// psi-spacing??
-// was ist der letzte psi Wert??
+The radial component $psi_i$ is defined as
 
-starting at the center $psi_0 = 0$ extending outwards.
+$ psi_i = (i+0.5) dot Delta psi #h(2cm) Delta psi = 1/N_psi  $ 
 
-The $zeta$-grid is defined by the following equations:
+starting at the center $psi_0 = (Delta psi)/2$ extending outwards. Note, that in CHEASE geometry the spacing is defined as
+
+$ Delta psi = (psi_"h" - psi_"l")/N_psi $
+
+The $zeta_k$-grid is defined as
 
 $
   zeta_k = k dot Delta zeta \
@@ -248,8 +250,8 @@ This again leaves a gap of $Delta s$ across the periodic boundary because of $s=
 
 // Will ich diesesn Teil hier drin haben als Teaser??
 Normally, this wouldn't be a problem. // TODO: ehh 🤷
-However, in the context of interpolation this gaps lead to complications.
-Using conventional methods interpolation is only possible between the first the last grid point. 
+However, in the context of interpolation these gaps lead to complications.
+Using conventional methods, interpolation is only possible between the first the last grid point. 
 This would leave a blank gap with the width of the grid-spacing, where no data can be generated.
 To circumvent this, the grid has to be extended using periodic boundary conditions.
 Details on how this is dealt with will be discussed in @sec:topovis:interpolation.
@@ -260,10 +262,11 @@ In the context of graph-theory or computational geometry _triangulation_ is the 
 
 #include "../../figs/triangulation/scattered/fig.typ"
 
-@arbitrary_triangulation above illustrates, that arbitrary triangulations can lead to many acute triangles. This is undesirable in many cases, as it can lead to numerical artifacts @klein2005voronoi[p.234]. 
-The triangles in @delaunay_triangulation on the other hand tend to be more equilateral leading to a more uniform representation of the grid @lucas2018delaunay. The _delaunay triangulation_ achieves this by maximizing the minimal interior angle of all triangles @klein2005voronoi[p.234]. // ??: add further information? e.g. the circumcircle criterion?
-
-// But there are also limits to the delaunay triangulation, which comes from two assumptions. No subset of four points are on the same circumcircle and no subset of three points lie on a straight line @klein2005voronoi[p.234]. 
+@fig:triangulation:scattered above shows two different triangulations of the same set of points. 
+@fig:triangulation:scattered:arbitrary illustrates, that arbitrary triangulations can lead to many acute triangles. 
+This is undesirable in many cases, as it can lead to numerical artifacts @klein2005voronoi[p.234]. 
+The triangles in @fig:triangulation:scattered:delaunay on the other hand tend to be more equilateral leading to a more uniform representation of the grid @lucas2018delaunay.
+The _delaunay triangulation_ achieves this by maximizing the minimal interior angle of all triangles @klein2005voronoi[p.234]. // ??: add further information? e.g. the circumcircle criterion?
 
 While delaunay triangulation works efficiently when the grid is more or less uniform, it doesn't perform well on non-uniform grids @lo2013multigrid[p.15]. // TODO: kinda misleading → cpu performance is not great under certain circumstances
 Moreover, different examples from #cite(<lo2013multigrid>,form: "prose", supplement: [p.21]), #cite(<peethambaran2015delaunay>, form: "prose", supplement: [p.166ff]) and #cite(<liu2008delaunay>, form: "prose", supplement: [p.1269]) show, that delaunay triangulation on non-uniform grids leads to many acute or big triangles. This can be illustrized well by examining the delaunay triangulation results of a spiral distrubution.
