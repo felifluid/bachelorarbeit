@@ -14,14 +14,15 @@ The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of 
 
 // nonlinear run
 
-// ?? add section for toroidal coordinates
+// TODO: add section for transformation: cylindrical → toroidal
 
 == Hamada coordinates
 To efficiently solve the gyrokinetic equation, GKW makes use of so called _hamada coordinates_.
 Hamada coordinates are retrieved by transforming the toroidal coordinates in such a way that
 
+
 + field lines become straight and
-+ one of the coordinates is aligned with the magnetic field. // Formatierung??
++ one of the coordinates is aligned with the magnetic field. // TODO: Formatierung
 
 For further reading on how this is achieved in detail, see @peeters2015[20ff] and @peeters2015[Appen. A].
 
@@ -134,7 +135,7 @@ However, we can combine this with @eq:zeta to find the definition
 $ G(psi, s, theta) = q(psi) s - g(psi, theta) $
 
 Note, that this is now a function of $theta$ instead of $s$. 
-However, at constant $psi$, every poloidal position is uniquely defined by either its angle $theta$ or its $s$ coordinate. // Stimmt das?? also... ist s(theta,psi) bilinear für psi const?
+However, at constant $psi$, every poloidal position is uniquely defined by either its angle $theta$ or its $s$ coordinate.
 Hence, $g(psi,theta)$ can be expressed as $g(psi, s)$ for constant $psi$.
 
 One can also find, that for $psi="const"$ the function $g(psi, s)$ must be periodic in $s$.
@@ -231,8 +232,10 @@ $ s_j = s_0 + j dot Delta s $
 
 with
 
-$ &s_0 = -0.5 + (Delta s)/2 $
-$ &Delta s = 1/N_s $
+$
+  &s_0 = -0.5 + (Delta s)/2 \
+  &Delta s = 1/N_s
+$
 
 which makes $s_(-1) = 0.5 - (Delta s)/2$ the maximum $s$ value.
 This again leaves a gap of $Delta s$ across the periodic boundary because of $s=s±1$. 
@@ -327,7 +330,7 @@ The program can be subdivided into the following sequences: //TODO: not happy wi
   2. Non-linear case: Interpolating 3D-potential and evaluating it at $zeta$-shift
 4. Plotting the potential on poloidal slice
 
-// TODO: maybe add flow chart?
+// TODO: maybe add flow chart?aims to 
 
 === Calculating the $zeta$\-shift <sec:background:topovis:zeta-shift>
 A poloidal slice implies satisfying the condition $#sym.phi = #text("const")$. The way the $zeta$\-shift is calculated is different for the kind of geometry being used for the simulation. ToPoVis works for three different geometries: 1) circular, 2) CHEASE and 3) s-#sym.alpha. In each geometry the transformations between toroidal and hamada coordinates are different @samaniego2024topovis[p.20ff].
@@ -368,19 +371,32 @@ $ G(psi, s) = s_B s_j abs(q(psi)) s $
 
 This time, `geom/gmap` is not being used. Instead quantity $G$ is calculated in ToPoVis.
 
-==== Linear simulations
-For linear simulations the calculation of the poloidal potential is trivial, as a function in hamada coordinates $f(psi, zeta, s)$ can be expressed as a fourier series.
-
-$ sum_k_zeta hat(f)(psi, k_zeta, s) exp(i k_zeta zeta) $
-
-$ f(psi, zeta, s) = hat(f)(psi, zeta, s) exp(i k_zeta zeta) + "C.C." $
-
-
-
-// parallel.dat? > reshape
-// k_zeta is constant
-
 === Calculating the potential
+==== Linear simulations
+In linear simulations GKW represents all pertubed quantities as a Fourier series @peeters2015[p.43]
+
+$ sum_k_zeta hat(f)(psi, k_zeta, s) exp(i k_zeta zeta) $ <eq:fourier_series>
+
+In linear simulations, usually only one Fourier mode is simulated.
+Because of this, only linear simulations with `nmod=1` are supported @samaniego2024topovis[p.27].
+Therefore, @eq:fourier_series simplifies to
+
+$ f(psi, zeta, s) = hat(f)(psi, zeta, s) exp(i k_zeta zeta) + hat(f)^*(psi, zeta, s) exp(-i k_zeta zeta) $
+
+The complex fourier coefficients are provided in the dataset `diagnostic/diagnos_mode_struct/parallel`, called `parallel.dat` in short.
+In it, several diagnostics connected with the parallel mode structure are stored.
+These include the fourier coefficients of the pertubed density, the pertubed parallel energy or the pertubed potential.
+A complete list and order of all diagnostics in `parallel.dat` can be found in #cite(<peeters2015>, form: "prose", supplement: "p.144").
+All quantities are saved sequentially in a 1d-array of length $N_"mod" N_x N_s N_"sp"$.
+To extract the fourier coefficients of the potential, `parallel.dat` is reshaped and accessed at the specific column - once for the real part of the fourier coefficient, and again for the imaginary part.
+ToPoVis achieves this using the included methods `reshape_parallel_dat_multi`, `fouriercoeff_imag` and `fouriercoeff_real`.
+Both parts are then combined to retrieve the complex fourier coefficient. Note that because $N_"mod"=1$, the fourier coefficients are a function of $psi$ and $s$ and no function of $zeta$.
+
+Using this, the potential at the poloidal cross section is calculated using the formula
+
+$ Phi(psi, s, zeta_s) = RR[hat(f)(psi, s) exp(i k_zeta zeta_s) + hat(f)^*(psi,s) exp(-i k_zeta zeta_s)] $
+
+
 ==== Non-linear simulations
 
 
