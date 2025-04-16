@@ -39,10 +39,9 @@ def plot_subsection(r, z, pot, xlim, ylim, grid: bool, method):
 
 figs_dir = './figs/triangulation_artifacts/'
 data_dir = './data/chease/ns128/'
-ext = '.png'
 
-def figpath(filename):
-    return figs_dir+filename+ext
+def figpath(filename, ext):
+    return figs_dir+filename+'.'+ext
 
 path = pathlib.Path(data_dir+'topovisdata.h5')
 
@@ -66,30 +65,31 @@ xlim = (1.245, 1.26)
 ylim = (-0.02, 0.092)
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='delaunay')
-fig.savefig(figpath('sparse/delaunay_grid'))
+fig.savefig(figpath('sparse/delaunay_grid','svg'))
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='delaunay')
-fig.savefig(figpath('sparse/delaunay_contour'))
+fig.savefig(figpath('sparse/delaunay_contour','png'), dpi=300)
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='regular')
-fig.savefig(figpath('sparse/regular_grid'))
+fig.savefig(figpath('sparse/regular_grid','svg'))
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='regular')
-fig.savefig(figpath('sparse/regular_contour'))
+fig.savefig(figpath('sparse/regular_contour','png'), dpi=300)
 
 # sheared
 
 xlim = (0.65, 0.67)
 ylim = (0.015, 0.045)
+slc = np.s_[:, 100:130]
 
-fig, ax = plot_subsection(R, Z, POT, xlim=xlim, ylim=ylim, grid=True, method='delaunay')
-fig.savefig(figpath('sheared/delaunay_grid'))
+fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='delaunay')
+fig.savefig(figpath('sheared/delaunay_grid','svg'))
 
-fig, ax = plot_subsection(R, Z, POT, xlim=xlim, ylim=ylim, grid=False, method='delaunay')
-fig.savefig(figpath('sheared/delaunay_contour'))
+fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='delaunay')
+fig.savefig(figpath('sheared/delaunay_contour', 'png'), dpi=300)
 
-fig, ax = plot_subsection(R, Z, POT, xlim=xlim, ylim=ylim, grid=True, method='regular')
-fig.savefig(figpath('sheared/regular_grid'))
+fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='regular')
+fig.savefig(figpath('sheared/regular_grid', 'svg'))
 
-fig, ax = plot_subsection(R, Z, POT, xlim=xlim, ylim=ylim, grid=False, method='regular')
-fig.savefig(figpath('sheared/regular_contour'))
+fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='regular')
+fig.savefig(figpath('sheared/regular_contour', 'png'), dpi=300)
