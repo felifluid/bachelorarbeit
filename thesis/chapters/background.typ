@@ -195,7 +195,11 @@ $ f(psi,k_zeta,s) = hat(f)(psi,k_zeta,s±1) exp(∓i k_zeta q) $
 === Specifications of the discrete grid
 As GKW solves the gyrokinetic equation numerically, it does so on a discrete hamada grid
 
-$ {(psi_i, s_j, zeta_k) in RR^3 | i,j,k in NN | i in [0, N_psi -1] , #h(0.5em) j in [0, N_s -1], #h(0.5em) k in [0, N_zeta -1]} $
+$ 
+  H = {(psi_i, s_j, zeta_k) in RR^3 | i in [0, N_psi -1] , j in [0, N_s -1], k in [0, N_zeta -1] } 
+$ <eq:discrete_hamada>
+
+with $i,j,k in NN$.
 
 The grid is equally spaced. The radial component $psi$ is defined as
 
@@ -398,7 +402,28 @@ $ Phi(psi, s, zeta_s) = RR[hat(f)(psi, s) exp(i k_zeta zeta_s) + hat(f)^*(psi,s)
 
 
 ==== Non-linear simulations
+Unlike the linear case, in non-linear simulations the potential #sym.Phi is calculated by GKW during runtime and exported as such.
+This is done for each timestep and saved as seperate datasets under `diagnostic/diagnos_fields/`.
+Each dataset is referenced by the key `Poten` followed by an 8 digit long number, e.g. `Poten00000343`. 
+If not specified otherwise, the last availiable dataset will be used, as it usually gives the most accurate results @samaniego2024topovis[p.77].
+As multiple $zeta$-modes are simulated in non-linear simulations, the potential $Phi(s, psi, zeta)$ is now three-dimensional.
 
+Oftentimes its more useful to look at the non-zonal potential, as it reveals more about the turbulence structures. // TODO: Quelle?
+This is achieved by substracting the mean $mu_j$ of each $psi_j$ from the potential
+
+$ 
+  Phi'_(i j k) = Phi_(i j k) - mu_j
+$
+with
+$
+  mu_j = 1/(N_s N_zeta) sum_(i=0)^(N_s-1) sum_(k=0)^(N_zeta -1) Phi_(i j k)
+$
+
+To retrieve potential data of a poloidal slice, i.e. $phi = "const"$, the 3d-potential $Phi(s, psi, zeta)$ needs to be evaluated at $zeta$-shift.
+But since, $zeta$-shift does not generally coincide with the discrete $zeta$-grid, interpolation is needed @samaniego2024topovis[p.23].
+ToPoVis supplies two different interpolation methods: B-Splines and interpolation via Fast Fourier Transformation.
+Either one can be choosen interactively, when running ToPoVis on non-linear simulation data.
+However, B-Spline interpolation is the preffered option, as it yielded better results in benchmarking @samaniego2024topovis[p.29ff].
 
 === What needs to be improved?
 
@@ -407,3 +432,6 @@ $ Phi(psi, s, zeta_s) = RR[hat(f)(psi, s) exp(i k_zeta zeta_s) + hat(f)^*(psi,s)
 // readability of the code
 
 // vectorize / optimize some calculations
+// e.g. interpolation, parallel.dat reshape
+
+// make topovis callable and importable
