@@ -412,7 +412,7 @@ If not specified otherwise, the last availiable dataset will be used, as it usua
 As multiple $zeta$-modes are simulated in non-linear simulations, the potential $Phi(s, psi, zeta)$ is now three-dimensional.
 
 Oftentimes its more useful to look at the non-zonal potential, as it reveals more about the turbulence structures. // TODO: Quelle?
-This is achieved by substracting the mean $mu_j$ of each $psi_j$ from the potential
+This is achieved by substracting the mean $mu_j$ over $s$ and $zeta$ for each $psi_j$ from the potential $Phi_(i j k)$ corresponding to $psi_j$, i.e.
 
 $ 
   Phi'_(i j k) = Phi_(i j k) - mu_j
@@ -427,3 +427,11 @@ But since, $zeta$-shift does not generally coincide with the discrete $zeta$-gri
 ToPoVis supplies two different interpolation methods: B-Splines and interpolation via Fast Fourier Transformation.
 Either one can be choosen interactively, when running ToPoVis on non-linear simulation data.
 However, B-Spline interpolation is the preffered option, as it yielded better results in benchmarking @samaniego2024topovis[p.29ff].
+
+=== Plotting and Data Export
+Finally, after the potential $Phi(psi,s)$ is calculated, a heatmap plot is created using the method `tricontourf`  from `matplotlib.pyplot` @samaniego2024topovis[p.27].
+The poloidal coordinates $R(psi, s)$ and $Z(psi, s)$ (see !!) needed for this are included in the dataset `geom`. // add reference to cylindrical → toroidal coords
+A colorbar and outlines at $psi_"min"$ and $psi_"max"$ are added.
+The area in the center, where no data was simulated, is filled white to hide inapplicable delaunay triangles.
+
+Additionally ToPoVis writes the plotted data $Phi$, $R$ and $Z$ to a hdf5-file @samaniego2024topovis[p.28].

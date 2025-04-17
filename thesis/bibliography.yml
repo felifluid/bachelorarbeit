@@ -49,6 +49,30 @@ peeters2015:
     value: https://bitbucket.org/gkw/gkw/wiki/Documentation
     date: 2025-01-17
 
+peeters2015code:
+  type: repository
+  title: GKW (Gyro-Kinetic Workshop)
+  author: 
+    - Peeters, A.
+    - Buchholz, R.
+    - Camenen, Y.
+    - Casson, F.J.
+    - Grosshauser, S.
+    - Hornsby, W.A.
+    - Manas, P.
+    - Migliano, P.
+    - Siccinio, M.
+    - Snodin, A.P.
+    - Strintzi, D.
+    - Sung, T.
+    - Szepesi, G.
+    - Zarzosi, D.
+    - Contributors
+  date: 2025
+  url:
+    value: https://bitbucket.org/gkw/gkw/wiki/Home
+    date: 2025-04-16
+
 samaniego2024topovis:
   type: thesis
   title: Visualizing Poloidal Cross Sections of Small Scale Turbolence in Global Tokamak Geometry

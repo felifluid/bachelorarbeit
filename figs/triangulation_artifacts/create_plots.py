@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 
-def plot_subsection(r, z, pot, xlim, ylim, grid: bool, method):
+def plot_subsection(r, z, pot, xlim, ylim, grid: bool, method, **kwargs):
     r_flat = np.ravel(r)
     z_flat = np.ravel(z)
     pot_flat = np.ravel(pot)
@@ -31,7 +31,10 @@ def plot_subsection(r, z, pot, xlim, ylim, grid: bool, method):
         ax.triplot(r_flat, z_flat, triangles=triangles, lw=0.25, c='0.3')
         ax.scatter(r_flat, z_flat, c='r', marker='.', edgecolors='0', lw=0, s=50)
     else:
-        ax.tricontourf(r_flat, z_flat, pot_flat, triangles=triangles, levels=200, cmap='seismic', vmin=-0.5, vmax=0.5)
+        kwargs['levels'] = 200
+        kwargs['cmap'] = 'seismic'
+
+        ax.tricontourf(r_flat, z_flat, pot_flat, triangles=triangles, **kwargs)
         ax.plot(np.ravel(r[-1, :]), np.ravel(z[-1, :]), color='grey', alpha=0.3, linewidth=2)
         ax.plot(np.ravel(r[0, :]), np.ravel(z[0, :]), color='grey', alpha=0.3, linewidth=2)
 
@@ -64,16 +67,17 @@ slc = np.s_[0:None:4, :]
 xlim = (1.245, 1.26)
 ylim = (-0.02, 0.092)
 
-fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='delaunay')
+kwargs = {'vmin': -0.5, 'vmax': 0.5}
+fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='delaunay', **kwargs)
 fig.savefig(figpath('sparse/delaunay_grid','svg'))
 
-fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='delaunay')
+fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='delaunay', **kwargs)
 fig.savefig(figpath('sparse/delaunay_contour','png'), dpi=300)
 
-fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='regular')
+fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='regular', **kwargs)
 fig.savefig(figpath('sparse/regular_grid','svg'))
 
-fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='regular')
+fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='regular', **kwargs)
 fig.savefig(figpath('sparse/regular_contour','png'), dpi=300)
 
 # sheared
