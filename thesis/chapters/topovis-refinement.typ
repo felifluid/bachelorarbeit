@@ -2,9 +2,12 @@
 
 = Improving the ToPoVis Code
 
+// TODO: passt die position hier?
+#include "../../figs/triangulation_artifacts/sparse/artefacts.typ"
+
 == Dealing with Numerical Artifacts
 
-With the original version of ToPoVis some numerical artifacts could be observed in the contour plots as can be seen in @fig:artifacts:contour_artifacts. 
+With the original version of ToPoVis some numerical artifacts could be observed in the contour plots as can be seen in @fig:numerical_artifacts. 
 The artifacts are particularly severe at the edges of plots in CHEASE geometry. 
 This made it harder to study small scale turbulences in these areas.
 Fixing these artifacts is the original motivation underlying this thesis. 
@@ -17,6 +20,8 @@ The triangulation defines sets of 3 grid points, that will be interpolated inbet
 As such, the choice of triangulation has a big impact on the resulting interpolation. 
 As discussed in section !!, delaunay triangulation usually yields the best results, however, it faces issues with heavily non-uniform grids.
 
+#include "../../figs/triangulation_artifacts/sparse/fig.typ"
+
 @fig:artifacts shows a subsection of simulation data in CHEASE geometry outputted by ToPoVis. 
 The section stands out with a really low density in poloidal direction and a high density in the radial direction and can therefore be classified as a heavily non-uniform grid.
 As explained in the previous section !!,
@@ -25,9 +30,6 @@ This is excactly what can be observed in @fig:artifacts:delaunay_triangles.
 Note that the axes aren't scaled equally to help visualize this effect. 
 Furthermore only every fourth point in the #sym.psi - direction is used to make the triangles distinguishable. 
 This has very little influence on the delaunay triangulation in this specific section.
-
-// TODO: split this into 2 figures
-#include "../../figs/triangulation_artifacts/sparse/fig.typ"
 
 === An alternative Triangulation
 
@@ -307,3 +309,9 @@ After evaluating #sym.Phi' on the fine s-#sym.psi\-#sym.zeta\-grid, the #sym.zet
 
 // made importable and callable as a local package
 
+// readability of the code
+
+// vectorize / optimize some calculations
+// e.g. interpolation, parallel.dat reshape
+
+// make topovis callable and importable
