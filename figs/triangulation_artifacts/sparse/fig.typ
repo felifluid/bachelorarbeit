@@ -20,7 +20,7 @@
         caption: "regular triangulation",
     ), <fig:artifacts:regular_triangles>,
     columns: (1fr, 1fr),
-    caption: [ Different plots of the same subsection ($R=[1.245,1.26], Z=[-0.02, 0.092]$) of a poloidal cross section characterized with a non-uniform grid structure at $s=±0$ in CHEASE geometry. The data to create these plots was simulated by GKW and post-processed with ToPoVis.
+    caption: [ Different plots of the same subsection ($R=[1.245,1.26], Z=[-0.02, 0.092]$) of a poloidal cross section characterized with a non-uniform grid structure at $s=±0$ in CHEASE geometry.
     ],
     label: <fig:artifacts>,
 )
