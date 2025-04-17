@@ -48,10 +48,49 @@ Beim betrachten eines Punktes $s_1 > 0.5$ müsste das für #sym.Phi heißen:
 $ Phi(psi, s_1, zeta) = hat(f)(psi, k, s_1 - 1) * exp(i k zeta(psi, s_1 - 1) - q) + hat(f)^*(psi, k, s_1 -1) * exp(-i k zeta(psi, s_1 - 1) -q) $
 
 Q: $s$-constant Linien zu Plots hinzufügen?
-A:
+A: Wenn Zeit ist.
+   Hab das mal für die Hamada Koordinaten gemacht. War gar nicht sooo aufwendig. Vielleicht füg ich das noch zu Topovis hinzu.
 
 Q: Ähnlich wie Sophia: Kling-Gupta Efficiency für Interpolation Ergebnisse? (oder ähnliche Form von durchschnittlicher Fehler (#sym.psi) in Abhängigkeit von $s$?)
+A: Neee. Is schlecht greifbar - lieber relative Differenz
+
+Q: Definition der Fourier Moden unklar \
+  - 2.297: Als Summe auch über $k_psi$
+  - A.39: Nur noch über $k_zeta$ → Normiert über Larmor radius $rho_*$
+  - ToPoVis: Ohne $k_psi$ - nicht normiert
 A:
 
-Q: CHEASE Zentrum in hoher s-Auflösung
+Q: Warum ist das $s$-Gitter ungleichmäßig in der poloidalen slice? \
+  Bei $psi=psi_max$ liegen die $s="const"$ Linien bei $s=plus.minus 0.5$ eng beieinander und bei $s=0$ enger.
+
+  PS: Interessanterweise ist das beim Plot im Büro genau umgekehrt (glaube aber meins ist richtig) 
+
 A:
+
+Q: Wie ist das diskrete Gitter in GKW definiert? \
+  Für $psi$ vermutlich
+  $ psi_i = (i+1) Delta psi #h(1cm) Delta psi = 1/N_psi #h(1cm) "mit" 0 <= i <= N_psi $
+  Bei $s$ denke ich 
+  $ s_j = s_0 + j dot Delta s #h(1cm) Delta s = 1/N_s #h(1cm) "mit" 0<=j<=N_s $
+  und bei $zeta$
+  $ zeta_k = k dot Delta zeta #h(1cm) Delta zeta = L_zeta/N_zeta #h(1cm) L_zeta = 1/n_"min" #h(1cm) 0 <= k <= N_zeta $
+  wobei $L_zeta$ der Anteil des Torus ist, der simuliert wurde.
+
+A: Beschränkt auf globale Version
+
+Q: Parallele Randbedingungen in GKW falsch definiert
+
+  Die parallelen Randbedingungen in GKW (A.36) sind nach unseren Ergebnissen falsch und müssten stattdessen
+  $ f(psi, zeta, s) = f(psi, zeta minus.plus q, s plus.minus 1) $
+  heißen.
+  Zumindest nach Florians Herleitung und Ergebnisse aus ToPoVis.
+  Die (richtigen) Formeln dazu leite ich übernommen und zitiert aus dem Dokument was Florian erstellt hat in meiner BA her.
+
+A:
+
+Q: Gibt es Vorgaben zum Styling? (Schriftgröße, Seitenabstände, Schriftart, etc.)
+A:
+
+Q: Was muss aufs Deckblatt?
+A:
+
