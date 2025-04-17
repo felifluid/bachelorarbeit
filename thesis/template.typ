@@ -54,27 +54,49 @@
                 align(center, smallcaps(hydra(1)))
             },
         )
+        
+        // PAR
+        set par(justify: true)
 
         // HEADINGS
         // clean numbering (https://sitandr.github.io/typst-examples-book/book/snippets/numbering.html?highlight=numbering#clean-numbering)
-        let heading_numbering(..schemes) = {
-            (..nums) => {
-                let (section, ..subsections) = nums.pos()
-                let (section_scheme, ..subschemes) = schemes.pos()
-
-                if subsections.len() == 0 {
-                    numbering(section_scheme, section)
-                } else if subschemes.len() == 0 {
-                    numbering(section_scheme, ..nums.pos())
+        // let heading_numbering(..schemes) = {
+        //     (..nums) => {
+        //         let (section, ..subsections) = nums.pos()
+        //         let (section_scheme, ..subschemes) = schemes.pos()
+        // 
+        //         if subsections.len() == 0 {
+        //             numbering(section_scheme, section)
+        //         } else if subschemes.len() == 0 {
+        //             numbering(section_scheme, ..nums.pos())
+        //         } else {
+        //             heading_numbering(..subschemes)(..subsections)
+        //         }
+        //     }
+        // }
+        // 
+        // set heading(numbering: heading_numbering("I.", "1."))
+        
+        set heading(numbering: "I.1.1")
+        
+        show heading: it => {
+            if it.level > 1 {
+                let counter = counter(heading).get().map(str)
+                let nums = counter.slice(1)
+        
+                let num = "0"
+        
+                if nums.len() > 1{
+                    num = nums.join(".")
                 } else {
-                    heading_numbering(..subschemes)(..subsections)
+                    num = nums.at(0)
                 }
+                num + " " + it.body
+            } else {
+                it
             }
         }
 
-        // apply custom numbering
-        set heading(numbering: heading_numbering("I.", "1."))
-        
         show heading: it => {
             let lvl = it.level
             if lvl == 1 {
@@ -103,12 +125,21 @@
                     #set text(size: 1.10em)
                     #it
                 ]
-            } else if lvl <= 4 {
+            } else if lvl == 4 {
                 block(
                     above: 1.55em,
                     below: 1em
                 )[
-                    #set text(size: 1em)
+                    #set text(size: 1.05em)
+                    #it
+                ]
+            } else if lvl >= 5 {
+                block(
+                    above: 1.55em,
+                    below: 1em
+                )[
+                    #set text(size: 1.0em)
+                    // omit numbering
                     #it.body
                 ]
             } 
