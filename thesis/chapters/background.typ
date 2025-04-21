@@ -170,7 +170,7 @@ $
   zeta(psi, s±1) &= -phi/(2pi) + G(psi, s±1) \
                  &= -phi/(2pi) + G(psi, s) ± q \
                  &= zeta(psi, s) ± q
-$
+$ <eq:double_periodic_zeta>
 
 Poloidal double periodicity can be generalized for any given function $f(psi, zeta, s)$
 
@@ -192,7 +192,7 @@ the poloidal double periodic boundary condition translates to
 // TODO: add box
 $ f(psi,k_zeta,s) = hat(f)(psi,k_zeta,s±1) exp(∓i k_zeta q) $
 
-=== Specifications of the discrete grid
+=== Specifications of the discrete grid <sec:discrete_grid>
 As GKW solves the gyrokinetic equation numerically, it does so on a discrete hamada grid
 
 $ 
@@ -282,7 +282,7 @@ This section focuses on interpolation of multidimensional data, at this is the d
 When faced with multidimensional data, there are multiple different interpolation approaches to choose from. 
 In this section two different methods are being introduced and discussed: Firstly, the functionality of the `RegularGridInterpolator` will be discussed. The second section takes a look at the `RBFInterpolator` and points out the differences of the two.
 
-=== RegularGridInterpolator
+=== RegularGridInterpolator <sec:background:rgi>
 The `RegularGridInterpolator` (RGI) is a python class provided by the package `scipy.interpolate` @scipy2025rgi. 
 The RGI is an interpolator, that is designed to work with N-dimensional data defined on a rectilinear grid; meaning a rectangular grid with even or uneven spacing @scipy2025rgi. 
 Different methods of interpolation are supported, namely nearest-neighbor, linear, or spline interpolations @scipy2025rgi.
@@ -295,7 +295,7 @@ When constructing splines, this involves solving a large sparse linear system @s
 
 // Bild maybe ??
 
-=== RBFInterpolator
+=== RBFInterpolator <sec:background:rbfi>
 A lot of data sets from real world applications are not defined on a regular grid. 
 Examples of this include measurements from meteorological stations, which are scattered irregularly, images with corrupted pixels, as well as potential or vector data from physical experiments @skala2016rbf[p.6].
 Many interpolation methods such as multivariate splines, Clough-Tocher or finite element interpolators expect a regularly structured grid, or depend on the prior creation of a mesh (usually through expensive triangulation) @wendland2004scattered[p.ix]. Radial basis functions (RBF) provide a truly meshless alternative for interpolation on scattered data @wendland2004scattered[p.ix]. 
@@ -377,7 +377,7 @@ $ G(psi, s) = s_B s_j abs(q(psi)) s $
 This time, `geom/gmap` is not being used. Instead quantity $G$ is calculated in ToPoVis.
 
 === Calculating the potential
-==== Linear simulations
+==== Linear simulations <sec:topovis:linear>
 In linear simulations GKW represents all pertubed quantities as a Fourier series @peeters2015[p.43]
 
 $ sum_k_zeta hat(f)(psi, k_zeta, s) exp(i k_zeta zeta) $ <eq:fourier_series>
@@ -402,7 +402,7 @@ Using this, the potential at the poloidal cross section is calculated using the 
 $ Phi(psi, s, zeta_s) = RR[hat(f)(psi, s) exp(i k_zeta zeta_s) + hat(f)^*(psi,s) exp(-i k_zeta zeta_s)] $
 
 
-==== Non-linear simulations
+==== Non-linear simulations <sec:topovis:nonlin>
 Unlike the linear case, in non-linear simulations the potential #sym.Phi is calculated by GKW during runtime and exported as such. // is this done always??
 This is done for each timestep and saved as seperate datasets under `diagnostic/diagnos_fields/`.
 Each dataset is referenced by the key `Poten` followed by an 8 digit long number, e.g. `Poten00000343`. 

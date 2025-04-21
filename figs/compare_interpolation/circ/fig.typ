@@ -11,7 +11,7 @@
         caption: $N_s=128$,
     ), <fig:interp:circ:ns128>,
     caption: [ 
-        Original plots without interpolation.
+        No interpolation.
     ],
     label: <fig:interp:circ>,
 )
