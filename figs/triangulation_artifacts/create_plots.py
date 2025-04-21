@@ -69,16 +69,16 @@ ylim = (-0.02, 0.092)
 
 kwargs = {'vmin': -0.5, 'vmax': 0.5}
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='delaunay', **kwargs)
-fig.savefig(figpath('sparse/delaunay_grid','svg'))
+fig.savefig(figpath('sparse/delaunay/grid','svg'))
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='delaunay', **kwargs)
-fig.savefig(figpath('sparse/delaunay_contour','png'), dpi=300)
+fig.savefig(figpath('sparse/delaunay/contour','png'), dpi=300)
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='regular', **kwargs)
-fig.savefig(figpath('sparse/regular_grid','svg'))
+fig.savefig(figpath('sparse/regular/grid','svg'))
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='regular', **kwargs)
-fig.savefig(figpath('sparse/regular_contour','png'), dpi=300)
+fig.savefig(figpath('sparse/regular/contour','png'), dpi=300)
 
 # sheared
 
@@ -87,13 +87,13 @@ ylim = (0.015, 0.045)
 slc = np.s_[:, 100:130]
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='delaunay')
-fig.savefig(figpath('sheared/delaunay_grid','svg'))
+fig.savefig(figpath('sheared/delaunay/grid','svg'))
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='delaunay')
-fig.savefig(figpath('sheared/delaunay_contour', 'png'), dpi=300)
+fig.savefig(figpath('sheared/delaunay/contour', 'png'), dpi=300)
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='regular')
-fig.savefig(figpath('sheared/regular_grid', 'svg'))
+fig.savefig(figpath('sheared/regular/grid', 'svg'))
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='regular')
-fig.savefig(figpath('sheared/regular_contour', 'png'), dpi=300)
+fig.savefig(figpath('sheared/regular/contour', 'png'), dpi=300)

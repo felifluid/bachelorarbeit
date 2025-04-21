@@ -6,36 +6,85 @@
 #include "../../figs/triangulation_artifacts/sparse/artefacts.typ"
 
 == Dealing with Numerical Artifacts
+=== The Cause of Numerical Artifacts
 
 With the original version of ToPoVis some numerical artifacts could be observed in the contour plots as can be seen in @fig:numerical_artifacts. 
 The artifacts are particularly severe at the edges of plots in CHEASE geometry. 
 This made it harder to study small scale turbulences in these areas.
 Fixing these artifacts is the original motivation underlying this thesis. 
 
-To create the plots in ToPoVis and the plots in this thesis the function `tricontourf` from the package `matplotlib.pyplot` is used @samaniego2024topovis[p.27].
+As mentioned in @sec:topovis:plotting, ToPoVis uses the function `tricontourf` from the package `matplotlib.pyplot` to create the heatmap plots.
 As the name suggests it uses an unstructured triangle mesh to draw contour regions.
 If no triangle grid is supplied, it will generate one implicitly using a delaunay algorithm @matplotlib2025tricontourf. 
-The generation of smooth surfaces using triangulation is commonly used as a linear interpolation of (un-)structured three-dimensional data @lawson1977software[p.1-2]. 
-The triangulation defines sets of 3 grid points, that will be interpolated inbetween. 
+This generation of smooth surfaces using triangulation is commonly used as a linear interpolation of (un-)structured three-dimensional data. 
+The method `tricontourf` uses the triangle mesh to interpolate between the discrete unstructured points.
 As such, the choice of triangulation has a big impact on the resulting interpolation. 
-As discussed in section !!, delaunay triangulation usually yields the best results, however, it faces issues with heavily non-uniform grids.
+As discussed in @sec:triang, delaunay triangulation usually yields the best results, however, it faces issues with heavily non-uniform grids.
+The detrimental effect of this in ToPoVis can be observed, when taking a look at the underlying grid structure and resulting delaunay triangulation in @fig:artifacts:sparse:delaunay.
 
-#include "../../figs/triangulation_artifacts/sparse/fig.typ"
+#include "../../figs/triangulation_artifacts/sparse/delaunay/fig.typ"
 
-@fig:artifacts shows a subsection of simulation data in CHEASE geometry outputted by ToPoVis. 
-The section stands out with a really low density in poloidal direction and a high density in the radial direction and can therefore be classified as a heavily non-uniform grid.
-As explained in the previous section !!,
+@fig:artifacts:sparse:delaunay shows a subsection of simulation data in CHEASE geometry outputted by ToPoVis. 
+The section stands out with a really low density of the $s$-grid and a high density in the radial direction and can therefore be classified as a heavily non-uniform grid.
+As explained in the previous @sec:triang,
 non-uniform distributions can lead to so called "fat" triangles in areas of low density, as well as many strongly acute triangles surrounding them.
-This is excactly what can be observed in @fig:artifacts:delaunay_triangles.
+This is excactly what can be observed in @fig:artifacts:sparse:delaunay:grid.
 Note that the axes aren't scaled equally to help visualize this effect. 
-Furthermore only every fourth point in the #sym.psi - direction is used to make the triangles distinguishable. 
-This has very little influence on the delaunay triangulation in this specific section.
+Furthermore only every fourth point in the  $psi$-direction is used to make the triangles more distinguishable. 
+This has little to no influence on the delaunay triangulation in this specific section.
 
 === An alternative Triangulation
+#include "../../figs/triangulation_artifacts/sparse/regular/fig.typ"
 
-A possible solution to this is presented in the bottom two figures. Instead of relying on delaunay triangulation, a custom regular triangle grid is used. This is achieved by a new method called `make_regular_triangles`. 
+A possible solution to this is presented in @fig:artifacts:sparse:regular up top.
+Instead of relying on delaunay triangulation, a custom _regular_ triangle grid is used.
+To achieve this, triangulation must be done in the equidistant hamada coordinates instead.
+The poloidal coordinates $R(psi,s)$ and $Z(psi,s)$ are exported by GKW as flattened arrays.
+As both coordinates are defined through the discrete hamada grid, they can also written as $R_(i j)$ and $Z_(i j)$, with $i,j$ being the indices of $psi$ and $s$ respectively.
+Therefore, every distinct poloidal point ${R_(i j), Z_(i j)}$ can be represented in the regular hamada coordinates $(psi_i,s_j)$ instead.
 
-The method makes a triangulation in the equirectangular (meaning equally spaced and rectangular) hamada coordinates. Both poloidal coordinates R and Z are exported by GKW as functions of #sym.psi and s, represented as discrete values in a 2d-array. Therefore, each pair of indices in hamada describe a point P. Its possible to map the indices of the arrays to a set of regular triangles. Regular meaning triangles have the form $ #sym.sum _(i=0)^n [(i,i), (i+1, i), (i, i+1)] $ // ??: ask Leo how to correctly write this mathematically
+// TODO: Überleitung?
+
+Consider an equally spaced and rectangular grid of points
+
+$ P_(i j) $
+
+defined by the two indices $i,j$
+
+$ 0<=i<=n -1, #h(1em) 0 <= j <= m -1 $
+
+where both $n>=2$ and $m>=2$.
+
+Then we want to create a triangle grid, in such a way as can be seen in @fig:triangulation:regular_grid below.
+
+#include "../../figs/triangulation/regular_grid/fig.typ"
+
+The list of triangles can be described mathematically as
+
+$ T = sum_(i=0)^(n-2) sum_(j=0)^(m-2) overbracket([(i,j), (i+1, j), (i, j+1)], #sym.triangle.tl) + overbracket([(i+1, j), (i+1, j+1), (i, j+1)], triangle.stroked.br) $ <eq:triangles_tuple>
+
+The choice of the diagonal direction can be chosen arbitrarily, i.e. either _right_ (as in @fig:triangulation:regular_grid) or _left_.
+
+However, plot functions like `tricontourf` do not support tuple representation $(i,j)$ of points as in @eq:triangles_tuple.
+Instead points have to be addressed by a singular index $k$, which represents their position in a _flattened_ array $P_k$, meaning that
+
+$ k_(i j) = i + j dot n $
+
+Therefore, @eq:triangles_tuple can be rewritten to
+
+$ T = sum_(i=0)^(n-2) sum_(j=0)^(m-2) overbracket([k_(i j), k_(i+1, j), k_(i, j+1)], #sym.triangle.tl) + overbracket([k_(i+1, j), k_(i+1, j+1), k_(i, j+1)], triangle.stroked.br) $ <eq:triangles:flattened>
+
+In the context of poloidal periodicity another row of triangles has to be added.
+This is equivalent to adding the following term to the above formula
+
+$ sum_(i=0)^(m-2) overbracket([k_(i, m-1), k_(i+1,m-1), k_(i, 0)],triangle.tl) + overbracket([k_(i+1, m-1), k_(i+1,0), k_(i, 0)], triangle.br) $
+
+again assuming index $j$ describes the poloidal $s$ coordinate.
+Doing so adds triangles between the first $j=0$ and last $j=m-1$ values for all radial indices $i$.
+
+In code this is done by the new method `make_regular_triangles` via list comprehentions.
+
+=== Limits of Triangulation
 
 While the function provides a better triangulation in non-uniform areas, it leads to many acute triangles in other areas. // TODO: specify area?
 The CHEASE geometry is sheared poloidal in #sym.theta along the radial coordinate #sym.psi. However, the shearing is asymmetrical in the poloidal coordinate s. Around $s=0$ the shearing is minimal, so lines with constant s are nearly straight radially. The shearing reaches its maximum at $s=±0.5$. 

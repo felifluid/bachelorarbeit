@@ -87,7 +87,7 @@ This can be seen more clearly in the constant $phi$ case, which is visualized in
 
 #include "../../figs/hamada/phi_const/fig.typ"
 
-@fig:hamada:phi:t shows the poloidal slice in polar coordinates with $s=text("const")$ lines added for reference.
+@fig:hamada:phi:t shows the poloidal slice in polar coordinates with $s=text("const")$ and $psi="const"$ lines added for reference.
 The discontinuity of the $zeta$\-grid at $s=±0.5$ is visible clearly.
 Also note that the s-grid is more dense on the left side (inner radius) than on the right side (outer radius).
 This is caused by a discrepency between the regularly spaced s-grid and the non-uniform geometry of the torus. // passt das??
@@ -205,11 +205,9 @@ The grid is equally spaced, specified by the following equations. The implementa
 
 The radial component $psi_i$ is defined as
 
-$ psi_i = (i+0.5) dot Delta psi #h(2cm) Delta psi = 1/N_psi  $ 
+$ psi_i = psi_l + i dot Delta psi #h(2cm) Delta psi = (psi_h - psi_l)/(N_psi)  $ 
 
-starting at the center $psi_0 = (Delta psi)/2$ extending outwards. Note, that in CHEASE geometry the spacing is defined as
-
-$ Delta psi = (psi_"h" - psi_"l")/N_psi $
+starting at the center $psi_l$ extending outwards to $psi_h$. 
 
 The $zeta_k$-grid is defined as
 
@@ -428,7 +426,7 @@ ToPoVis supplies two different interpolation methods: B-Splines and interpolatio
 Either one can be choosen interactively, when running ToPoVis on non-linear simulation data.
 However, B-Spline interpolation is the preffered option, as it yielded better results in benchmarking @samaniego2024topovis[p.29ff].
 
-=== Plotting and Data Export
+=== Plotting and Data Export <sec:topovis:plotting>
 Finally, after the potential $Phi(psi,s)$ is calculated, a heatmap plot is created using the method `tricontourf`  from `matplotlib.pyplot` @samaniego2024topovis[p.27].
 The poloidal coordinates $R(psi, s)$ and $Z(psi, s)$ (see !!) needed for this are included in the dataset `geom`. // add reference to cylindrical → toroidal coords
 A colorbar and outlines at $psi_"min"$ and $psi_"max"$ are added.
