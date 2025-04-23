@@ -10,8 +10,6 @@
 
 #include "chapters/topovis-refinement.typ"
 
-#include "chapters/code.typ"
-
 #include "chapters/conclusion.typ"
 
 #include "chapters/outlook.typ"

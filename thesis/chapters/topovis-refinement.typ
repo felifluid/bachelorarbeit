@@ -3,7 +3,7 @@
 = Improving the ToPoVis Code
 
 // TODO: passt die position hier?
-#include "../../figs/triangulation_artifacts/sparse/artefacts.typ"
+#include "../../figs/triangulation_artifacts/sparse/artefacts.typ"; <fig:numerical_artifacts>
 
 == Dealing with Numerical Artifacts
 === The Cause of Numerical Artifacts
@@ -24,7 +24,7 @@ The detrimental effect of this in ToPoVis can be observed, when taking a look at
 
 #include "../../figs/triangulation_artifacts/sparse/delaunay/fig.typ"
 
-@fig:artifacts:sparse:delaunay shows a subsection of simulation data in CHEASE geometry outputted by ToPoVis. 
+@fig:artifacts:sparse:delaunay and @fig:artifacts:sparse:regular[] show a subsection of simulation data in CHEASE geometry outputted by ToPoVis. 
 The section stands out with a really low density of the $s$-grid and a high density in the radial direction and can therefore be classified as a heavily non-uniform grid.
 As explained in the previous @sec:triang,
 non-uniform distributions can lead to so called "fat" triangles in areas of low density, as well as many strongly acute triangles surrounding them.
@@ -68,7 +68,7 @@ The choice of the diagonal direction can be chosen arbitrarily, i.e. either _rig
 However, plot functions like `tricontourf` do not support tuple representation $(i,j)$ of points as in @eq:triangles_tuple.
 Instead points have to be addressed by a singular index $k$, which represents their position in a _flattened_ array $P_k$, meaning that
 
-$ k_(i j) = i + j dot n $
+$ k_(i j) = i + j dot n $ <eq:triangle:flattened_index>
 
 Therefore, @eq:triangles_tuple can be rewritten to
 

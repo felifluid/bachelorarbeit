@@ -1,32 +1,20 @@
 #import "@preview/subpar:0.2.1"
+#import "@preview/ouset:0.2.0": ouset
 #import "../functions.typ" : enum_numbering
 
 = Background
 == GKW
-The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of a confined plasma, usually inside of a tokamak @peeters2015[1]. It is written in Fortran 95 and was initially developed at the University of Warwick in 2007 @peeters2015[1]. The code is freely availiable and currently being hosted at https://bitbucket.org/gkw/gkw. It works in both linear and non-linear regimes @peeters2015[1]
+The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of a confined plasma, usually inside of a tokamak. It is written in Fortran 95 and was initially developed at the University of Warwick in 2007. The code is freely availiable and currently being hosted at https://bitbucket.org/gkw/gkw. It works in both linear and non-linear regimes.
+For indepth information about GKW and how it works see #cite(<peeters2015>, form: "prose").
 
-// linear case
-// GKW solves eigenvalues k_zeta (fourier eigenmodes)
-// eigenvalues are symmetrical
-// as "linear" they do not couple and evolve independently
-// usually only one fourier mode is simulated
-// → fourier coefficient is 2D (psi, s) with k_zeta constant
-
-// nonlinear run
-
-// TODO: add section for transformation: cylindrical → toroidal
-
-== Hamada coordinates
+== Hamada Coordinates
 To efficiently solve the gyrokinetic equation, GKW makes use of so called _hamada coordinates_.
 Hamada coordinates are retrieved by transforming the toroidal coordinates in such a way that
-
 
 + field lines become straight and
 + one of the coordinates is aligned with the magnetic field. // TODO: Formatierung
 
-For further reading on how this is achieved in detail, see @peeters2015[20ff] and @peeters2015[Appen. A].
-
-This leads to the following fairly complex generalized equations
+This leads to the following generalized equations
 
 $
   &psi(r) = r/R_"ref" #<eq:psi> \
@@ -34,7 +22,8 @@ $
   &zeta(psi, theta) = q s - phi/(2pi) - g(theta, psi) #<eq:zeta>
 $ <eq:hamada>
 
-Sometimes, $zeta$ is called the "toroidal" coordinate, while s is referred to as the "poloidal" coordinate. 
+For further reading on how this is achieved in detail, see @peeters2015[20ff] and @peeters2015[Appen. A].
+Sometimes, $zeta$ is called the _toroidal_ coordinate, while s is referred to as the _poloidal_ coordinate. 
 However, this can be misleading as varying $zeta$ at constant $psi$ and $s$, will result in a screw like motion along both toroidally along $phi$ and poloidally along $theta$.
 The so called _safety factor_
 
@@ -52,7 +41,11 @@ where $s_B = ±1$ and $s_j = ±1$ represent the sign of the magnetic field and t
 Using above transformation the coordinates are normalized and made unitless. 
 The radial coordinate $psi$ is retrieved by normalizing the minor radius $r$ to the major radius $R_text("ref")$, while the $s$-grid is normalized to the interval $[-0.5, 0.5]$.
 
-// TODO: Überleitung
+Note that the generalized coordinates in Equations @eq:hamada[] just assume a toroidal geometry, while the exact shape of the tokamak geometry is left uncertain.
+A few different geometries are implemented, namely 1) circular, 2) CHEASE as well as 3) the simplified circular s-#sym.alpha geometry.
+The next section takes a look at Hamada Coordinates in _circular_ coordinates.
+
+=== Circular Case
 In circular geometry the coordinate transformation is defined by the following equations (see @peeters2015[A1])
 
 $
@@ -72,7 +65,7 @@ $ zeta_text("max") = abs(q)/2 $
 in the case of $phi=0$. 
 The $zeta$-grid is oftentimes normalized to $[0,1]$, however this mapping is not generally continuous, as will be explained in @sec:background:hamada:periodicity.
 
-For easier understanding of how toroidal and hamadian coordinates are transformed, Figure @fig:hamda:x[] & @fig:hamda:phi[] show side by side comparisons of $psi="const"$ and $phi="const"$ surfaces.
+For easier understanding of how toroidal and hamadian coordinates are transformed, Figure @fig:hamda:x[] & @fig:hamda:phi[] show side by side comparisons of $psi="const"$ and $phi="const"$ surfaces respectively.
 
 #include "../../figs/hamada/psi_const/fig.typ"
 
@@ -96,32 +89,33 @@ In hamada coordinates the poloidal slice is represented as a curved surface in 3
 The surface can be described as a two dimensional function $zeta(psi,s)$, which is referred to as _$zeta$-shift_ on the basis of #cite(<samaniego2024topovis>, form: "prose").
 It spans across nearly the whole domain of the hamada coordinates.
 One can recognise the unique shape of the curve in the $zeta$-$s$-plane from @fig:hamda:x, which flattens out to a straight line when approaching $psi=0$.
-@sec:background:topovis:zeta-shift discusses details on how $zeta$shift is defined and calculated using data from GKW.
+@sec:background:topovis:zeta-shift discusses details on how $zeta$-shift is defined and calculated using data from GKW.
 
 === Periodicity <sec:background:hamada:periodicity>
+===== Toroidal Periodicity
 Trivially the toroidal angle $phi$ is periodic:
 
-$ phi = phi ± 2pi $
+$ phi = phi ± 2pi $ <eq:periodic:phi>
 
-Using a generalized definition of $zeta$ 
+We can generalize @eq:zeta further to get
 
 $ zeta = -phi/(2pi) + G(psi, s) $ <eq:zeta_general>
 
-the periodicity of $phi$ translates to the $zeta$-grid as
+Equations @eq:periodic:phi[] and @eq:zeta_general[] can be combined to get the periodic boundary condition
 
 $ zeta = zeta ± 1 $ <eq:periodic:zeta>
 
-as long as both $psi$ and $s$ are held constant. 
-The toroidal boundary condition can be generalized for any function $f(psi, zeta, s)$
+as both $psi$ and $s$ are no functions of $phi$. 
+This again can be generalized for any function
 
 $ f(psi, zeta, s) = f(psi, zeta ± 1, s) $ <eq:toroidal_periodicity>
 
 The spectral representation stays unaffected by this @peeters2015[p.44].
 
-#v(0.5cm)
+===== Poloidal Periodicity
 For the torus poloidal periodicity is simply expressed as
 
-$ theta = theta ± 2pi $
+$ theta = theta ± 2pi $ <eq:periodic:theta>
 
 If both $psi$ and $zeta$ are held constant, this periodicity translates directly to 
 
@@ -129,8 +123,8 @@ $ s = s±1 $ <eq:periodic:s>
 
 But since in hamada coordinates $s(theta, psi)$ and therefore also $zeta(phi, psi, s(theta, psi))$ are functions of $theta$, in general something called _double periodicity_ or _parallel periodicity_ occurs.
 
-The quantity $G(psi, s)$ in the general definition of $zeta$ in #ref(<eq:zeta_general>) is not periodic in general. 
-However, we can combine this with @eq:zeta to find the definition
+The quantity $G(psi, s)$ in #ref(<eq:zeta_general>) is not periodic in general. 
+However, we can combine this with @eq:zeta to find
 
 $ G(psi, s, theta) = q(psi) s - g(psi, theta) $
 
@@ -147,35 +141,36 @@ $ Delta theta = theta_B - theta_A = 0 $
 and therefore
 
 $ 
-  &g(psi, theta) = g(psi, theta±2pi) \
-  &g(psi,s) = g(psi, s±1)
+  &g(psi, theta) = g(psi, theta±2pi)  #<eq:periodic:g:theta> \
+  &g(psi,s) = g(psi, s±1) #<eq:periodic_g>
 $
 
 Hence, and the quantity $G(psi, theta)$ can be written as
 
-$ G(psi, s) = q s - g(psi, s) $
+$ G(psi, s) = q s - g(psi, s) $ <eq:big_G>
+
+with $g(psi,s)$ being periodic in $s$.
 
 Again, consider following a field line one poloidal turn and evaluate
 
 $
-  G(psi, s±1) &= q (s±1) - g(psi, s±1) \
-              &= q s ± q - g(psi, s) \
-              &= G(psi, s) ± q
-$
+  G(psi, s±1) &ouset(=, #ref(<eq:big_G>,supplement: [])) q (s±1) - g(psi, s±1) \
+              &ouset(=, #ref(<eq:periodic_g>, supplement: [])) q s ± q - g(psi, s) \
+              &ouset(=, #ref(<eq:big_G>,supplement: [])) G(psi, s) ± q
+$ <eq:periodic:G>
 
-by using @eq:zeta.
 With this a function for $zeta$ can be derived like
 
 $ 
-  zeta(psi, s±1) &= -phi/(2pi) + G(psi, s±1) \
-                 &= -phi/(2pi) + G(psi, s) ± q \
-                 &= zeta(psi, s) ± q
+  zeta(psi, s±1) &ouset(=, #ref(<eq:zeta_general>, supplement: [])) -phi/(2pi) + G(psi, s±1) \
+                 &ouset(=, #ref(<eq:periodic:G>, supplement: [])) -phi/(2pi) + G(psi, s) ± q \
+                 &ouset(=, #ref(<eq:zeta_general>, supplement: [])) zeta(psi, s) ± q
 $ <eq:double_periodic_zeta>
 
 Poloidal double periodicity can be generalized for any given function $f(psi, zeta, s)$
 
 // TODO: add box
-$ f(psi, zeta, s) = f(psi, zeta ∓ q, s±1) $
+$ f(psi, zeta, s) = f(psi, zeta ∓ q, s±1) $ <eq:double_periodicity>
 
 In the case of a function $f(psi, s)$ that is not depended on $zeta$, the above equation simplifies to
 
@@ -190,7 +185,7 @@ $ f(psi, zeta, s) = sum_(k_zeta) hat(f)(psi,k_zeta,s) exp(i k_zeta zeta) $
 the poloidal double periodic boundary condition translates to
 
 // TODO: add box
-$ f(psi,k_zeta,s) = hat(f)(psi,k_zeta,s±1) exp(∓i k_zeta q) $
+$ f(psi,k_zeta,s) = hat(f)(psi,k_zeta,s±1) exp(∓i k_zeta q) $ <eq:spectral_double_periodicity>
 
 === Specifications of the discrete grid <sec:discrete_grid>
 As GKW solves the gyrokinetic equation numerically, it does so on a discrete hamada grid
