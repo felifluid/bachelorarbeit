@@ -4,15 +4,19 @@
 
 = Background <chap:background>
 == GKW
-The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of a confined plasma, usually inside of a tokamak. It is written in Fortran 95 and was initially developed at the University of Warwick in 2007. The code is freely availiable and currently being hosted at https://bitbucket.org/gkw/gkw. It works in both linear and non-linear regimes.
+The _Gyrokinetic Workshop_ (GKW) is a code written in Fortran 95 to simulate and study turbolences of a confined plasma, usually inside of a tokamak. 
+This involves solving the five-dimensional gyrokinetic equation, hence the name.
+Due to the computational complexity it uses a highly scalable parallel approach.
+GKW supports both linear and non-linear regimes, for both local and global toroidal simulations, while this thesis will only focus on linear and non-linear global runs for all purposes.
+The code is freely availiable and currently being hosted at https://bitbucket.org/gkw/gkw. 
 For indepth information about GKW and how it works see #cite(<peeters2015>, form: "prose").
 
 == Hamada Coordinates
-To efficiently solve the gyrokinetic equation, GKW makes use of so called _hamada coordinates_.
+To efficiently solve the gyrokinetic equation, GKW makes use of so called _Hamada Coordinates_.
 Hamada coordinates are retrieved by transforming the toroidal coordinates in such a way that
 
 + field lines become straight and
-+ one of the coordinates is aligned with the magnetic field. // TODO: Formatierung
++ one of the coordinates is aligned with the magnetic field.
 
 This leads to the following generalized equations
 
@@ -24,7 +28,7 @@ $ <eq:hamada>
 
 For further reading on how this is achieved in detail, see @peeters2015[20ff] and @peeters2015[Appen. A].
 Sometimes, $zeta$ is called the _toroidal_ coordinate, while s is referred to as the _poloidal_ coordinate. 
-However, this can be misleading as varying $zeta$ at constant $psi$ and $s$, will result in a screw like motion along both toroidally along $phi$ and poloidally along $theta$.
+However, this can be misleading as varying $zeta$ at lconstant $psi$ and $s$, will result in a screw like motion along both toroidally along $phi$ and poloidally along $theta$.
 The so called _safety factor_
 
 $ q(psi) = B^gamma/B^s $
