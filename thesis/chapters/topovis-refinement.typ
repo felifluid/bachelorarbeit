@@ -1,6 +1,6 @@
 #import "@preview/subpar:0.2.1"
 
-= Improving the ToPoVis Code
+= Improving the ToPoVis Code <chap:improvement>
 
 // TODO: passt die position hier?
 #include "../../figs/triangulation_artifacts/sparse/artefacts.typ"; <fig:numerical_artifacts>

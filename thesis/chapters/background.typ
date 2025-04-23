@@ -2,7 +2,7 @@
 #import "@preview/ouset:0.2.0": ouset
 #import "../functions.typ" : enum_numbering
 
-= Background
+= Background <chap:background>
 == GKW
 The _Gyrokinetic Workshop_ (GKW) is a code to simulate and study turbolences of a confined plasma, usually inside of a tokamak. It is written in Fortran 95 and was initially developed at the University of Warwick in 2007. The code is freely availiable and currently being hosted at https://bitbucket.org/gkw/gkw. It works in both linear and non-linear regimes.
 For indepth information about GKW and how it works see #cite(<peeters2015>, form: "prose").
