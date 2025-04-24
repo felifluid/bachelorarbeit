@@ -365,16 +365,45 @@ After evaluating $Phi'$ on the fine $s$-$psi$-$zeta$-grid, the $zeta$-dimension 
 ==== Results
 
 == Miscellaneous
+// ?? do I use past tense here?
+The new ToPoVis code is completely rewritten from scratch, due to the profound changes, that are needed to implement interpolation into the original version of ToPoVis.
+Doing so also allows for varies additional restructuring and optimizing of the code.
+These changes in itself are to small to group into their own sections, so they are listed in this section.
 
-// more efficient as calculations got more vectorized instead of through for loops
+===== Dropped FFT-Interpolation Support
+The option to interpolate the potential using FFT in non-linear cases was not reimplemented in the new version of ToPoVis.
+FFT interpolation yields worse results compared to spline interpolation as benchmarks show @samaniego2024topovis[p.42].
 
-// more arguments to modify plot
+===== Updated gmap
+The definition of `gmap` in GKW has been changed during the creation of this thesis to make the calculation of $zeta$-shift independent of geometry.
+Because of this the method `shift_zeta` is adjusted accordingly.
+Additionally the flag `--legacy-gmap` is added to allow for downward compatibility.
+Setting this restores legacy behavior to calculate $zeta$-shift depending on the geometry as specified in @sec:background:topovis:zeta-shift.
 
-// made importable and callable as a local package
+===== Optimizations
+While the original version, solves several calculations iteratively using `for`-loops, the new code is optimized use vectorization instead.
+One example of this is the interpolation of the potential in the non-linear case, which is now done on a three-dimensional grid using the RGI.
 
-// readability of the code
+Additionally, the two import functions for the real and imaginary fourier coefficients are combined into one to avoid reshaping `parallel.dat` multiple times.
 
-// vectorize / optimize some calculations
-// e.g. interpolation, parallel.dat reshape
+===== Additional Arguments
+The list of arguments to call ToPoVis with, is extended to allow for further customization.
+The new arguments are grouped into two categories: 1) interpolation and 2) plotting.
+The first one include two new required arguments, namely `fx` and `fs`.
+They specify the factor by which the $psi$ and $s$ grid are scaled up respectively.
+Additionally the interpolator and interpolation method can be specified via arguments.
+The plot group adds a variety of arguments to modify the plot, e.g. the image dpi or file extension.
 
-// make topovis callable and importable
+===== Restructuring and Readability
+The main process is restructured to a proper `main(args)` function, which has several advantages.
+It increases readability and helps differentiate variables and their visibility.
+Furthermore, it allows ToPoVis to be imported as a local python package and called from within other scripts. 
+The input parameters can then be supplied using the `args` parameter instead of the command line. 
+The final data is returned by the function for further processing.
+
+In an attempt to standardize the importing of data sets from the `gkwdata.h5` files, a new class `GKWData(path, poten_timestep)` is added.
+Upon initialization, all neccessary data sets are read from file, reformatted for easier access and saved as class variables.
+This avoids the use of pseudo constants.
+
+On the same note the class `ToPoVisData` is added as singular variable that is being returned, when called from within another script.
+It stores all arguments and results of the code as class variables and includes a comprehensive plotting function.
