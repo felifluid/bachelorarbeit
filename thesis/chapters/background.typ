@@ -3,6 +3,16 @@
 #import "../functions.typ" : enum_numbering
 
 = Background <chap:background>
+#include "../../figs/tokamak/fig.typ"
+== A Word to Nuclear Fusion
+In short, nuclear fusion is the process of two nuclei fusing together to form a heavier nucleus, which results in a convertion of mass to energy given by Einstein's mass-energy formula.
+This usually involves increasing the temperature of an ionized gas called plasma to around 100 million degrees.
+The challenge is then to confine this high temperature plasma, which is commonly done by strong magnetic fields with a device called _tokamak_ (see @fig:tokamak) @li2014tokamak[p.1].
+
+The current of the moving plasma itself creates a poloidal magnetic field.
+Additionally, both poloidal and toroidal external magnetic field are applied simultaniously to confine and shape the plasma.
+Altogether this results in a magnetic field that twists helically around the torus @samaniego2024topovis[p.11].
+
 == GKW
 The _Gyrokinetic Workshop_ (GKW) is a code written in Fortran 95 to simulate and study turbolences of a confined plasma, usually inside of a tokamak. 
 This involves solving the five-dimensional gyrokinetic equation, hence the name.
@@ -13,7 +23,21 @@ For indepth information about GKW and how it works see #cite(<peeters2015>, form
 
 == Hamada Coordinates
 To efficiently solve the gyrokinetic equation, GKW makes use of so called _Hamada Coordinates_.
-Hamada coordinates are retrieved by transforming the toroidal coordinates in such a way that
+Before that, a quick view into toroidal coordinates is needed.
+@fig:cylindrical-toroidal shows the relation between cylindrical $(R,Z,phi)$ and toroidal $(psi, theta, phi)$ coordinates. 
+In it, the helical magnetic field lines for $psi="const"$ are also shown.
+
+#include "../../figs/cylindrical_coords/fig.typ"
+
+The relation can be expressed via the following equations @samaniego2024topovis[p.11]:
+
+$
+  &R = R_0 + psi cos theta \
+  &Z = psi sin theta \
+  &phi = phi
+$ <eq:cylindrical_toroidal>
+
+Hamada coordinates are retrieved by transforming the toroidal $(psi,theta,phi)$ coordinates in such a way that
 
 + field lines become straight and
 + one of the coordinates is aligned with the magnetic field.
