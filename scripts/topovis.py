@@ -605,7 +605,7 @@ def parse_args(args):
                         dest='legacy_gmap',
                         help="Calculates the G-factor numerically, instead of just importing from GKW." #TODO: Better description
                         )
-    plot_group = parser.add_argument_group('plot', description='Parameters for the plot')
+    plot_group = parser.add_argument_group('plot', description='Plotting parameters.')
     plot_group.add_argument('--triang-method', 
                             type=str,
                             choices=('regular', 'delaunay'),
@@ -619,12 +619,12 @@ def parse_args(args):
     plot_group.add_argument('--plot-out',
                             dest='plot_out',
                             type=str,
-                            help="(optional) Specify a file to write the plot into WITH extension. Can either be a full path, or a filename. If it's a filename, it will save to the current directory. Default is 'plot.pdf'."
+                            help="(optional) Specify a file to write the plot into WITH extension. Can either be a full path, or a filename. If it's a filename, it will save to the current directory. Default is 'plot.png'."
                             )
     plot_group.add_argument('--plot-grid',
                             dest='plot_grid',
                             action='store_true',
-                            help='(optional) plots scatter plot with triangulation instead of a contour plot. Good for debugging and spotting triangulation artifacts.'
+                            help='(optional) plots scatter plot with triangulation instead of a contour plot. Good for debugging, spotting triangulation artifacts and getting a feel for grid density.'
                             )
     plot_group.add_argument('--levels',
                             dest='levels',
@@ -644,7 +644,7 @@ def parse_args(args):
                             action='store_true',
                             help="(optional) Hide axes in plot."
                             )
-    interpolation_group = parser.add_argument_group('interpolation', description='Set interpolation parameters.')
+    interpolation_group = parser.add_argument_group('interpolation', description='Iterpolation parameters.')
     interpolation_group.add_argument('fx', 
                                      type=int, 
                                      help='Factor by which to refine the psi-grid through interpolation.')
@@ -1181,10 +1181,12 @@ def main(args = None):
                 out.save_results(x_fine, s_fine, r_n_fine_flat, z_fine_flat, pot_fine_flat, zeta_s_fine_flat)
             else:
                 pass
+                # FIXME: add no interpolation option
 
 
     # -------------------------------------- SAVING RESULTS TO FILE -----------------------------------------
 
+    # FIXME: move this to ToPoVisData
     if DATA_OUT:
         logging.info(f'Saving data to file: {DATA_OUT}')
         with h5py.File(DATA_OUT, 'w') as f:
