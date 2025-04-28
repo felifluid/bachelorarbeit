@@ -523,7 +523,7 @@ def _plot_grid(ax, triangulation, z, **kwargs):
                vmax=kwargs.pop('vmax')
             )
 
-def plot(r, z, pot, fig=None, ax=None, triang_method='regular', omit_axes=False, omit_cbar=False, **kwargs):
+def plot(r, z, pot, fig=None, ax=None, triang_method='regular', omit_axes=False, omit_cbar=False, plot_grid=False, **kwargs):
     if fig is None:
         fig = plt.gcf()
     if ax is None:
@@ -569,7 +569,10 @@ def plot(r, z, pot, fig=None, ax=None, triang_method='regular', omit_axes=False,
     # fill inner empty circle with white area, this is only neccessary in case of delaunay triangulation
     ax.fill(r[0, :], z[0, :], color='white', zorder=10)
     
-    _plot_contourf(ax, triangulation, pot, show_grid=False, **kwargs)
+    if plot_grid:
+        _plot_grid(ax, triangulation, pot, **kwargs)
+    else:
+        _plot_contourf(ax, triangulation, pot, show_grid=False, **kwargs)
 
     if not omit_cbar:
         cmap = plt.get_cmap(kwargs['cmap'])
@@ -656,10 +659,6 @@ def parse_args(args):
                                      choices=('rgi', 'rbfi'),
                                      default='rgi',
                                      help="(optional) Which interpolator to use to interpolate the potential. 'rgi' uses the RegularGridInterpolator, which interpolates on hamada coordinates, 'rbfi' uses the RBFInterpolator, which interpolates in poloidal coordinates. Default is 'rgi'.")
-    interpolation_group.add_argument('--periodic',
-                                     action='store_true',
-                                     help='If supplied, applies period boundary condition to grid to interpolate between s=-0.5 and s=0.5. Has no effect when fs=1.'
-                                    )
     interpolation_group.add_argument('--method',
                                      metavar='method',
                                      choices=('nearest', 'linear', 'cubic', 'quintic'),
@@ -843,11 +842,12 @@ class ToPoVisData:
         self.fs = fs
         self.interpolator = interpolator
 
-    def set_plot_args(self, triang_method, levels, omit_axes, dpi):
+    def set_plot_args(self, triang_method, levels, omit_axes, dpi, plot_grid=False):
         self.triang_method = triang_method
         self.levels = levels
         self.omit_axes = omit_axes
         self.dpi = dpi
+        self.plot_grid = plot_grid
     
     def save_results(self, x, s, r, z, pot, zeta_s, fcoeffs = None):
         self.nx = len(x)
@@ -863,7 +863,7 @@ class ToPoVisData:
         self.fcoeffs = fcoeffs
 
     def plot(self, fig=None, ax=None, **kwargs):
-        return plot(self.r, self.z, self.pot, fig, ax, self.triang_method, self.omit_axes, **kwargs)
+        return plot(self.r, self.z, self.pot, fig, ax, self.triang_method, self.omit_axes, False, self.plot_grid, **kwargs)
 
 ################################################## MAIN ##################################################
 
@@ -899,10 +899,8 @@ def main(args = None):
     FX = int(args.fx)
     FS = int(args.fs)
 
-    INTERPOLATE : bool = FX > 1 or FS > 1 or True # !!
-    INTERPOLATOR = args.interpolator
-    PERIODIC : bool = (args.periodic or INTERPOLATOR == 'rbfi') # and FS > 1 !!
-    
+    INTERPOLATE : bool = FX > 1 or FS > 1
+    INTERPOLATOR = args.interpolator    
 
     VALID_METHODS = ['nearest', 'linear', 'cubic', 'quintic']
     if args.method in VALID_METHODS:
@@ -935,7 +933,7 @@ def main(args = None):
     PLOT_GRID = bool(args.plot_grid)
 
     out = ToPoVisData(PHI, POTEN_TIMESTEP, METHOD, FX, FS, INTERPOLATOR)
-    out.set_plot_args(TRIANG_METHOD, LEVELS, OMIT_AXES, DPI)
+    out.set_plot_args(TRIANG_METHOD, LEVELS, OMIT_AXES, DPI, PLOT_GRID)
 
     # ----------------------------------------- GKWDATA ----------------------------------------------
 
@@ -970,7 +968,7 @@ def main(args = None):
 
     if INTERPOLATE:
         # CREATE FINE HAMADA GRID
-        x_fine, s_fine = interpolate_hamada_grid(dat.x, dat.s, FX, FS, extrapolate_s=PERIODIC)
+        x_fine, s_fine = interpolate_hamada_grid(dat.x, dat.s, FX, FS, extrapolate_s=True)
         
         nx_fine = len(x_fine)
         ns_fine = len(s_fine)
@@ -978,17 +976,11 @@ def main(args = None):
         xs_fine = xx_fine, ss_fine = np.meshgrid(x_fine, s_fine, indexing='ij')   # ! has to use indexing='ij'
         xs_points_fine = grid_to_points(xs_fine)
 
-        if PERIODIC:
-            # extend s-grid (not wrap!)
-            s = extend_regular_array(dat.s, OVERLAP)     # shape (ns+2n)
-            x = dat.x                                    # shape (nx)
-            r_n = extend_periodically(dat.r_n, OVERLAP, axis=1)
-            z = extend_periodically(dat.z, OVERLAP, axis=1)
-        else:
-            s = dat.s
-            x = dat.x
-            r_n = dat.r_n
-            z = dat.z
+        # extend s-grid (not wrap!)
+        s = extend_regular_array(dat.s, OVERLAP)     # shape (ns+2n)
+        x = dat.x                                    # shape (nx)
+        r_n = extend_periodically(dat.r_n, OVERLAP, axis=1)
+        z = extend_periodically(dat.z, OVERLAP, axis=1)
 
         # NOTE: The poloidal coordinates ALWAYS get interpolated using RGI
 
@@ -1026,27 +1018,22 @@ def main(args = None):
             # INTERPOLATE DATA
 
             if INTERPOLATOR == 'rgi':
-                if PERIODIC:
-                    # APPLY PERIODIC BOUNDARY CONDITIONS
+                # APPLY PERIODIC BOUNDARY CONDITIONS
 
-                    # extend s-grid (not wrap!)
-                    s = extend_regular_array(dat.s, OVERLAP)     # shape (ns+2n)
-                    x = dat.x                                    # shape (nx)
+                # extend s-grid (not wrap!)
+                s = extend_regular_array(dat.s, OVERLAP)     # shape (ns+2n)
+                x = dat.x    # shape (nx)
 
-                    # ζ(s) = ζ(s±1) ∓ q
-                    zeta_s = extend_periodically(zeta_s, OVERLAP, 1)    # extend grid periodically in s
-                    zeta_s[:, :OVERLAP] -= dat.q[:, None]               # apply boundary condition for zeta[s < -0.5]
-                    zeta_s[:, -OVERLAP:None] += dat.q[:, None]          # apply boundary condition for zeta[s > 0.5]
-                    # zeta_s = zeta_s % 1                               # map zeta back to [0,1]
+                # ζ(s) = ζ(s±1) ∓ q
+                zeta_s = extend_periodically(zeta_s, OVERLAP, 1)    # extend grid periodically in s
+                zeta_s[:, :OVERLAP] -= dat.q[:, None]               # apply boundary condition for zeta[s < -0.5]
+                zeta_s[:, -OVERLAP:None] += dat.q[:, None]          # apply boundary condition for zeta[s > 0.5]
+                # zeta_s = zeta_s % 1                               # map zeta back to [0,1]
 
-                    # f(s) = f(s±1) * exp(±ikq)
-                    fcoeffs = extend_periodically(fcoeffs, OVERLAP, 1)              # extend grid periodically in s
-                    fcoeffs[:, :OVERLAP] *= np.exp(1j * k * dat.q[:, None])
-                    fcoeffs[:, -OVERLAP:None] *= np.exp(-1j * k * dat.q[:, None])
-                else:
-                    x = dat.x
-                    s = dat.s
-                    fcoeffs = dat.fcoeffs
+                # f(s) = f(s±1) * exp(±ikq)
+                fcoeffs = extend_periodically(fcoeffs, OVERLAP, 1)              # extend grid periodically in s
+                fcoeffs[:, :OVERLAP] *= np.exp(1j * k * dat.q[:, None])
+                fcoeffs[:, -OVERLAP:None] *= np.exp(-1j * k * dat.q[:, None])
 
                 # interpolate zeta-shift
                 logging.info(f'Interpolating zeta-shift')
@@ -1108,7 +1095,7 @@ def main(args = None):
             pot_mean = np.mean(pot3d, axis=(0,2))    # shape (nx,)
             pot3d = pot3d - pot_mean[None, :, None]
 
-        whole_pot = repeat_pot(pot3d, dat.n_spacing)        # shape (ns, nx, mphi*n_spacing)
+        pot = repeat_pot(pot3d, dat.n_spacing)        # shape (ns, nx, mphi*n_spacing)
 
         s = dat.s
         x = dat.x
@@ -1136,14 +1123,14 @@ def main(args = None):
 
             # interpolate pot
             logging.info('Constructing splines, this might take a while...')
-            pot3d_rgi = scipy.interpolate.RegularGridInterpolator((s, x, z), whole_pot, method=METHOD)
+            pot3d_rgi = scipy.interpolate.RegularGridInterpolator((s, x, z), pot, method=METHOD)
 
             pot3d_p = np.zeros((len(s_e), len(x_e), len(z_e)))
 
             # TODO: maybe this can be done in one step?
             
             # copy original pot
-            pot3d_p[OVERLAP:-OVERLAP, :, :] = whole_pot
+            pot3d_p[OVERLAP:-OVERLAP, :, :] = pot
 
             slc = np.s_[-OVERLAP:None, :, :]
             points = grid_to_points((sss_p[slc], xxx_p[slc], zzz_p[slc]))
@@ -1187,32 +1174,42 @@ def main(args = None):
             out.save_results(x_fine, s_fine, r_n_fine_flat, z_fine_flat, pot_fine_flat, zeta_s_fine_flat)
         else:
             # FIXME: there's still some bug in here :(
-            logging.info("Constructing splines. This might take a while...")
-            # initialize RGI on sparse grid
-            pot_rgi = scipy.interpolate.RegularGridInterpolator((s, x, z), whole_pot, method=METHOD)
+            # logging.info("Constructing splines. This might take a while...")
+            # # initialize RGI on sparse grid
+            # pot_rgi = scipy.interpolate.RegularGridInterpolator((s, x, z), whole_pot, method=METHOD)
 
-            # GRID PREPERATION
-            ss, xx = np.meshgrid(s, x, indexing='ij')
+            # # GRID PREPERATION
+            # ss, xx = np.meshgrid(s, x, indexing='ij')
 
-            # map zeta_s to [0, max(z)]
-            zz = zeta_s % np.max(z) # FIXME: this is inaccurate
+            # # map zeta_s to [0, max(z)]
+            # zz = zeta_s % np.max(z) # FIXME: this is inaccurate
 
-            # construct 3d meshgrid
-            sss = np.expand_dims(ss, -1)
-            xxx = np.expand_dims(xx, -1)
-            zzzeta_s = np.expand_dims(zz, -1)
-            sxz = sss, xxx, zzzeta_s
-            sxz_points = grid_to_points(sxz)
+            # # construct 3d meshgrid
+            # sss = np.expand_dims(ss, -1)
+            # xxx = np.expand_dims(xx, -1)
+            # zzzeta_s = np.expand_dims(zz, -1)
+            # sxz = sss, xxx, zzzeta_s
+            # sxz_points = grid_to_points(sxz)
+ 
+            # logging.info("Evaluating potential on zeta-shift.")
+            # # evaluate potential on zeta_s
+            # pot3d_flat = pot_rgi(sxz_points)
 
-            logging.info("Evaluating potential on zeta-shift.")
-            # evaluate potential on zeta_s
-            pot3d_flat = pot_rgi(sxz_points)
-
-            # omit zeta dimension
-            pot3d = np.reshape(pot3d_flat, np.shape(sss))
-            pot = pot3d[:,:,0]
-            pot_flat = np.ravel(pot, 'C')   # NOTE: this also transposes from (s,x) to (x,s)
+            # # omit zeta dimension
+            # pot3d = np.reshape(pot3d_flat, np.shape(sss))
+            # pot = pot3d[:,:,0]
+            # pot_flat = np.ravel(pot, 'C')   # NOTE: this also transposes from (s,x) to (x,s)
+            # 
+            # out.save_results(x, s, dat.r_n_flat, dat.z_flat, pot_flat, zeta_s)
+            logging.info("Interpolating potential on zeta-shift.")
+            pot_ev = np.zeros(shape=(dat.nx, dat.ns))
+            for i in range(dat.nx):
+                for j in range(dat.ns):
+                    spl = scipy.interpolate.splrep(z, pot[j,i,:], k=3)
+                    pot_ev[i,j] = scipy.interpolate.splev(zeta_s[i,j] % np.max(z), spl)
             
+            pot_flat = np.ravel(pot_ev, order='C')
+
             out.save_results(x, s, dat.r_n_flat, dat.z_flat, pot_flat, zeta_s)
 
 
