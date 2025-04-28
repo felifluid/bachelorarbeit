@@ -573,7 +573,7 @@ def plot(r, z, pot, fig=None, ax=None, triang_method='regular', omit_axes=False,
 
     if not omit_cbar:
         cmap = plt.get_cmap(kwargs['cmap'])
-        norm = matplotlib.colors.Normalize(vmin=kwargs['vmin'], vmax=kwargs['vmax'])
+        norm = matplotlib.colors.TwoSlopeNorm(0, vmin=z.min(), vmax=z.max())
         fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, label=r'$\Phi$')
 
     return fig, ax
@@ -599,7 +599,7 @@ def parse_args(args):
     parser.add_argument('-z', '--zonal',
                         action='store_true',
                         dest='zonal',
-                        help="(optional) If set plots zonal potential. This is only being used in nonlinear simulations.")
+                        help="(optional) If set plots zonal potential. This is only being used in non-linear simulations.")
     parser.add_argument('--legacy-gmap',
                         action='store_true',
                         dest='legacy_gmap',
@@ -644,7 +644,7 @@ def parse_args(args):
                             action='store_true',
                             help="(optional) Hide axes in plot."
                             )
-    interpolation_group = parser.add_argument_group('interpolation', description='Iterpolation parameters.')
+    interpolation_group = parser.add_argument_group('interpolation', description='Interpolation parameters.')
     interpolation_group.add_argument('fx', 
                                      type=int, 
                                      help='Factor by which to refine the psi-grid through interpolation.')
@@ -663,8 +663,8 @@ def parse_args(args):
     interpolation_group.add_argument('--method',
                                      metavar='method',
                                      choices=('nearest', 'linear', 'cubic', 'quintic'),
-                                     default='quintic',
-                                     help="(optional) Method of interpolation. Valid options are: 'nearest', 'linear', 'cubic', 'quintic'. Default is 'quintic'. When faced with memory or processing constraints this should be changed.")
+                                     default='cubic',
+                                     help="(optional) Method of interpolation. Valid options are: 'nearest', 'linear', 'cubic', 'quintic'. Default is 'cubic'. When faced with memory or processing constraints this should be changed to 'linear'.")
     interpolation_group.add_argument('--data-out',
                                      dest='data_out',
                                      type=str, 
@@ -849,7 +849,7 @@ class ToPoVisData:
         self.omit_axes = omit_axes
         self.dpi = dpi
     
-    def save_results(self, x, s, r, z, pot, zeta_s, fcoeffs):
+    def save_results(self, x, s, r, z, pot, zeta_s, fcoeffs = None):
         self.nx = len(x)
         self.ns = len(s)
         self.x = x
@@ -892,10 +892,14 @@ def main(args = None):
 
     LEGACY_GMAP = args.legacy_gmap
 
+    if int(args.fx) < 1 or int(args.fs) < 1:
+        logging.fatal('Interpolating factors FX and FS must be positive integers, exiting.')
+        sys.exit(1)
+
     FX = int(args.fx)
     FS = int(args.fs)
 
-    INTERPOLATE : bool = FX > 1 or FS > 1
+    INTERPOLATE : bool = FX > 1 or FS > 1 or True # !!
     INTERPOLATOR = args.interpolator
     PERIODIC : bool = (args.periodic or INTERPOLATOR == 'rbfi') # and FS > 1 !!
     
@@ -940,6 +944,8 @@ def main(args = None):
 
     # --------------------------------------- PREPERATION --------------------------------------------
 
+    logging.info(f'{dat.dataset_name}')
+
     IS_LIN = dat.is_lin
 
     if LEGACY_GMAP:
@@ -969,7 +975,7 @@ def main(args = None):
         nx_fine = len(x_fine)
         ns_fine = len(s_fine)
         # precalculate different coordinate representations for reuse
-        xs_fine = xx_fine, ss_fine = np.meshgrid(x_fine, s_fine, indexing='ij')   # ! has to be in this order, or use indexing='ij'
+        xs_fine = xx_fine, ss_fine = np.meshgrid(x_fine, s_fine, indexing='ij')   # ! has to use indexing='ij'
         xs_points_fine = grid_to_points(xs_fine)
 
         if PERIODIC:
@@ -1109,79 +1115,105 @@ def main(args = None):
         z = whole_zeta
 
         if INTERPOLATE:
-            if PERIODIC:
-                # extend grid
-                s_e = extend_regular_array(s, OVERLAP)
-                x_e = x
-                z_e = z
+            # extend grid
+            s_e = extend_regular_array(s, OVERLAP)
+            x_e = x
+            z_e = z
 
-                #
-                s_p = extend_periodically(s, OVERLAP, 0)
-                x_p = x
-                z_p = z
+            # extend grid periodically
+            s_p = extend_periodically(s, OVERLAP, 0)
+            x_p = x
+            z_p = z
 
-                sss_p, xxx_p, zzz_p = np.meshgrid(s_p, x_p, z_p, indexing='ij')
+            sss_p, xxx_p, zzz_p = np.meshgrid(s_p, x_p, z_p, indexing='ij')
 
-                # ζ(s) = ζ(s±1) ∓ q
-                zzz_p[-OVERLAP:None, :, :] -= dat.q[None, :, None] 
-                zzz_p[:OVERLAP, :, :] += dat.q[None, :, None] 
-                zzz_p = zzz_p % np.max(z) # FIXME: this is inaccurate. max(zeta) is smaller 1
+            # ζ(s) = ζ(s±1) ∓ q
+            zzz_p[-OVERLAP:None, :, :] -= dat.q[None, :, None] 
+            zzz_p[:OVERLAP, :, :] += dat.q[None, :, None] 
+            zzz_p = zzz_p % np.max(z) # FIXME: this is inaccurate. max(zeta) is smaller 1
 
-                # sxz_p = sss_p, xxx_p, zzz_p
+            # sxz_p = sss_p, xxx_p, zzz_p
 
-                # interpolate pot
-                logging.info('Constructing splines, this might take a while...')
-                pot3d_rgi = scipy.interpolate.RegularGridInterpolator((s, x, z), whole_pot, method=METHOD)
+            # interpolate pot
+            logging.info('Constructing splines, this might take a while...')
+            pot3d_rgi = scipy.interpolate.RegularGridInterpolator((s, x, z), whole_pot, method=METHOD)
 
-                pot3d_p = np.zeros((len(s_e), len(x_e), len(z_e)))
+            pot3d_p = np.zeros((len(s_e), len(x_e), len(z_e)))
 
-                # TODO: maybe this can be done in one step?
+            # TODO: maybe this can be done in one step?
+            
+            # copy original pot
+            pot3d_p[OVERLAP:-OVERLAP, :, :] = whole_pot
 
-                # copy original pot
-                pot3d_p[OVERLAP:-OVERLAP, :, :] = whole_pot
+            slc = np.s_[-OVERLAP:None, :, :]
+            points = grid_to_points((sss_p[slc], xxx_p[slc], zzz_p[slc]))
+            p = pot3d_rgi(points)
+            pot3d_p[slc] = np.reshape(p, shape=(np.shape(pot3d_p[slc])))
 
-                slc = np.s_[-OVERLAP:None, :, :]
-                points = grid_to_points((sss_p[slc], xxx_p[slc], zzz_p[slc]))
-                p = pot3d_rgi(points)
-                pot3d_p[slc] = np.reshape(p, shape=(np.shape(pot3d_p[slc])))
+            slc = np.s_[:OVERLAP, :, :]
+            points = grid_to_points((sss_p[slc], xxx_p[slc], zzz_p[slc]))
+            p = pot3d_rgi(points)
+            pot3d_p[slc] = np.reshape(p, shape=(np.shape(pot3d_p[slc])))
 
-                slc = np.s_[:OVERLAP, :, :]
-                points = grid_to_points((sss_p[slc], xxx_p[slc], zzz_p[slc]))
-                p = pot3d_rgi(points)
-                pot3d_p[slc] = np.reshape(p, shape=(np.shape(pot3d_p[slc])))
+            # apply parallel boundary condition to zeta shift
 
-                # apply parallel boundary condition to zeta shift
-
-                # ζ(s) = ζ(s±1) ∓ q
-                zeta_s_p = extend_periodically(zeta_s, OVERLAP, 1)    # extend grid periodically in s
-                zeta_s_p[:, :OVERLAP] -= dat.q[:, None]               # apply boundary condition for zeta[s < -0.5]
-                zeta_s_p[:, -OVERLAP:None] += dat.q[:, None]          # apply boundary condition for zeta[s > 0.5]
+            # ζ(s) = ζ(s±1) ∓ q
+            zeta_s_p = extend_periodically(zeta_s, OVERLAP, 1)    # extend grid periodically in s
+            zeta_s_p[:, :OVERLAP] -= dat.q[:, None]               # apply boundary condition for zeta[s < -0.5]
+            zeta_s_p[:, -OVERLAP:None] += dat.q[:, None]          # apply boundary condition for zeta[s > 0.5]
                 
-                # interpolate zeta-shift
-                logging.info(f'Interpolating zeta-shift')
-                zeta_s_rgi = scipy.interpolate.RegularGridInterpolator((x_e, s_e), zeta_s_p, method=METHOD)
-                zeta_s_fine_flat = zeta_s_rgi(xs_points_fine) 
-                zeta_s_fine_flat = zeta_s_fine_flat % np.max(z_e)     # FIXME: this is inaccurate!
-                zeta_s_fine = np.reshape(zeta_s_fine_flat, (nx_fine, ns_fine))
+            # interpolate zeta-shift
+            logging.info(f'Interpolating zeta-shift')
+            zeta_s_rgi = scipy.interpolate.RegularGridInterpolator((x_e, s_e), zeta_s_p, method=METHOD)
+            zeta_s_fine_flat = zeta_s_rgi(xs_points_fine) 
+            zeta_s_fine_flat = zeta_s_fine_flat % np.max(z_e)     # FIXME: this is inaccurate!
+            zeta_s_fine = np.reshape(zeta_s_fine_flat, (nx_fine, ns_fine))
 
-                sss_fine = np.expand_dims(ss_fine, -1)
-                xxx_fine = np.expand_dims(xx_fine, -1)
-                zzzeta_s_fine = np.expand_dims(zeta_s_fine, -1)
+            sss_fine = np.expand_dims(ss_fine, -1)
+            xxx_fine = np.expand_dims(xx_fine, -1)
+            zzzeta_s_fine = np.expand_dims(zeta_s_fine, -1)
 
-                sxz_fine = sss_fine, xxx_fine, zzzeta_s_fine
-                sxz_fine_points = grid_to_points(sxz_fine)
+            sxz_fine = sss_fine, xxx_fine, zzzeta_s_fine
+            sxz_fine_points = grid_to_points(sxz_fine)
 
-                pot3d_p_rgi = scipy.interpolate.RegularGridInterpolator((s_e, x_e, z_e), pot3d_p, method=METHOD)
+            logging.info(f"Interpolating 3d potential. This might take a while...")
+            pot3d_p_rgi = scipy.interpolate.RegularGridInterpolator((s_e, x_e, z_e), pot3d_p, method=METHOD)
+            pot3d_fine_flat = pot3d_p_rgi(sxz_fine_points)
+            pot3d_fine = np.reshape(pot3d_fine_flat, np.shape(sss_fine))
+            pot_fine = pot3d_fine[:,:,0]
+            
+            pot_fine_flat = np.ravel(pot_fine, 'C') # NOTE: this is set to 'C' to transpose the potential from (s,x) to (x,s)
 
-                pot3d_fine_flat = pot3d_p_rgi(sxz_fine_points)
-                pot3d_fine = np.reshape(pot3d_fine_flat, np.shape(sss_fine))
-                pot_fine = pot3d_fine[:,:,0]
-                pot_fine_flat = np.ravel(pot_fine)
+            out.save_results(x_fine, s_fine, r_n_fine_flat, z_fine_flat, pot_fine_flat, zeta_s_fine_flat)
+        else:
+            # FIXME: there's still some bug in here :(
+            logging.info("Constructing splines. This might take a while...")
+            # initialize RGI on sparse grid
+            pot_rgi = scipy.interpolate.RegularGridInterpolator((s, x, z), whole_pot, method=METHOD)
 
-                out.save_results(x_fine, s_fine, r_n_fine_flat, z_fine_flat, pot_fine_flat, zeta_s_fine_flat)
-            else:
-                pass
-                # FIXME: add no interpolation option
+            # GRID PREPERATION
+            ss, xx = np.meshgrid(s, x, indexing='ij')
+
+            # map zeta_s to [0, max(z)]
+            zz = zeta_s % np.max(z) # FIXME: this is inaccurate
+
+            # construct 3d meshgrid
+            sss = np.expand_dims(ss, -1)
+            xxx = np.expand_dims(xx, -1)
+            zzzeta_s = np.expand_dims(zz, -1)
+            sxz = sss, xxx, zzzeta_s
+            sxz_points = grid_to_points(sxz)
+
+            logging.info("Evaluating potential on zeta-shift.")
+            # evaluate potential on zeta_s
+            pot3d_flat = pot_rgi(sxz_points)
+
+            # omit zeta dimension
+            pot3d = np.reshape(pot3d_flat, np.shape(sss))
+            pot = pot3d[:,:,0]
+            pot_flat = np.ravel(pot, 'C')   # NOTE: this also transposes from (s,x) to (x,s)
+            
+            out.save_results(x, s, dat.r_n_flat, dat.z_flat, pot_flat, zeta_s)
 
 
     # -------------------------------------- SAVING RESULTS TO FILE -----------------------------------------
