@@ -41,7 +41,7 @@ def plot_subsection(r, z, pot, xlim, ylim, grid: bool, method, **kwargs):
     return fig, ax
 
 figs_dir = './figs/triangulation_artifacts/'
-data_dir = './data/chease/ns128/'
+data_dir = './data/lin/chease/ns128/'
 
 def figpath(filename, ext):
     return figs_dir+filename+'.'+ext
