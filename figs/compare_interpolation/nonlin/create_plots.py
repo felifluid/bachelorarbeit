@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 figs_dir = './figs/compare_interpolation/nonlin/'
+data_dir = './data/nonlin/circ/sophia/'
 ext = '.png'
 DPI = 400
 
@@ -12,10 +13,19 @@ def figpath(filename):
     return figs_dir+filename+ext
 
 args_list = [
-    {'ns': '64', 'fs': '1', 'fx': '1', 'method': 'linear'},
-    {'ns': '16', 'fs': '1', 'fx': '1', 'method': 'linear'},
-    {'ns': '16', 'fs': '4', 'fx': '1', 'method': 'linear'},
+    {'dsf': '0', 'fs': '1'},
+    {'dsf': '2', 'fs': '1'},
+    {'dsf': '4', 'fs': '1'},
+    {'dsf': '8', 'fs': '1'},
+    {'dsf': '2', 'fs': '2'},
+    {'dsf': '4', 'fs': '4'},
+    {'dsf': '8', 'fs': '8'},
 ]
+
+intrp_idx = 4
+
+def args_to_name(args: dict[str, str]):
+    return 'dsf' + args['dsf'] + '-fs' + args['fs']
 
 results : list[topovis.ToPoVisData] = []
 names = []
@@ -23,11 +33,13 @@ names = []
 vmin = np.inf
 vmax = -np.inf
 
-for args in args_list:
-    data_dir = './data/nonlin/circ/'+'ns'+args['ns']+'/'
+print("Evaluating poloidal cross-sections")
+
+for idx, args in enumerate(args_list):
     in_path = data_dir+'gkwdata.h5'
 
-    res = topovis.main(['-vv', '--omit-axes', '--period', '--method', args['method'], '--triang-method', 'regular', '--legacy-gmap', in_path, args['fx'], args['fs']])
+    print(f'Evaluating dataset {idx}')
+    res = topovis.main(['--omit-axes', '--method', 'cubic', '--triang-method', 'regular', '--dsf', args['dsf'],  '--legacy-gmap', in_path, '1', args['fs']])
 
     results.append(res)
 
@@ -36,23 +48,24 @@ for args in args_list:
     if min < vmin: vmin = min
     if max > vmax: vmax = max
 
-
-
 def plot(res):
-    # kwargs = {'vmin': vmin, 'vmax': vmax}
+    kwargs = {'vmin': vmin, 'vmax': vmax, 'vcenter': 0}
 
     fig, ax = plt.subplots()
     fig.tight_layout()
 
-    res.plot(fig, ax)
+    res.plot(fig, ax, **kwargs)
 
-    path = figs_dir + 'ns' + str(res.ns//res.fs) + '-fs' + str(res.fs) + ext
-    plt.savefig(path, dpi=DPI)
+    return fig, ax
 
 # plot results
 
-for res in results:
-    plot(res)
+print("Plotting datasets")
+
+for idx, res in enumerate(results):
+    fig, ax = plot(res)
+    path = figs_dir + args_to_name(args_list[idx]) + ext
+    plt.savefig(path, dpi=DPI)
 
 
 # plots diffs
@@ -60,13 +73,14 @@ for res in results:
 def difference(a,b):
     return np.abs((a-b)/np.max(b))
 
-exact = results.pop(0)
-ns16_fs1 = results.pop(0)
+exact = results[0]
+
+print("Calculating differences")
 
 vmin = np.inf
 vmax = -np.inf
 
-for res in results:
+for idx, res in enumerate(results[intrp_idx:], intrp_idx):
     diff = difference(res.pot, exact.pot)
     min = float(np.min(diff))
     max = float(np.max(diff))
@@ -76,13 +90,19 @@ for res in results:
     # save diff into ToPoVis Data object
     res.diff = diff
 
-for res in results:
-    kwargs = {'cmap':'Reds','vmin': vmin, 'vmax': vmax}
+
+print("Plotting differences")
+
+for idx, res in enumerate(results[intrp_idx:], intrp_idx):
+    # explicitely setting vcenter to None to disable centering cbar
+    kwargs = {'cmap':'Reds','vmin': vmin, 'vmax': vmax, 'vcenter': None}
 
     fig, ax = plt.subplots()
     fig.tight_layout()
 
-    topovis.plot(res.r, res.z, res.diff, fig, ax, omit_axes=True, **kwargs)
+    topovis.plot(exact.r, exact.z, res.diff, fig, ax, omit_axes=True, **kwargs)
 
-    path = figs_dir + 'ns' + str(res.ns) + '-fs' + str(res.fs) + '-diff' + ext
+    path = figs_dir + args_to_name(args_list[idx]) + '-diff' + ext
     plt.savefig(path, dpi=DPI)
+
+print("Done")
