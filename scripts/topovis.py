@@ -417,7 +417,7 @@ def repeat_pot(pot, n_spacing : int):
         The potential on the whole torus.
     """
 
-    return np.repeat(pot, n_spacing, axis=2)
+    return np.tile(pot, (1,1,n_spacing))
 # ---------------------------------------------- PLOTTING ------------------------------------------------
 
 def make_regular_triangles(nx, ns, dir='r', periodic=False):
@@ -522,6 +522,33 @@ def _plot_grid(ax, triangulation, z, **kwargs):
                vmin=kwargs.pop('vmin'),
                vmax=kwargs.pop('vmax')
             )
+    
+def _clip_cmap(cmap, vmin, vmax, vcenter=None, vmin_clip=None, vmax_clip=None):
+    """
+    Return a clipped but color-mapping preserving Norm and Colormap.
+
+    The returned Norm and Colormap map data values to the same colors as
+    would  `Normalize(vmin, vmax)`  with *cmap_name*, but values below
+    *vmin_clip* and above *vmax_clip* are mapped to under and over values
+    instead.
+
+    Ref: https://discourse.matplotlib.org/t/limiting-colormapping/20598/5
+    """
+    if vmin_clip is None:
+        vmin_clip = vmin
+    if vmax_clip is None:
+        vmax_clip = vmax
+    
+    assert vmin <= vmin_clip < vmax_clip <= vmax
+    cmin = (vmin_clip - vmin) / (vmax - vmin)
+    cmax = (vmax_clip - vmin) / (vmax - vmin)
+
+    big_cmap = matplotlib.cm.get_cmap(cmap, 512)
+
+    new_norm = matplotlib.colors.Normalize(vmin_clip, vmax_clip)
+    new_cmap = matplotlib.colors.ListedColormap(big_cmap(np.linspace(cmin, cmax, 256)))
+
+    return new_cmap, new_norm
 
 def plot(r, z, pot, fig=None, ax=None, triang_method='regular', omit_axes=False, omit_cbar=False, plot_grid=False, **kwargs):
     if fig is None:
@@ -529,12 +556,10 @@ def plot(r, z, pot, fig=None, ax=None, triang_method='regular', omit_axes=False,
     if ax is None:
         ax = plt.gca()
 
-    if 'vmin' not in kwargs:
-        kwargs['vmin'] = np.min(pot)
-    if 'vmax' not in kwargs:
-        kwargs['vmax'] = np.max(pot)
-    if 'cmap' not in kwargs:
-        kwargs['cmap'] = 'seismic'
+    vmin = kwargs.pop('vmin', np.min(pot))
+    vmax = kwargs.pop('vmax', np.max(pot))
+    vcenter = kwargs.pop('vcenter', 0.0)
+    cmap = kwargs.pop('cmap', 'seismic')
     
     nx, ns = np.shape(r)
 
@@ -544,8 +569,6 @@ def plot(r, z, pot, fig=None, ax=None, triang_method='regular', omit_axes=False,
     if triang_method == 'regular':
         triangles = make_regular_triangles(nx, ns, periodic=True)
     elif triang_method == 'delaunay':
-        # NOTE: this ALWAYS creates periodic triangles
-        # TODO: maybe it's possible to filter these out? then again it's unneccessary when periodic interpolation works
         triangles = matplotlib.tri.Triangulation(r_flat, z_flat).triangles
     else:
         raise ValueError(f"No other triangulation method supported other than 'regular' and 'delaunay', got {triang_method}")
@@ -570,14 +593,16 @@ def plot(r, z, pot, fig=None, ax=None, triang_method='regular', omit_axes=False,
     ax.fill(r[0, :], z[0, :], color='white', zorder=10)
     
     if plot_grid:
-        _plot_grid(ax, triangulation, pot, **kwargs)
+        _plot_grid(ax, triangulation, pot)
     else:
-        _plot_contourf(ax, triangulation, pot, show_grid=False, **kwargs)
+        _plot_contourf(ax, triangulation, pot, show_grid=False, vmin=vmin, vmax=vmax, cmap=cmap)
 
     if not omit_cbar:
-        cmap = plt.get_cmap(kwargs['cmap'])
-        norm = matplotlib.colors.TwoSlopeNorm(0, vmin=z.min(), vmax=z.max())
-        fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, label=r'$\Phi$')
+        vmin_clip = np.min(pot)
+        vmax_clip = np.max(pot)
+        
+        clipped_cmap, clipped_norm = _clip_cmap(cmap, vmin, vmax, vcenter, vmin_clip, vmax_clip)
+        fig.colorbar(matplotlib.cm.ScalarMappable(norm=clipped_norm, cmap=clipped_cmap), ax=ax)
 
     return fig, ax
 
@@ -607,6 +632,11 @@ def parse_args(args):
                         action='store_true',
                         dest='legacy_gmap',
                         help="Calculates the G-factor numerically, instead of just importing from GKW." #TODO: Better description
+                        )
+    parser.add_argument('--dsf', '--downsample',
+                        type=int,
+                        default=0,
+                        help="(optional) Downsamples the s-grid resolution by just using every Nth grid point. Used for benchmarking and debugging interpolation and triangulation. This is an experimental feature."
                         )
     plot_group = parser.add_argument_group('plot', description='Plotting parameters.')
     plot_group.add_argument('--triang-method', 
@@ -932,6 +962,8 @@ def main(args = None):
     OMIT_AXES = bool(args.omit_axes)
     PLOT_GRID = bool(args.plot_grid)
 
+    DSF = int(args.dsf)
+
     out = ToPoVisData(PHI, POTEN_TIMESTEP, METHOD, FX, FS, INTERPOLATOR)
     out.set_plot_args(TRIANG_METHOD, LEVELS, OMIT_AXES, DPI, PLOT_GRID)
 
@@ -943,6 +975,38 @@ def main(args = None):
     # --------------------------------------- PREPERATION --------------------------------------------
 
     logging.info(f'{dat.dataset_name}')
+
+    # Downsample for debugging
+    if DSF < 0:
+        logging.fatal(f"Downsample factor must be positive. Exiting.")
+        sys.exit(1)
+    elif DSF == 0:
+        pass
+    elif DSF == 1:
+        logging.warning(f"Got DSF of 1. Ignoring.")
+        pass
+    elif DSF > 1:
+        logging.warning(f"Downsampling grid by factor {DSF}")
+        slc = np.s_[::int(DSF)]
+        dat.s = dat.s[slc]
+        dat.ns = len(dat.s)
+        dat.g = dat.g[:, slc]
+        dat.g_flat = np.ravel(dat.g, 'C')
+        dat.r_n = dat.r_n[:, slc]
+        dat.r_n_flat = np.ravel(dat.r_n, 'C')
+        dat.z = dat.z[:, slc]
+        dat.z_flat = np.ravel(dat.z, 'C')
+        
+        try:
+            dat.fcoeffs = dat.fcoeffs[:, slc]
+        except AttributeError:
+            pass
+            
+        try:
+            dat.pot3d = dat.pot3d[slc, :, :]
+        except AttributeError:
+            pass
+    
 
     IS_LIN = dat.is_lin
 
