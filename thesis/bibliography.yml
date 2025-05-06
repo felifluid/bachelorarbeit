@@ -291,3 +291,37 @@ rath2025boundary:
   title: Parallel Boundary Conditions [internal document]
   date: 2025
   author: Rath, Florian
+
+dimits2000simulations:
+  type: article
+  title: Comparisons and physics basis of tokamak transport models and turbulence simulations
+  author:
+  - Dimits, A. M.
+  - Bateman, G.
+  - Beer, M. A.
+  - Cohen, B. I.
+  - Dorland, W.
+  - Hammett, G. W.
+  - Kim, C.
+  - Kinsey, J. E.
+  - Kotschenreuther, M.
+  - Kritz, A. H.
+  - Lao, L. L.
+  - Mandrekas, J.
+  - Nevins, W. M.
+  - Parker, S. E.
+  - Redd, A. J.
+  - Shumaker, D. E.
+  - Sydora, R.
+  - Weiland, J.
+  date: 2000
+  page-range: 969–983
+  url: https://doi.org/10.1063/1.873896
+  serial-number:
+    doi: 10.1063/1.873896
+    issn: 1070-664X
+  parent:
+    type: periodical
+    title: Physics of Plasmas
+    issue: 3
+    volume: 7

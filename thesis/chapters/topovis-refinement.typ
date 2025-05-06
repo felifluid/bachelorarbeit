@@ -363,6 +363,24 @@ In code this is done by expanding the $psi$-$s$-grid in the $zeta$ dimension and
 After evaluating $Phi'$ on the fine $s$-$psi$-$zeta$-grid, the $zeta$-dimension gets discarted and the potential gets transposed to be of shape $(N_(psi,text("fine")), N_(s,text("fine")))$ for consistency.
 
 ==== Results
+In the case of non-linear simulations, comparison between different simulations is not possible.
+This is due to the chaotic nature of non-linear simulations. 
+Even two simulations using the exact same input parameters will eventually lead to different results.
+Therefore the only way to test the accuracy of the interpolation is by _downsampling_ simulation data and then upscaling it again.
+
+For this, a new feature is added to just use every nth $s$-point from every dataset.
+The debug parameter `--dsf` controls how much the grid is sampled down, e.g. $"DSF"=4$ just keeps every forth $s$-grid point. 
+Note, that this is an experimental feature, which is added for this sole purpose and is not tested extensively.
+Downscaling of the $psi$-grid or $zeta$-grid is also not currently supported.
+
+The test is done using a high-resolution ($N_s=64$) simulation of the well known _cyclone benchmark case_ (see @dimits2000simulations). 
+The resolution is then downsampled by factors 2, 4 and 8 before upscaling it through interpolation by the same factor using cubic splines.
+Each downsampled low-resolution data is also plotted without interpolation.
+
+For comparison, each interpolated data is compared against the original high-resolution dataset by calculating their relative difference.
+Additionally, 
+
+#include "../../figs/compare_interpolation/nonlin/fig.typ"
 
 == Miscellaneous
 // ?? do I use past tense here?
