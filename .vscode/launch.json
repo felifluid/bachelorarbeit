@@ -51,15 +51,47 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "nonlin_circ.png", "--method", "cubic", "--periodic", "${workspaceFolder}/data/nonlin/circ/gkwdata.h5", "1", "4"]
+            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "nonlin_circ.png", "--method", "cubic", "--periodic", "${workspaceFolder}/data/nonlin/circ/ns16/gkwdata.h5", "1", "4"]
         },
         {
-            "name": "Nonlin Circ Periodic",
+            "name": "Nonlin ns64 no interpolation",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "nonlin_circ_original.png", "--method", "linear", "--periodic", "${workspaceFolder}/data/nonlin/circ/gkwdata.h5", "2", "1"]
-        }
+            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "nonlin_ns64_fs1.png", "--method", "cubic", "--periodic", "${workspaceFolder}/data/nonlin/circ/ns64/gkwdata.h5", "1", "1"]
+        },
+        {
+            "name": "Nonlin Sophia FS1 LEGACY",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["${workspaceFolder}/data/nonlin/circ/sophia/gkwdata.h5", "0"]
+        },
+        {
+            "name": "Nonlin Sophia FS1",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["-vv", "--triang-method", "delaunay", "--omit-axes", "--plot-out", "nonlin_sophia_fs1.png", "--method", "cubic", "--legacy-gmap", "${workspaceFolder}/data/nonlin/circ/sophia/gkwdata.h5", "1", "1"]
+        },
+        {
+            "name": "Nonlin Sophia FS4 DSF4",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "nonlin_sophia_fs4_dsf4.png", "--method", "linear", "--dsf", "4", "${workspaceFolder}/data/nonlin/circ/sophia/gkwdata.h5", "1", "4"]
+        },
+        {
+            "name": "Nonlin Sophia FS1 DSF4",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["-vv", "--triang-method", "regular", "--omit-axes", "--plot-out", "nonlin_sophia_fs1_dsf4.png", "--method", "linear", "--dsf", "4", "${workspaceFolder}/data/nonlin/circ/sophia/gkwdata.h5", "1", "1"]
+        },
     ]
 }
