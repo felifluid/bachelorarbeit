@@ -581,7 +581,7 @@ def plot(r, z, pot, fig=None, ax=None, triang_method='regular', omit_axes=False,
         ax.set_ylabel(r'$Z$')
 
 
-    ax.set_aspect('equal')
+    ax.set_aspect(1, adjustable='datalim')
     
     triangulation = matplotlib.tri.Triangulation(r_flat, z_flat, triangles=triangles)
 
@@ -893,7 +893,15 @@ class ToPoVisData:
         self.fcoeffs = fcoeffs
 
     def plot(self, fig=None, ax=None, **kwargs):
-        return plot(self.r, self.z, self.pot, fig, ax, self.triang_method, self.omit_axes, False, self.plot_grid, **kwargs)
+        r = kwargs.pop('r', self.r)
+        z = kwargs.pop('z', self.z)
+        pot = kwargs.pop('pot', self.pot)
+        triang_method = kwargs.pop('triang_method', self.triang_method)
+        omit_axes = kwargs.pop('omit_axes', self.omit_axes)
+        omit_cbar = kwargs.pop('omit_cbar', False)
+        plot_grid = kwargs.pop('plot_grid', self.plot_grid)
+
+        return plot(r, z, pot, fig, ax, triang_method, omit_axes, omit_cbar, plot_grid, **kwargs)
 
 ################################################## MAIN ##################################################
 
