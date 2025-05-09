@@ -1,5 +1,6 @@
 #import "@preview/hydra:0.6.1": hydra
 #import "@preview/equate:0.3.1": equate
+#import "@preview/numbly:0.1.0": numbly
 
 #let convert_arr(arr) = {
     str(arr)
@@ -60,42 +61,14 @@
 
         // HEADINGS
         // clean numbering (https://sitandr.github.io/typst-examples-book/book/snippets/numbering.html?highlight=numbering#clean-numbering)
-        // let heading_numbering(..schemes) = {
-        //     (..nums) => {
-        //         let (section, ..subsections) = nums.pos()
-        //         let (section_scheme, ..subschemes) = schemes.pos()
-        // 
-        //         if subsections.len() == 0 {
-        //             numbering(section_scheme, section)
-        //         } else if subschemes.len() == 0 {
-        //             numbering(section_scheme, ..nums.pos())
-        //         } else {
-        //             heading_numbering(..subschemes)(..subsections)
-        //         }
-        //     }
-        // }
-        // 
-        // set heading(numbering: heading_numbering("I.", "1."))
         
-        set heading(numbering: "I.1.1")
-        
-        show heading: it => {
-            if it.level > 1 {
-                let counter = counter(heading).get().map(str)
-                let nums = counter.slice(1)
-        
-                let num = "0"
-        
-                if nums.len() > 1{
-                    num = nums.join(".")
-                } else {
-                    num = nums.at(0)
-                }
-                num + " " + it.body
-            } else {
-                it
-            }
-        }
+        set heading(
+            numbering: numbly(
+                "{1:I.}",
+                "{2:1.}",
+                "{2:1}.{3:1}.",
+                "{2:1}.{3:1}.{4:1}.",
+        ))
 
         show heading: it => {
             let lvl = it.level
@@ -176,9 +149,29 @@
         counter(page).update(1)
 
         // TABLE OF CONTENTS
+        let custom_indent(n) = {
+            if n > 1 {
+                n*1em
+            } else {
+                0em
+            }
+        }
+
+        set outline(indent: custom_indent)
+        set outline.entry(fill: repeat(".", gap: 0.5em))
+
+        show outline.entry.where(level: 1): set block(above: 1em)
+        show outline.entry.where(level: 1): it => {
+            link(it.element.location(), strong(it.indented(it.prefix(), it.body())))
+        }
+
+        show outline.entry.where(level: 1): set text(size:1.15em)
+        show outline.entry.where(level: 2): set text(size:1em)
+        show outline.entry.where(level: 3): set text(size:0.95em)
+        show outline.entry.where(level: 4): set text(size:0.9em)
+
         outline(
             title: "Contents",
-            indent: 2em,
             depth: 4,
         )
 

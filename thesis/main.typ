@@ -1,6 +1,10 @@
 #import "template.typ": apply-template
 
-#show: apply-template
+#show: apply-template(
+  author: "Feli Nara Celeste",
+  city: "Bayreuth",
+  submissionDate: "" // TODO: add this
+)[
 
 #include "chapters/abstract.typ"
 
@@ -16,7 +20,9 @@
 
 // Addendum
 
-#set heading(numbering: "A", supplement: [Appendix])
+#set heading(numbering: "A)", supplement: [Appendix])
 #counter(heading).update(0)
 
 #include "chapters/usage.typ"
+
+]
