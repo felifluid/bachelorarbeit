@@ -645,14 +645,10 @@ def parse_args(args):
                             dest='triang_method',
                             default='regular', 
                             help="(optional) Method to use for triangulation. 'regular' creates regular triangles in hamada coordinates, whereas 'delaunay' performs a Delaunay triangulation in poloidal coordinates. Default is 'regular'.")
-    plot_group.add_argument('--plot-hamada', 
-                            action='store_true',
-                            dest='plot_hamada', 
-                            help='(optional) If set, plots in Hamada coordinates instead of poloidal coordinates.')
-    plot_group.add_argument('--plot-out',
+    plot_group.add_argument('-p', '--plot-out',
                             dest='plot_out',
                             type=str,
-                            help="(optional) Specify a file to write the plot into WITH extension. Can either be a full path, or a filename. If it's a filename, it will save to the current directory. Default is 'plot.png'."
+                            help="(optional) Specify a file to write the plot into WITH extension. Can either be a full path, or a filename. If it's a filename, it will save to the current directory. Default is None."
                             )
     plot_group.add_argument('--plot-grid',
                             dest='plot_grid',
@@ -678,10 +674,10 @@ def parse_args(args):
                             help="(optional) Hide axes in plot."
                             )
     interpolation_group = parser.add_argument_group('interpolation', description='Interpolation parameters.')
-    interpolation_group.add_argument('fx', 
+    interpolation_group.add_argument('--fx', 
                                      type=int, 
                                      help='Factor by which to refine the psi-grid through interpolation.')
-    interpolation_group.add_argument('fs', 
+    interpolation_group.add_argument('--fs', 
                                      type=int, 
                                      help='Factor by which to refine the s-grid through interpolation.')
     interpolation_group.add_argument('--interpolator',
@@ -689,15 +685,15 @@ def parse_args(args):
                                      choices=('rgi', 'rbfi'),
                                      default='rgi',
                                      help="(optional) Which interpolator to use to interpolate the potential. 'rgi' uses the RegularGridInterpolator, which interpolates on hamada coordinates, 'rbfi' uses the RBFInterpolator, which interpolates in poloidal coordinates. Default is 'rgi'.")
-    interpolation_group.add_argument('--method',
+    interpolation_group.add_argument('-m', '--method',
                                      metavar='method',
                                      choices=('nearest', 'linear', 'cubic', 'quintic'),
                                      default='cubic',
                                      help="(optional) Method of interpolation. Valid options are: 'nearest', 'linear', 'cubic', 'quintic'. Default is 'cubic'. When faced with memory or processing constraints this should be changed to 'linear'.")
-    interpolation_group.add_argument('--data-out',
+    interpolation_group.add_argument('-d', '--data-out',
                                      dest='data_out',
                                      type=str, 
-                                     help="(optional) Specify a h5-file to write the interpolation data into. Can either be a full path, or a filename. If it's a filename, it will save to the current directory. Default is 'topovis_data.h5'.")
+                                     help="(optional) Specify a h5-file to write the interpolation data into. Can either be a full path, or a filename. If it's a filename, it will save to the current directory.")
 
     return parser.parse_args(args)
 ################################################# CLASSES ################################################
@@ -863,7 +859,6 @@ class GKWData:
         return fcoeff_real + 1j * fcoeff_im
 
 class ToPoVisData:
-    # TODO: Make this the class around basically everything
     def __init__(self, phi, poten_timestep, method, fx, fs, interpolator):
         self.phi = phi
         self.poten_timestep = poten_timestep
@@ -981,8 +976,6 @@ def main(args = None):
     dat = GKWData(HDF5_PATH, poten_timestep=POTEN_TIMESTEP)
 
     # --------------------------------------- PREPERATION --------------------------------------------
-
-    logging.info(f'{dat.dataset_name}')
 
     # Downsample for debugging
     if DSF < 0:
@@ -1241,43 +1234,17 @@ def main(args = None):
             pot3d_fine = np.reshape(pot3d_fine_flat, np.shape(sss_fine))
             pot_fine = pot3d_fine[:,:,0]
             
-            pot_fine_flat = np.ravel(pot_fine, 'C') # NOTE: this is set to 'C' to transpose the potential from (s,x) to (x,s)
+            pot_fine_flat = np.ravel(pot_fine, 'C') 
+            # NOTE: this is set to 'C' to transpose the potential from (s,x) to (x,s)
 
             out.save_results(x_fine, s_fine, r_n_fine_flat, z_fine_flat, pot_fine_flat, zeta_s_fine_flat)
         else:
-            # FIXME: there's still some bug in here :(
-            # logging.info("Constructing splines. This might take a while...")
-            # # initialize RGI on sparse grid
-            # pot_rgi = scipy.interpolate.RegularGridInterpolator((s, x, z), whole_pot, method=METHOD)
-
-            # # GRID PREPERATION
-            # ss, xx = np.meshgrid(s, x, indexing='ij')
-
-            # # map zeta_s to [0, max(z)]
-            # zz = zeta_s % np.max(z) # FIXME: this is inaccurate
-
-            # # construct 3d meshgrid
-            # sss = np.expand_dims(ss, -1)
-            # xxx = np.expand_dims(xx, -1)
-            # zzzeta_s = np.expand_dims(zz, -1)
-            # sxz = sss, xxx, zzzeta_s
-            # sxz_points = grid_to_points(sxz)
- 
-            # logging.info("Evaluating potential on zeta-shift.")
-            # # evaluate potential on zeta_s
-            # pot3d_flat = pot_rgi(sxz_points)
-
-            # # omit zeta dimension
-            # pot3d = np.reshape(pot3d_flat, np.shape(sss))
-            # pot = pot3d[:,:,0]
-            # pot_flat = np.ravel(pot, 'C')   # NOTE: this also transposes from (s,x) to (x,s)
-            # 
-            # out.save_results(x, s, dat.r_n_flat, dat.z_flat, pot_flat, zeta_s)
             logging.info("Interpolating potential on zeta-shift.")
             pot_ev = np.zeros(shape=(dat.nx, dat.ns))
             for i in range(dat.nx):
                 for j in range(dat.ns):
                     spl = scipy.interpolate.splrep(z, pot[j,i,:], k=3)
+                    # NOTE: mapping to max(z) is inaccurate
                     pot_ev[i,j] = scipy.interpolate.splev(zeta_s[i,j] % np.max(z), spl)
             
             pot_flat = np.ravel(pot_ev, order='C')

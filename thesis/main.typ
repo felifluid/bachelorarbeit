@@ -13,3 +13,10 @@
 #include "chapters/conclusion.typ"
 
 #include "chapters/outlook.typ"
+
+// Addendum
+
+#set heading(numbering: "A", supplement: [Appendix])
+#counter(heading).update(0)
+
+#include "chapters/usage.typ"

@@ -97,7 +97,7 @@ For easier understanding of how toroidal and hamadian coordinates are transforme
 
 #include "../../figs/hamada/psi_const/fig.typ"
 
-@fig:hamada:x:t shows the torus in cartesian coordinates, as seen in ref!!.
+@fig:hamada:x:t shows the torus in cartesian coordinates.
 Both plots do not represent the whole torus, but just its outest mantle ($psi=psi_"max"$).
 The grid in @fig:hamada:x:h has been adjusted, to emphasize the relationship of $zeta$ and $q$.
 The top line is $zeta(s, phi=0)$, while the bottom line represents $zeta(s, phi=2pi)$ with all other toroidal angles lying in between. // TODO: umformulieren
@@ -115,12 +115,11 @@ This is caused by a discrepency between the regularly spaced s-grid and the non-
 
 In hamada coordinates the poloidal slice is represented as a curved surface in 3d-space as can be seen in @fig:hamada:phi:h.
 The surface can be described as a two dimensional function $zeta(psi,s)$, which is referred to as _$zeta$-shift_ on the basis of #cite(<samaniego2024topovis>, form: "prose").
-It spans across nearly the whole domain of the hamada coordinates.
-One can recognise the unique shape of the curve in the $zeta$-$s$-plane from @fig:hamda:x, which flattens out to a straight line when approaching $psi=0$.
+One can recognise the unique shape of the curve in the $zeta$-$s$-plane from @fig:hamada:x:h, which flattens out to a straight line when approaching $psi=0$.
 @sec:background:topovis:zeta-shift discusses details on how $zeta$-shift is defined and calculated using data from GKW.
 
 === Periodicity <sec:background:hamada:periodicity>
-===== Toroidal Periodicity
+==== Toroidal Periodicity
 Trivially the toroidal angle $phi$ is periodic:
 
 $ phi = phi ± 2pi $ <eq:periodic:phi>
@@ -140,7 +139,7 @@ $ f(psi, zeta, s) = f(psi, zeta ± 1, s) $ <eq:toroidal_periodicity>
 
 The spectral representation stays unaffected by this @peeters2015[p.44].
 
-===== Poloidal Periodicity
+==== Poloidal Periodicity
 For the torus poloidal periodicity is simply expressed as
 
 $ theta = theta ± 2pi $ <eq:periodic:theta>
@@ -255,7 +254,7 @@ This means, that even if $L_zeta=1$ the grid will have a spacing of $Delta zeta$
 
 Similarly such a gap is also present for the $s$-grid. The grid is defined as
 
-$ s_j = s_0 + j dot Delta s $
+$ s_j = s_0 + j dot Delta s $ <eq:discrete_s>
 
 with
 
@@ -266,8 +265,6 @@ $
 
 which makes $s_(-1) = 0.5 - (Delta s)/2$ the maximum $s$ value.
 This again leaves a gap of $Delta s$ across the periodic boundary because of $s=s±1$. 
-
-// why is this done like this??
 
 // Will ich diesesn Teil hier drin haben als Teaser??
 Normally, this wouldn't be a problem. // TODO: ehh 🤷
@@ -365,7 +362,7 @@ A poloidal slice implies satisfying the condition $#sym.phi = #text("const")$. T
 
 In all geometries $zeta$ is the only coordinate that is dependend on #sym.phi and can be defined generally as follows:
 
-$ zeta = -frac(#sym.phi, 2#sym.pi) + G(psi, s) $
+$ zeta = -frac(#sym.phi, 2#sym.pi) + G(psi, s) $ <eq:zeta_s>
 
 With each geometry having its own definition of $G$. // TODO: formulation 
 
@@ -386,7 +383,7 @@ The resulting geometry factor can be expressed as @samaniego2024topovis[p.21]:
 
 // !! citation other than topovis?
 
-$ G(psi, s) = underbrace(s_B s_j frac(F(Psi) J_Psi _(zeta s)(Psi), 4pi^2), text("gmap")(psi, s)) integral_0^s d tilde(s) frac(1, R^2(psi, tilde(s))) $
+$ G(psi, s) = underbrace(s_B s_j frac(F(Psi) J_Psi _(zeta s)(Psi), 4pi^2), text("gmap")(psi, s)) integral_0^s d tilde(s) frac(1, R^2(psi, tilde(s))) $ <eq:G:chease>
 
 The prefactor of the integral is calculated by GKW and is outputted to `geom/gmap` as a discrete 2D-function @samaniego2024topovis[p.21]. The $s$-integral, however, is being calculated by ToPoVis. This is being done using numerical trapezoidal integration @samaniego2024topovis[p.21]. In the usual case of an even number of grid points in the $s$ direction $s=0$ and therefore $R(s=0)$ doesn't not exist and is interpolated using B-splines @samaniego2024topovis[p.21]. 
 

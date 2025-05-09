@@ -234,23 +234,25 @@ Therefore the interpolation results at the boundary will show numerical artifact
 To check whether the two interpolations methods give accurate results, the same GKW simulation was conducted with $N_s = 32$ and $N_s = 128$. 
 The low resolution data was then upscaled by each interpolator to match the fine grid.
 
-#include "../../figs/compare_interpolation/circ/fig.typ"
-
-#include "../../figs/compare_interpolation/circ/rbfi/fig.typ"
-
-#include "../../figs/compare_interpolation/circ/rgi/fig.typ"
+#include "../../figs/compare_interpolation/lin/circ/fig.typ"
 
 For an intuitive comparison of the interpolated potential $Phi'$ versus the potential of the accurate simulation $Phi$, the relative (normalized) difference of the two is plotted via the following formula:
 
 $ Delta = frac(abs(Phi' - Phi), max(Phi)) $
 
-One can immediately notice the strong deviation at the left side of the plot in the RBFI results (#ref(<fig:interp:circ:rbfi>)).
-It's located more precisely between the first $s_0=-0.5+(Delta s)/2$ and last $s_(-1)=0.5-(Delta s)/2$ constant-$s$ lines.
+One can immediately notice the strong deviation at the left side of the plot in the RBFI results.
+It's located more precisely between the first in the gap of the $s$-grid as specified in @eq:discrete_s.
+The RGI overall performs better than the RBFI.
 
-
-It can be observed, that the RGI overall performs better than the RBFI.
-
-// TODO: 1D graph with mean in psi?
+#figure(
+    table(
+        columns: 3,
+        [*difference in %*], [*max*], [*mean*],
+        [*RGI*], [0.23], [0.02],
+        [*RBFI*], [0.73], [0.03]
+    ),
+    caption: [Relative differences for $N_s=32$ to $N_s=128$ interpolation.]
+)
 
 === Non-linear Simulations
 ==== Functionality // TODO: Überschrift
@@ -265,7 +267,7 @@ The general process of calculating the potential on a poloidal slice in the non-
 )
 
 The process of upscaling $Phi$, would be no more than evaluating the splines it on the fine grid using the RGI.
-But doing so, a gap arises between $s_0 = -0.5+(Delta s)/2$ and $s_(-1) = 0.5 - (Delta s)/2$ where interpolation is not possible.
+But due to the specifications of the discrete grid discussed in @sec:discrete_grid, there is a gap in the $s$-grid where interpolation is not possible (see @eq:discrete_s).
 To circumvent this, the grid has to be extended considering parallel periodic boundary conditions. 
 Both $zeta$-shift and the potential $Phi(s,psi,zeta)$ have to be extended that way.
 
@@ -280,16 +282,10 @@ $ Phi(s,psi,zeta(s)) = Phi(s±1, psi, zeta(s±1) ∓ q(psi)) $
 ===== 1. Extend the sparse grid
 As the RGI demands a strictly ascending or descending grid, the sparse s-grid has to be extended regularly _without_ accounting for boundary conditions, while $psi$ and $zeta$ are not modified. 
 This extended grid is used to define the _virtual_ positions of the periodically extended potential.
-The term virtual is chosen, because the points lie outside of domain $-0.5 < s < 0.5$.
+The term virtual is chosen, because the points lie outside of domain $-0.5 < s < 0.5$ and are used as reference points for the RGI.
 
 Additionaly, the sparse $(s,psi,zeta)$ grid needs to be extended periodically in regard of the parallel periodic boundary conditions. 
-The s-grid is periodic, (see @eq:periodic:s)
-
-$ s = s±1 $
-
-// Gleichung rauslassen??
-
-and is therefore extended by wrapping the array periodically.
+The s-grid is periodic (see @eq:periodic:s) is therefore extended by wrapping the array periodically.
 The periodic $zeta_p$-grid has to account for the parallel periodic boundary condition
 
 $ zeta(s) = zeta(s±1) ∓ q $
@@ -374,16 +370,32 @@ Note, that this is an experimental feature, which is added for this sole purpose
 Downscaling of the $psi$-grid or $zeta$-grid is also not currently supported.
 
 The test is done using a high-resolution ($N_s=64$) simulation of the well known _cyclone benchmark case_ (see @dimits2000simulations). 
-The resolution is then downsampled by factors 2, 4 and 8 before upscaling it through interpolation by the same factor using cubic splines.
-Each downsampled low-resolution data is also plotted without interpolation.
-
-For comparison, each interpolated data is compared against the original high-resolution dataset by calculating their relative difference.
-Additionally, 
+The $s$-grid resolution is then downsampled by factors 2, 4 and 8 before upscaling it through interpolation by the same factor using cubic splines.
+Each downsampled low-resolution data is plotted both with and without interpolation. For validation, each upscaled data is compared against the original high-resolution dataset by calculating their relative difference.
 
 #include "../../figs/compare_interpolation/nonlin/fig.typ"
 
+One can immediately notice, how the quality of the downsampled plots worsens as the grid resolution decreases.
+The plots get smeared poloidally and the circular shape degenerates to the shape of polygons.
+Meanwhile the upscaled results are very similar.
+The circular shape defined by the $R$ and $Z$ grids are being reconstructed as possible through cubic interpolation.
+When scaling the $s$-grid down by a factor of 2, upscaling is nearly lossless.
+The relative differences increase when further reducing the resolution. 
+In @tab:nonlin:diffs below, the max and mean relative differences are displayed.
+
+#figure(
+    table(
+        columns: 3,
+        [*differences in %*], [*max*], [*mean*],
+        [*DSF2*], [$0.065$], [$< 0.001$],
+        [*DSF4*], [$1.26$], [$0.12$],
+        [*DSF8*], [$1.46$], [$0.21$],
+        [*DSF16*], [$1.24$], [$0.20$]
+    ),
+    caption: [Relative differences of upscaled data and exact values],
+) <tab:nonlin:diffs>
+
 == Miscellaneous
-// ?? do I use past tense here?
 The new ToPoVis code is completely rewritten from scratch, due to the profound changes, that are needed to implement interpolation into the original version of ToPoVis.
 Doing so also allows for varies additional restructuring and optimizing of the code.
 These changes in itself are to small to group into their own sections, so they are listed in this section.
@@ -393,13 +405,20 @@ The option to interpolate the potential using FFT in non-linear cases was not re
 FFT interpolation yields worse results compared to spline interpolation as benchmarks show @samaniego2024topovis[p.42].
 
 ===== Updated gmap
-The definition of `gmap` in GKW has been changed during the creation of this thesis to make the calculation of $zeta$-shift independent of geometry.
-Because of this the method `shift_zeta` is adjusted accordingly.
-Additionally the flag `--legacy-gmap` is added to allow for downward compatibility.
+As the resolution could be upscaled through interpolation, a discontinuity could be notices at $s=plus.minus 0.5$ in CHEASE geometry visualizations.
+This is likely caused by an error in the calculation of $zeta$-shift, which involves a numerical integration as specified in @eq:G:chease.
+To avoid the need for this numerical integration, the definition of `gmap` in GKW has been changed. 
+This makes the calculation of $zeta$-shift independent of geometry.
+The method `shift_zeta` is adjusted accordingly to always calculate $zeta$-shift using the general formula 
+
+$ zeta_s = -phi/(2 pi) + G(psi, s) $
+
+The function $G(psi,s)$ is calculated accordingly depending on the geometry by GKW during runtime and saved to `gmap`.
+To provide backward compatibility, the flag `--legacy-gmap` is added.
 Setting this restores legacy behavior to calculate $zeta$-shift depending on the geometry as specified in @sec:background:topovis:zeta-shift.
 
 ===== Optimizations
-While the original version, solves several calculations iteratively using `for`-loops, the new code is optimized use vectorization instead.
+While the original version, solves several calculations iteratively using `for`-loops, the new code is optimized to use vectorization instead.
 One example of this is the interpolation of the potential in the non-linear case, which is now done on a three-dimensional grid using the RGI.
 
 Additionally, the two import functions for the real and imaginary fourier coefficients are combined into one to avoid reshaping `parallel.dat` multiple times.
@@ -407,10 +426,7 @@ Additionally, the two import functions for the real and imaginary fourier coeffi
 ===== Additional Arguments
 The list of arguments to call ToPoVis with, is extended to allow for further customization.
 The new arguments are grouped into two categories: 1) interpolation and 2) plotting.
-The first one include two new required arguments, namely `fx` and `fs`.
-They specify the factor by which the $psi$ and $s$ grid are scaled up respectively.
-Additionally the interpolator and interpolation method can be specified via arguments.
-The plot group adds a variety of arguments to modify the plot, e.g. the image dpi or file extension.
+A full list of arguments and new usage can be found in @chap:usage.
 
 ===== Restructuring and Readability
 The main process is restructured to a proper `main(args)` function, which has several advantages.
