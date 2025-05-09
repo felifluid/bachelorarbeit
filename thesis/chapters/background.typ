@@ -292,10 +292,14 @@ Moreover, different examples from #cite(<lo2013multigrid>,form: "prose", supplem
 // ??: are these images too small?
 #include "../../figs/triangulation/spiral/fig.typ"
 
-Even on a non-uniform grid like the spiral shown in @fig:spiral_linear, the delaunay triangulation results in a uniform representation of the grid. However, this triangulation is quiet sensitive to noise, as can be observed in @fig:spiral_noisy. This is caused by preffering tiny, but delaunay-conform triangles in high-density ares, instead of big but acute triangles in low-density areas. // TODO: what excactly is caused?
-A possible refinement of the triangulation is to add more data points in areas with low density, as being shown in @fig:two_noisy_spirals #footnote[#cite(<ruppert1995delaunay>, form: "prose") and further #cite(<shewchuk1996triangle>, form: "prose") present more elaborate ways of refining a triangulation. Both offer algorithmical approaches to add the least amount of extra vertices to the grid so that no resulting angles exceed a given angle. _Triangle_ is an implementation of this and is freely availiable at https://www.cs.cmu.edu/~quake/triangle.html @shewchuck2025triangle.]. // ??: maybe move this to outlook? 
+Even on a non-uniform grid like the spiral shown in @fig:spiral:single_lin, the delaunay triangulation results in a uniform representation of the grid. 
+However, this triangulation is quiet sensitive to noise, as can be observed in @fig:spiral:single_noisy. 
+This is caused by preffering tiny, but delaunay-conform triangles in high-density ares, instead of big but acute triangles in low-density areas. 
+A possible refinement of the triangulation is to add more data points in areas with low density, as being shown in @fig:spiral:double_noisy #footnote[#cite(<ruppert1995delaunay>, form: "prose") and further #cite(<shewchuk1996triangle>, form: "prose") present more elaborate ways of refining a triangulation. 
+Both offer algorithmical approaches to add the least amount of extra vertices to the grid so that no resulting angles exceed a given angle. 
+_Triangle_ is an implementation of this and is freely availiable at https://www.cs.cmu.edu/~quake/triangle.html @shewchuck2025triangle.]. 
 
-However, in the context of three-dimensional data, every point is assigned a value. In order to add more additional points interpolation is necessary. // for example with height data
+However, in the context of three-dimensional data, every point is assigned a value. In order to add more additional points interpolation is necessary. 
 
 == Interpolation
 This section focuses on interpolation of multidimensional data, at this is the data being interpolated in ToPoVis is three-dimensional.
