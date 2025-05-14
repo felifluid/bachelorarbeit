@@ -2,7 +2,7 @@
 
 #subpar.grid(
     figure(
-        image("grid.svg"),
+        image("grid.png"),
         caption: "grid + triangulation",
     ), <fig:artifacts:sparse:regular:grid>,
     figure(

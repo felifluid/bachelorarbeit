@@ -1,5 +1,16 @@
 {
     "python.analysis.extraPaths": [
         "./scripts"
+    ],
+    "cSpell.words": [
+        "CHEASE",
+        "Gyrokinetic",
+        "Hamada",
+        "poloidal",
+        "poloidally",
+        "tokamak",
+        "tokamaks",
+        "toroidally",
+        "turbulences"
     ]
 }

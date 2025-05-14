@@ -7,8 +7,7 @@
 
 == Dealing with Numerical Artifacts
 === The Cause of Numerical Artifacts
-
-With the original version of ToPoVis some numerical artifacts could be observed in the contour plots as can be seen in @fig:numerical_artifacts. 
+In some cases, the original version of ToPoVis creates numerical artifacts in the contour plots as can be seen in @fig:numerical_artifacts. 
 The artifacts are particularly severe at the edges of plots in CHEASE geometry. 
 This made it harder to study small scale turbulences in these areas.
 Fixing these artifacts is the original motivation underlying this thesis. 
@@ -28,7 +27,7 @@ The detrimental effect of this in ToPoVis can be observed, when taking a look at
 The section stands out with a really low density of the $s$-grid and a high density in the radial direction and can therefore be classified as a heavily non-uniform grid.
 As explained in the previous @sec:triang,
 non-uniform distributions can lead to so called "fat" triangles in areas of low density, as well as many strongly acute triangles surrounding them.
-This is excactly what can be observed in @fig:artifacts:sparse:delaunay:grid.
+This is exactly what can be observed in @fig:artifacts:sparse:delaunay:grid.
 Note that the axes aren't scaled equally to help visualize this effect. 
 Furthermore only every fourth point in the  $psi$-direction is used to make the triangles more distinguishable. 
 This has little to no influence on the delaunay triangulation in this specific section.
@@ -38,7 +37,7 @@ This has little to no influence on the delaunay triangulation in this specific s
 
 A possible solution to this is presented in @fig:artifacts:sparse:regular up top.
 Instead of relying on delaunay triangulation, a custom _regular_ triangle grid is used.
-To achieve this, triangulation must be done in the equidistant hamada coordinates instead.
+To achieve this, triangulation must be done in the equidistant Hamada coordinates instead.
 The poloidal coordinates $R(psi,s)$ and $Z(psi,s)$ are exported by GKW as flattened arrays.
 As both coordinates are defined through the discrete hamada grid, they can also written as $R_(i j)$ and $Z_(i j)$, with $i,j$ being the indices of $psi$ and $s$ respectively.
 Therefore, every distinct poloidal point ${R_(i j), Z_(i j)}$ can be represented in the regular hamada coordinates $(psi_i,s_j)$ instead.
@@ -110,7 +109,7 @@ There cannot be made a clear decision in favor of neither of the two approaches,
 Findings in section !! show, that interpolations in hamada coordinates are coinciding better with the high resolution simulations.
 
 A more and refined way to improve triangulations is to avoid the causes of unfavorable triangulations in the first place. 
-Is can be achieved by interpolating the grid by other means _before_ triangulation is done, which will be discussed next.
+It can be achieved by interpolating the grid by other means _before_ triangulation is done, which will be discussed next.
 
 // the best method would probably be to use delaunay refinement in combination with interpolation -> outlook
 
@@ -371,7 +370,9 @@ Downscaling of the $psi$-grid or $zeta$-grid is also not currently supported.
 
 The test is done using a high-resolution ($N_s=64$) simulation of the well known _cyclone benchmark case_ (see @dimits2000simulations). 
 The $s$-grid resolution is then downsampled by factors 2, 4 and 8 before upscaling it through interpolation by the same factor using cubic splines.
-Each downsampled low-resolution data is plotted both with and without interpolation. For validation, each upscaled data is compared against the original high-resolution dataset by calculating their relative difference.
+Each downsampled low-resolution data is plotted both with and without interpolation. For validation, each upscaled potential $Phi'$ is compared against the original high-resolution potential $Phi$ by calculating their relative difference using the following formula:
+
+$ Delta = frac(abs(Phi' - Phi), max(Phi)) $
 
 #include "../../figs/compare_interpolation/nonlin/fig.typ"
 

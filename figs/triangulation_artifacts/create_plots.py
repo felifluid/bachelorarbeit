@@ -35,8 +35,8 @@ def plot_subsection(r, z, pot, xlim, ylim, grid: bool, method, **kwargs):
         kwargs['cmap'] = 'seismic'
 
         ax.tricontourf(r_flat, z_flat, pot_flat, triangles=triangles, **kwargs)
-        ax.plot(np.ravel(r[-1, :]), np.ravel(z[-1, :]), color='grey', alpha=0.3, linewidth=2)
-        ax.plot(np.ravel(r[0, :]), np.ravel(z[0, :]), color='grey', alpha=0.3, linewidth=2)
+        ax.plot(np.ravel(r[-1, :]), np.ravel(z[-1, :]), color='grey', alpha=0.3, linewidth=1)
+        ax.plot(np.ravel(r[0, :]), np.ravel(z[0, :]), color='grey', alpha=0.3, linewidth=1)
 
     return fig, ax
 
@@ -69,13 +69,13 @@ ylim = (-0.02, 0.092)
 
 kwargs = {'vmin': -0.5, 'vmax': 0.5}
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='delaunay', **kwargs)
-fig.savefig(figpath('sparse/delaunay/grid','svg'))
+fig.savefig(figpath('sparse/delaunay/grid','png'))
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='delaunay', **kwargs)
 fig.savefig(figpath('sparse/delaunay/contour','png'), dpi=300)
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='regular', **kwargs)
-fig.savefig(figpath('sparse/regular/grid','svg'))
+fig.savefig(figpath('sparse/regular/grid','png'))
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='regular', **kwargs)
 fig.savefig(figpath('sparse/regular/contour','png'), dpi=300)
@@ -87,13 +87,13 @@ ylim = (0.015, 0.045)
 slc = np.s_[:, 100:130]
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='delaunay')
-fig.savefig(figpath('sheared/delaunay/grid','svg'))
+fig.savefig(figpath('sheared/delaunay/grid','png'))
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='delaunay')
 fig.savefig(figpath('sheared/delaunay/contour', 'png'), dpi=300)
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='regular')
-fig.savefig(figpath('sheared/regular/grid', 'svg'))
+fig.savefig(figpath('sheared/regular/grid', 'png'))
 
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=False, method='regular')
 fig.savefig(figpath('sheared/regular/contour', 'png'), dpi=300)

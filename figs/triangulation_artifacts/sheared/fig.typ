@@ -4,19 +4,19 @@
 
 #subpar.grid(
     figure(
-        image("delaunay_contour.png"),
+        image("delaunay/contour.png"),
         caption: "delaunay contour plot",
     ), <fig:sheared_triang:delaunay_contour> ,
     figure(
-        image("delaunay_grid.svg"),
+        image("delaunay/grid.png"),
         caption: "delaunay triangulation",
     ), <fig:sheared_triang:delaunay_triangles>,
     figure(
-        image("regular_contour.png"),
+        image("regular/contour.png"),
         caption: "regular contour plot",
     ), <fig:sheared_triang:regular_contour>,
     figure(
-        image("regular_grid.svg"),
+        image("regular/grid.png"),
         caption: "regular triangulation",
     ), <fig:sheared_triang:regular_triangles>,
     columns: (1fr, 1fr),

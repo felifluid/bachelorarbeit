@@ -31,7 +31,7 @@
 
 &gridsize
     nx = 128
-    n_s_grid = 256
+    n_s_grid = 512
     n_mu_grid = 16
     n_vpar_grid = 64
     nmod = 1
@@ -43,19 +43,19 @@
     mumax = 8.0
 
     n_procs_sp = 2
-    n_procs_s = 32
+    n_procs_s = 64
     n_procs_mu = 4
     n_procs_vpar = 1
 /
 
 &mode
     mode_box = .true.
-    n_spacing = 24
+    n_spacing = 20
 /
 
 &geom
     geom_type = 'chease_global'
-    eqfile = '../hamada.dat'
+    eqfile = '../../hamada.dat'
 
     signj = -1
 /

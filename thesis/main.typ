@@ -1,9 +1,10 @@
 #import "template.typ": apply-template
 
 #show: apply-template(
+  title: "Improved Visualization of Turbulences in a Tokamak using refined Triangulation and Interpolation",
   author: "Feli Nara Celeste",
   city: "Bayreuth",
-  submissionDate: "" // TODO: add this
+  submissionDate: "TBD" // TODO: add this
 )[
 
 #include "chapters/abstract.typ"
@@ -20,7 +21,7 @@
 
 // Addendum
 
-#set heading(numbering: "A)", supplement: [Appendix])
+#set heading(numbering: "A.", supplement: [Appendix])
 #counter(heading).update(0)
 
 #include "chapters/usage.typ"
