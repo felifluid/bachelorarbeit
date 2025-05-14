@@ -4,53 +4,106 @@ import topovis
 import matplotlib.pyplot as plt
 import numpy as np
 
-data_dir = 'data/chease/global-aug/'
+data_dir = 'data/lin/chease/bugfix/'
 figs_dir = './figs/compare_interpolation/chease/'
-ext = '.svg'
+ext = '.png'
 DPI = 400
 
 def figpath(filename):
     return figs_dir+filename+ext
 
-args_list = [
-    {'geom': 'chease', 'nspacing': '8', 'fs': '1', 'fx': '1'},
-    {'geom': 'chease', 'nspacing': '8', 'method': 'rgi', 'fs': '4', 'fx': '1'},
-]
+def h5path(ns: int):
+    return data_dir + 'ns' + str(ns) + '/gkwdata.h5' 
 
-results : list[topovis.ToPoVisData] = []
-names = []
+lo = topovis.main(['--omit-axes', h5path(ns=128)])
+hi = topovis.main(['--omit-axes', h5path(ns=512)])
+rgi = topovis.main(['--omit-axes', '--interpolator', 'rgi', '--fs', '4', '--method', 'cubic', h5path(ns=128)])
+rbfi = topovis.main(['--omit-axes', '--interpolator', 'rbfi', '--fs', '4', '--method', 'cubic', h5path(ns=128)])
+
+results = [lo, hi, rgi, rbfi]
+
+# determine vmin & vmax
 
 vmin = np.inf
 vmax = -np.inf
-
-for args in args_list:
-    in_path = data_dir+'nspacing'+args['nspacing']+'/gkwdata.h5'
-
-    if 'method' in args:
-        res = topovis.main(['-vv', '--omit-axes', '--periodic', '--interpolator', args['method'], in_path, args['fx'], args['fs']])
-    else:
-        res = topovis.main(['-vv', '--omit-axes', in_path, args['fx'], args['fs']])
-
-    results.append(res)
-
+for res in results:
     min = float(np.min(res.pot))
     max = float(np.max(res.pot))
     if min < vmin: vmin = min
     if max > vmax: vmax = max
 
-def plot(res):
-    kwargs = {'vmin': vmin, 'vmax': vmax}
+print("Creating Plot")
 
-    fig, ax = plt.subplots()
-    fig.tight_layout()
+fig, axs = plt.subplots(2,2, figsize=(9,7.5))
+fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95, wspace=0.05, hspace=0.05)
 
-    res.plot(fig, ax, **kwargs)
-    if res.fs == 1 and res.fx == 1:
-        folder = 'original'
-    else:
-        folder = str(res.interpolator)
-    path = figs_dir + folder + '/' + 'fs' + str(res.fs) + '-fx' +str(res.fx) + ext
-    plt.savefig(path, dpi=DPI)
+kwargs = {'vmin': vmin, 'vmax': vmax, 'vcenter': 0, 'omit_axes': True, 'omit_cbar': False}
 
-for res in results:
-    plot(res)
+xlim = (1.245, 1.26)
+ylim = (-0.02, 0.092)
+
+rgi.plot(fig, axs[0,0], **kwargs)
+rbfi.plot(fig, axs[1,0], **kwargs)
+
+# plots diffs
+def difference(a,b):
+    return np.abs((a-b)/np.max(b))
+
+print('Calculating diffs')
+
+rgi_diff = difference(hi.pot, rgi.pot)
+print(f'RGI: max {np.max(rgi_diff)}, mean {np.mean(rgi_diff)}')
+rbfi_diff = difference(hi.pot, rbfi.pot)
+print(f'RGI: max {np.max(rbfi_diff)}, mean {np.mean(rbfi_diff)}')
+
+vmin_diff = np.min([rgi_diff, rbfi_diff])
+vmax_diff = np.max([rgi_diff, rbfi_diff])
+
+
+print("Plotting differences")
+
+kwargs = {'vmin': vmin_diff, 'vmax': vmax_diff, 'vcenter': None, 'omit_axes': True, 'cmap': 'Reds'}
+
+kwargs['pot'] = rgi_diff
+rgi.plot(fig, axs[0,1], **kwargs)
+
+kwargs['pot'] = difference(hi.pot, rbfi.pot)
+rbfi.plot(fig, axs[1,1], **kwargs)
+
+cols = ['upscaled potential', 'relative difference']
+rows = ['RGI', 'RBFI']
+
+for ax, col in zip(axs[0], cols):
+    ax.set_title(col)
+
+for ax, row in zip(axs[:, 0], rows):
+    ax.set_ylabel(row, size='large')
+
+for row in axs:
+    for ax in row:
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+        ax.set_aspect('auto')
+
+fig.savefig(figs_dir + 'interpolation.png', dpi=DPI)
+
+kwargs = {'vmin': vmin, 'vmax': vmax, 'vcenter': 0, 'omit_axes': True, 'omit_cbar': False}
+
+
+# FIXME: two seperate plots > combine in typst
+fig, (ax0, ax1) = plt.subplots(1,2, figsize=(16,9))
+
+lo.plot(fig, ax0, **kwargs)
+hi.plot(fig, ax1, **kwargs)
+
+ax0.set_xlim(xlim)
+ax0.set_ylim(ylim)
+ax0.set_aspect('auto')
+
+ax1.set_xlim(xlim)
+ax1.set_ylim(ylim)
+ax1.set_aspect('auto')
+
+fig.savefig(figs_dir + 'original.png', dpi=DPI)
+
+print("Done")
