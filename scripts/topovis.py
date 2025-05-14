@@ -675,11 +675,13 @@ def parse_args(args):
                             )
     interpolation_group = parser.add_argument_group('interpolation', description='Interpolation parameters.')
     interpolation_group.add_argument('--fx', 
-                                     type=int, 
-                                     help='Factor by which to refine the psi-grid through interpolation.')
+                                     type=int,
+                                     default=1,
+                                     help='(optional) Factor by which to refine the psi-grid through interpolation.')
     interpolation_group.add_argument('--fs', 
                                      type=int, 
-                                     help='Factor by which to refine the s-grid through interpolation.')
+                                     default=1,
+                                     help='(optional) Factor by which to refine the s-grid through interpolation.')
     interpolation_group.add_argument('--interpolator',
                                      dest='interpolator',
                                      choices=('rgi', 'rbfi'),
@@ -952,7 +954,6 @@ def main(args = None):
 
     # Set plot args
 
-    PLOT_HAMADA = args.plot_hamada
     TRIANG_METHOD = args.triang_method
     LEVELS = int(args.levels)
     DPI = int(args.dpi)
