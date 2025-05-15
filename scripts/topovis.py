@@ -12,10 +12,7 @@ import scipy.interpolate
 import matplotlib.tri
 import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.axes
 import matplotlib.colors
-import matplotlib.figure
-import pathlib
 
 ################################################## FUNCTIONS #################################################
 
