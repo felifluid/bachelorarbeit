@@ -5,13 +5,18 @@
 = Background <chap:background>
 #include "../../figs/tokamak/fig.typ"
 == A Word to Nuclear Fusion
-In short, nuclear fusion is the process of two nuclei fusing together to form a heavier nucleus, which results in a conversion of mass to energy given by Einstein's mass-energy formula.
+In short, nuclear fusion is the process of two nuclei fusing together to form a heavier nucleus, which results in a conversion of mass to energy given by Einstein's mass-energy equivalence formula.
 This usually involves increasing the temperature of an ionized gas called plasma to around 100 million degrees.
-The challenge is then to confine this high temperature plasma, which is commonly done by strong magnetic fields with a device called _tokamak_ (see @fig:tokamak) @li2014tokamak[p.1].
+The challenge is then to confine this high temperature plasma, which is commonly done by strong magnetic fields inside a device called _tokamak_ @li2014tokamak[p.1].
 
-The current of the moving plasma itself creates a poloidal magnetic field.
-Additionally, both a poloidal and a toroidal external magnetic field are applied simultaneously to confine and shape the plasma.
-Altogether this results in a magnetic field that twists helically around the torus @samaniego2024topovis[p.11].
+@fig:tokamak shows a schematic representation of such a tokamak.
+The plasma is being contained inside the shape of the pink torus.
+This is done by applying a _toroidal_ magnetic field, meaning the field lines follow a circle the long way around the torus.
+It is created by the blue toroidal field coils.
+The current of the moving plasma itself creates a poloidal magnetic field as depicted by the green arrows.
+For the purpose of plasma stabilisation, a _poloidal_ external magnetic field is created by the outer poloidal field coils.
+Altogether this results in a magnetic field that twists helically around the torus as visualized as the black line.
+Inner poloidal field coils can then be used to generate electricity similar to a transformer circuit @samaniego2024topovis[p.11].
 
 == Gyrokinetic Workshop (GKW)
 The _Gyrokinetic Workshop_ (GKW) is a code written in Fortran 95 to simulate and study turbulences of a confined plasma, usually inside of a tokamak. 
