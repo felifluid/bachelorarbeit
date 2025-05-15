@@ -90,20 +90,23 @@ fig.savefig(figs_dir + 'interpolation.png', dpi=DPI)
 kwargs = {'vmin': vmin, 'vmax': vmax, 'vcenter': 0, 'omit_axes': True, 'omit_cbar': False}
 
 
-# FIXME: two seperate plots > combine in typst
-fig, (ax0, ax1) = plt.subplots(1,2, figsize=(16,9))
+fig, ax = plt.subplots()
 
-lo.plot(fig, ax0, **kwargs)
-hi.plot(fig, ax1, **kwargs)
+lo.plot(fig, ax, **kwargs)
 
-ax0.set_xlim(xlim)
-ax0.set_ylim(ylim)
-ax0.set_aspect('auto')
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
+ax.set_aspect('auto')
 
-ax1.set_xlim(xlim)
-ax1.set_ylim(ylim)
-ax1.set_aspect('auto')
+fig.savefig(figs_dir + 'ns126.png', dpi=DPI)
 
-fig.savefig(figs_dir + 'original.png', dpi=DPI)
+fig, ax = plt.subplots()
+
+hi.plot(fig, ax, **kwargs)
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
+ax.set_aspect('auto')
+
+fig.savefig(figs_dir + 'ns512.png', dpi=DPI)
 
 print("Done")
