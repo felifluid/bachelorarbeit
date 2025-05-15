@@ -18,11 +18,12 @@ However, the latter option makes it possible to further analyze and modify the d
 
 #show figure: set block(breakable: true)
 
+== List of Arguments
 #figure(
   table(
     columns: 4,
     align: left,
-    table.header([*argument*], [*description*], [*default value*], [*valid supplement type/values*]),
+    table.header([*argument*], [*description*], [*default*], [*supplement type/values*]),
     [`-v`, `-vv`, `-vvv`], [Causes script to print debugging messages about its progress.], [/], [/],
     [`-h`, `--help`], [Prints a help message.], [/], [/],
     [`--phi`], [Toroidal angle $phi$], [$0.0$], [float],
@@ -44,3 +45,15 @@ However, the latter option makes it possible to further analyze and modify the d
   ),
   caption: [List of all optional ToPoVis arguments.]
 ) <tab:topovis_args>
+
+== Package Versions
+ToPoVis was developed and tested on python 3.13 using the following package versions.
+
+#figure(
+  table(
+    columns: 5,
+    align: left,
+    [*package*], [`h5py`], [`matplotlib`], [`numpy`], [`scipy`],
+    [*version*], [3.13.0], [3.10.0], [2.2.3], [1.15.2]
+  )
+)
