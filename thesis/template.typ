@@ -10,6 +10,7 @@
     documentName: [Thesis],
     title: [Title],
     author: "Author",
+    logo: none,
     faculty: "Faculty / Group",
     degree: "Degree",
     supervisors: ("Name1", "Name 2"),
@@ -36,7 +37,7 @@
         set page(numbering: none)
 
         align(center)[
-            // TODO: Logo
+            #image(logo, width: 50%)
             #faculty
 
             //title

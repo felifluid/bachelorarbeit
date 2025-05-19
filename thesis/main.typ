@@ -8,6 +8,7 @@
   supervisors: ("Prof. Dr. Arthur Peeters", "Dr. Florian Rath"),
   degree: "Bachelor of Science (LA Gym)",
   city: "Bayreuth",
+  logo: "../figs/logo.svg",
   submissionDate: datetime.today(),
   preface: [
     ToPoVis is a code that computes and visualizes plasma structures as poloidal cross sections in global tokamak geometry.
