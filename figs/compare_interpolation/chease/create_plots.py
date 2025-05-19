@@ -15,10 +15,10 @@ def figpath(filename):
 def h5path(ns: int):
     return data_dir + 'ns' + str(ns) + '/gkwdata.h5' 
 
-lo = topovis.main(['--omit-axes', h5path(ns=128)])
-hi = topovis.main(['--omit-axes', h5path(ns=512)])
+lo = topovis.main([h5path(ns=128)])
+hi = topovis.main([h5path(ns=512)])
 rgi = topovis.main(['--omit-axes', '--interpolator', 'rgi', '--fs', '4', '--method', 'cubic', h5path(ns=128)])
-rbfi = topovis.main(['--omit-axes', '--interpolator', 'rbfi', '--fs', '4', '--method', 'cubic', h5path(ns=128)])
+rbfi = topovis.main(['--omit-axes', '--interpolator', 'rbfi', '--fs', '4', h5path(ns=128)])
 
 results = [lo, hi, rgi, rbfi]
 
@@ -34,13 +34,18 @@ for res in results:
 
 print("Creating Plot")
 
+print("Plotting sheared section")
+
 fig, axs = plt.subplots(2,2, figsize=(9,7.5))
 fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95, wspace=0.05, hspace=0.05)
 
 kwargs = {'vmin': vmin, 'vmax': vmax, 'vcenter': 0, 'omit_axes': True, 'omit_cbar': False}
 
-xlim = (1.245, 1.26)
-ylim = (-0.02, 0.092)
+#xlim = (1.245, 1.26)
+#ylim = (-0.02, 0.092)
+
+xlim = (0.65, 0.67)
+ylim = (0.015, 0.045)
 
 rgi.plot(fig, axs[0,0], **kwargs)
 rbfi.plot(fig, axs[1,0], **kwargs)
@@ -85,7 +90,71 @@ for row in axs:
         ax.set_ylim(ylim)
         ax.set_aspect('auto')
 
-fig.savefig(figs_dir + 'interpolation.png', dpi=DPI)
+fig.savefig(figs_dir + 'sheared/interpolation.png', dpi=DPI)
+
+kwargs = {'vmin': vmin, 'vmax': vmax, 'vcenter': 0, 'omit_axes': True, 'omit_cbar': False}
+
+fig, ax = plt.subplots()
+
+lo.plot(fig, ax, **kwargs)
+
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
+ax.set_aspect('auto')
+
+fig.savefig(figs_dir + 'sheared/ns126.png', dpi=DPI)
+
+fig, ax = plt.subplots()
+
+hi.plot(fig, ax, **kwargs)
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
+ax.set_aspect('auto')
+
+fig.savefig(figs_dir + 'sheared/ns512.png', dpi=DPI)
+
+
+# ---- sparse ----
+print("Plotting sparse section")
+
+xlim = (1.245, 1.26)
+ylim = (-0.02, 0.092)
+
+fig, axs = plt.subplots(2,2, figsize=(9,7.5))
+fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95, wspace=0.05, hspace=0.05)
+
+kwargs = {'vmin': vmin, 'vmax': vmax, 'vcenter': 0, 'omit_axes': True, 'omit_cbar': False}
+
+
+rgi.plot(fig, axs[0,0], **kwargs)
+rbfi.plot(fig, axs[1,0], **kwargs)
+
+print("Plotting differences")
+
+kwargs = {'vmin': vmin_diff, 'vmax': vmax_diff, 'vcenter': None, 'omit_axes': True, 'cmap': 'Reds'}
+
+kwargs['pot'] = rgi_diff
+rgi.plot(fig, axs[0,1], **kwargs)
+
+kwargs['pot'] = difference(hi.pot, rbfi.pot)
+rbfi.plot(fig, axs[1,1], **kwargs)
+
+cols = ['upscaled potential', 'relative difference']
+rows = ['RGI', 'RBFI']
+
+for ax, col in zip(axs[0], cols):
+    ax.set_title(col)
+
+for ax, row in zip(axs[:, 0], rows):
+    ax.set_ylabel(row, size='large')
+
+for row in axs:
+    for ax in row:
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+        ax.set_aspect('auto')
+
+fig.savefig(figs_dir + 'sparse/interpolation.png', dpi=DPI)
 
 kwargs = {'vmin': vmin, 'vmax': vmax, 'vcenter': 0, 'omit_axes': True, 'omit_cbar': False}
 
@@ -98,7 +167,7 @@ ax.set_xlim(xlim)
 ax.set_ylim(ylim)
 ax.set_aspect('auto')
 
-fig.savefig(figs_dir + 'ns126.png', dpi=DPI)
+fig.savefig(figs_dir + 'sparse/ns126.png', dpi=DPI)
 
 fig, ax = plt.subplots()
 
@@ -107,6 +176,6 @@ ax.set_xlim(xlim)
 ax.set_ylim(ylim)
 ax.set_aspect('auto')
 
-fig.savefig(figs_dir + 'ns512.png', dpi=DPI)
+fig.savefig(figs_dir + 'sparse/ns512.png', dpi=DPI)
 
 print("Done")

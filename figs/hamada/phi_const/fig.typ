@@ -4,14 +4,14 @@
   columns: 2,
   figure(
     image("toroidal.png"),
-    caption: [toroidal],
+    caption: [poloidal],
   ), <fig:hamada:phi:t>,
   figure(
     image("hamada.png"),
     caption: [hamada]
   ), <fig:hamada:phi:h>,
   caption: [
-    Hamada and toroidal surfaces for $phi=text("const")$. The color gradient represents $zeta$.
+    $phi=text("const")$ surfaces. The color gradient represents $zeta$.
   ],
   label: <fig:hamda:phi>,
 )

@@ -3,9 +3,12 @@
 
 #show: apply-template(
   title: "Improved Visualization of Turbulences in a Tokamak using refined Triangulation and Interpolation",
-  author: "Feli Nara Celeste",
+  faculty: "Faculty of Theoretical Plasma Physics \ TPV",
+  author: "Feli Nara Celeste Berner",
+  supervisors: ("Prof. Dr. Arthur Peeters", "Dr. Florian Rath"),
+  degree: "Bachelor of Science (LA Gym)",
   city: "Bayreuth",
-  submissionDate: "TBD" // TODO: add this
+  submissionDate: datetime.today()
 )[
 
 #include "chapters/abstract.typ"

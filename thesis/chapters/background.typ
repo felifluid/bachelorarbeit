@@ -30,7 +30,7 @@ For in-depth information about GKW and how it works see #cite(<peeters2015>, for
 == Hamada Coordinates
 To efficiently solve the gyrokinetic equation, GKW makes use of so called _Hamada Coordinates_.
 Before that, a quick view into toroidal coordinates is needed.
-@fig:cylindrical-toroidal shows the relation between cylindrical $(R,Z,phi)$ and toroidal $(psi, theta, phi)$ coordinates. 
+@fig:cylindrical-toroidal shows the relation between cylindrical $(R,z,phi)$ and toroidal $(psi, theta, phi)$ coordinates. 
 In it, the helical magnetic field lines for $psi="const"$ are also shown.
 
 #include "../../figs/cylindrical_coords/fig.typ"
@@ -38,9 +38,9 @@ In it, the helical magnetic field lines for $psi="const"$ are also shown.
 The relation can be expressed via the following equations @samaniego2024topovis[p.11]:
 
 $
-  &R = R_0 + psi cos theta \
-  &Z = psi sin theta \
-  &phi = phi
+  &R = R_0 + psi cos theta ,\
+  &Z = psi sin theta ,\
+  &phi = phi .
 $ <eq:cylindrical_toroidal>
 
 Hamada coordinates are retrieved by transforming the toroidal $(psi,theta,phi)$ coordinates in such a way that
@@ -51,14 +51,15 @@ Hamada coordinates are retrieved by transforming the toroidal $(psi,theta,phi)$ 
 This leads to following generalized equations
 
 $
-  &psi(r) = r/R_"ref" #<eq:psi> \
-  &s(theta, psi) = integral_0^theta ("d"theta')/(bold(B) dot nabla theta') slash.big integral.cont ("d"theta')/(bold(B) dot nabla theta') #<eq:s> \
-  &zeta(psi, theta) = q s - phi/(2pi) - g(theta, psi) #<eq:zeta>
+  &psi(r) = r/R_"ref" , #<eq:psi> \
+  &s(theta, psi) = integral_0^theta ("d"theta')/(bold(B) dot nabla theta') slash.big integral.cont ("d"theta')/(bold(B) dot nabla theta') , #<eq:s> \
+  &zeta(psi, theta) = q s - phi/(2pi) - g(theta, psi) . #<eq:zeta>
 $ <eq:hamada>
 
 For further reading on how this is achieved in detail, see @peeters2015[20ff] and @peeters2015[Appen. A].
 Sometimes, $zeta$ is called the _toroidal_ coordinate, while s is referred to as the _poloidal_ coordinate. 
 However, this can be misleading as varying $zeta$ at constant $psi$ and $s$ will result in a screw like motion both toroidally along $phi$ and poloidally along $theta$.
+
 The so called _safety factor_
 
 $ q(psi) = B^gamma/B^s $
@@ -68,7 +69,7 @@ A safety factor of $q=5/4$ would mean that the magnetic field line reaches its s
 Generally, higher values of $q$ result in better plasma stability.
 In GKW the sign of the safety factor is oftentimes normalized to 
 
-$ q = s_B s_j abs(q) $ <eq:q>
+$ q = s_B s_j abs(q) ,$ <eq:q>
 
 where $s_B = ±1$ and $s_j = ±1$ represent the sign of the magnetic field and the plasma current @peeters2015[p.21].
 
@@ -83,9 +84,9 @@ The next section takes a look at Hamada Coordinates in _circular_ coordinates.
 In circular geometry the coordinate transformation is defined by the following equations (see @peeters2015[A1])
 
 $
-  &psi(r) = r/R_text("ref") \ 
-  &s(r, theta) = 1/(2 pi) (theta + psi sin theta) \
-  &zeta (r, theta, phi) = - phi/(2 pi) + s_B s_j abs(q)/pi arctan((1-psi)/(1+psi) tan theta/2)
+  &psi(r) = r/R_text("ref") ,\ 
+  &s(r, theta) = 1/(2 pi) (theta + psi sin theta) ,\
+  &zeta (r, theta, phi) = - phi/(2 pi) + s_B s_j abs(q)/pi arctan((1-psi)/(1+psi) tan theta/2) .
 $
 
 Assuming $s_B s_j = +1$ the $zeta$-grid can range from 
@@ -97,7 +98,7 @@ for $phi=2pi$ to
 $ zeta_text("max") = abs(q)/2 $ 
 
 in the case of $phi=0$. 
-The $zeta$-grid is oftentimes normalized to $[0,1]$.
+The $zeta$-grid is commonly normalized to $[0,1]$.
 However this mapping is not generally continuous, as will be explained in @sec:background:hamada:periodicity.
 
 For easier understanding of how toroidal and hamadian coordinates are transformed, Figure @fig:hamda:x[] & @fig:hamda:phi[] show side by side comparisons of $psi="const"$ and $phi="const"$ surfaces respectively.
@@ -123,19 +124,24 @@ This is caused by a discrepancy between the regularly spaced s-grid and the non-
 In hamada coordinates the poloidal slice is represented as a curved surface in 3d-space as can be seen in @fig:hamada:phi:h.
 The surface can be described as a two dimensional function $zeta(psi,s)$, which is referred to as _$zeta$-shift_ on the basis of #cite(<samaniego2024topovis>, form: "prose").
 One can recognise the unique shape of the curve in the $zeta$-$s$-plane from @fig:hamada:x:h, which flattens out to a straight line when approaching $psi=0$.
-@sec:background:topovis:zeta-shift discusses details on how $zeta$-shift is defined and calculated using data from GKW.
+@sec:background:topovis:zeta-shift will discuss details on how $zeta$-shift is defined and calculated using data from GKW.
 
 === Periodicity <sec:background:hamada:periodicity>
 ==== Toroidal Periodicity
 Trivially the toroidal angle $phi$ is periodic:
 
-$ phi = phi ± 2pi $ <eq:periodic:phi>
+$ phi = phi ± 2pi . $ <eq:periodic:phi>
 
-@eq:zeta can be generalized further to get
+@eq:zeta can be generalized to get
 
 $ zeta = -phi/(2pi) + G(psi, s) $ <eq:zeta_general>
 
-Combining equations @eq:periodic:phi[] and @eq:zeta_general[] results in the periodic boundary condition
+with 
+
+$ G(psi,s,theta) = q(psi) s - g(psi, theta) . $ <eq:G>
+
+The quantity $G(psi,s,theta)$ is no periodic in general @rath2025boundary.
+However, as $G(psi,s,theta)$ is not a function of $phi$ equations @eq:periodic:phi[] and @eq:zeta_general[] can be combined, which results in the periodic boundary condition
 
 $ zeta = zeta ± 1 $ <eq:periodic:zeta>
 
@@ -149,22 +155,19 @@ The spectral representation stays unaffected by this @peeters2015[p.44].
 ==== Poloidal Periodicity
 For the torus poloidal periodicity is simply expressed as
 
-$ theta = theta ± 2pi $ <eq:periodic:theta>
+$ theta = theta ± 2pi . $ <eq:periodic:theta>
 
 If both $psi$ and $zeta$ are held constant, this periodicity translates directly to 
 
-$ s = s±1 $ <eq:periodic:s>
+$ s = s±1 . $ <eq:periodic:s>
 
 But since in Hamada coordinates $s(theta, psi)$ and therefore also $zeta(phi, psi, s(theta, psi))$ are functions of $theta$, in general something called _double periodicity_ or _parallel periodicity_ occurs.
 
-The quantity $G(psi, s)$ in #ref(<eq:zeta_general>) is not periodic in general. 
-However, this can be combined with @eq:zeta to find
-
-$ G(psi, s, theta) = q(psi) s - g(psi, theta) $
-
-Note that this is now a function of $theta$ instead of $s$. 
+The quantity $G(psi,s,theta)$ in #ref(<eq:G>) is not periodic in general.
 However, at constant $psi$, every poloidal position is uniquely defined by either its angle $theta$ or its $s$ coordinate.
-Hence, $g(psi,theta)$ can be expressed as $g(psi, s)$ for constant $psi$.
+Hence, $g(psi,theta)$ can be expressed as $g(psi, s)$ for constant $psi$ and therefore
+
+$ G(psi, s) = q(psi) s - g(psi, s)$
 
 One can also find that for $psi="const"$ the function $g(psi, s)$ must be periodic in $s$.
 When following a field line $zeta$ one poloidal turn at a constant $psi$ from $theta_A = 0$ to $theta_B = ±2pi$.
@@ -180,21 +183,18 @@ $
   &g(psi,s) = g(psi, s±1) #<eq:periodic_g>
 $
 
-Hence, and the quantity $G(psi, theta)$ can be written as
-
-$ G(psi, s) = q s - g(psi, s) $ <eq:big_G>
-
-with $g(psi,s)$ being periodic in $s$.
+Meaning $g(psi,s)$ is also periodic in $s$.
 
 Again, consider following a field line one poloidal turn and evaluate
 
 $
-  G(psi, s±1) &ouset(=, #ref(<eq:big_G>,supplement: [])) q (s±1) - g(psi, s±1) \
+  G(psi, s±1) &ouset(=, #ref(<eq:G>,supplement: [])) q (s±1) - g(psi, s±1) \
               &ouset(=, #ref(<eq:periodic_g>, supplement: [])) q s ± q - g(psi, s) \
-              &ouset(=, #ref(<eq:big_G>,supplement: [])) G(psi, s) ± q
+              &ouset(=, #ref(<eq:G>,supplement: [])) G(psi, s) ± q
 $ <eq:periodic:G>
 
-With this a function for $zeta$ can be derived like
+Which results in the periodic boundary condition for $G(psi, s)$.
+With this a periodic boundary condition for $zeta$ can be derived like
 
 $ 
   zeta(psi, s±1) &ouset(=, #ref(<eq:zeta_general>, supplement: [])) -phi/(2pi) + G(psi, s±1) \
@@ -397,6 +397,8 @@ $ G(psi, s) = underbrace(s_B s_j frac(F(Psi) J_Psi _(zeta s)(Psi), 4pi^2), text(
 
 The prefactor of the integral is calculated by GKW and is outputted to `geom/gmap` as a discrete 2D-function @samaniego2024topovis[p.21]. The $s$-integral, however, is being calculated by ToPoVis. This is being done using numerical trapezoidal integration @samaniego2024topovis[p.21]. In the usual case of an even number of grid points in the $s$ direction $s=0$ and therefore $R(s=0)$ does not exist and is interpolated using B-splines @samaniego2024topovis[p.21]. 
 
+Note that this behavior was changed during the process of this thesis, the quantity `gmap` is now always equivalent to $G(psi,s)$ for all geometries.
+
 ==== s-#sym.alpha Geometry
 The s-#sym.alpha geometry is the first order approximation of the circular geometry. Flux surfaces are circular and having a small inverse aspect ratio $psi = r/R << 1$ @peeters2015[p.23]. Because of the heavily simplified nature of this, it can lead to numerical instability for non-linear simulations @peeters2015[p.23]. In this geometry the geometry factor $G$ is defined like this @peeters2015[p.23] #footnote[In previous versions of @peeters2015 $zeta$ was falsely defined as $zeta = frac(s_B s_j, 2pi) [abs(q) theta - phi]$.]:
 
@@ -414,7 +416,7 @@ In linear simulations, usually only one Fourier mode is simulated.
 Because of this, only linear simulations with `nmod=1` are supported @samaniego2024topovis[p.27].
 Therefore, @eq:fourier_series simplifies to
 
-$ f(psi, zeta, s) = hat(f)(psi, zeta, s) exp(i k_zeta zeta) + hat(f)^*(psi, zeta, s) exp(-i k_zeta zeta) $
+$ f(psi, zeta, s) = hat(f)(psi, zeta, s) exp(i k_zeta zeta) + hat(f)^*(psi, zeta, s) exp(-i k_zeta zeta) . $
 
 The complex Fourier coefficients are provided in the dataset `diagnostic/diagnos_mode_struct/parallel`, called `parallel.dat` in short.
 In it, several diagnostics connected with the parallel mode structure are stored.
@@ -425,7 +427,7 @@ To extract the fourier coefficients of the potential, `parallel.dat` is reshaped
 ToPoVis achieves this using the included methods `reshape_parallel_dat_multi`, `fouriercoeff_imag` and `fouriercoeff_real`.
 Both parts are then combined to retrieve the complex Fourier coefficient. Note that because $N_"mod"=1$, the Fourier coefficients are a function of $psi$ and $s$ and no function of $zeta$.
 
-Using this, the potential at the poloidal cross section is calculated using the formula
+Using this, the potential at the poloidal cross section is calculated using the following formula:
 
 $ Phi(psi, s, zeta_s) = RR[hat(f)(psi, s) exp(i k_zeta zeta_s) + hat(f)^*(psi,s) exp(-i k_zeta zeta_s)] $
 
@@ -445,7 +447,7 @@ $
 $
 with
 $
-  mu_j = 1/(N_s N_zeta) sum_(i=0)^(N_s-1) sum_(k=0)^(N_zeta -1) Phi_(i j k)
+  mu_j = 1/(N_s N_zeta) sum_(i=0)^(N_s-1) sum_(k=0)^(N_zeta -1) Phi_(i j k) .
 $
 
 To retrieve potential data of a poloidal slice, i.e. $phi = "const"$, the 3d-potential $Phi(s, psi, zeta)$ now needs to be evaluated at $zeta$-shift.

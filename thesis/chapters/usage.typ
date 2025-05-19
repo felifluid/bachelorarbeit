@@ -1,4 +1,5 @@
 = Usage <chap:usage>
+#set heading(outlined: false)
 The ToPoVis code, takes one mandatory parameter, namely the path of the `gkwdata.h5` file, as well as several other optional arguments as input strings.
 The script can be called from terminal using the command 
 

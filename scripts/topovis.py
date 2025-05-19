@@ -1119,7 +1119,7 @@ def main(args = None):
                 rz_points = np.column_stack((dat.r_n_flat, dat.z_flat))
 
                 # FIXME: add to argparse
-                rbf_kwargs = {'neighbors':100, 'kernel': 'linear', 'degree': 0}
+                rbf_kwargs = {'neighbors':200}
 
                 # interpolate zeta-shift
                 logging.info(f'Interpolating zeta-shift')

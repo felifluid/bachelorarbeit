@@ -83,7 +83,7 @@ Doing so adds triangles between the first $j=0$ and last $j=m-1$ values for all 
 
 In code this is done by the new method `make_regular_triangles` via list comprehentions.
 
-=== Limits of Triangulation
+=== Limits of Triangulation <sec:triang:limits>
 
 While regular triangulation provides better results in some areas, it can lead to unfavorable triangles in different ones. 
 The CHEASE geometry is _sheared_ poloidal in $theta$ along the radial coordinate $psi$. 
@@ -230,14 +230,17 @@ Because the grid is discrete, its also not possible to add new points at the hal
 Therefore the interpolation results at the boundary will show numerical artifacts for poloidal interpolation.
 
 ===== Results and Comparison
-To check whether the two interpolations methods give accurate results, the same GKW simulation was conducted with $N_s = 32$ and $N_s = 128$. 
+To check whether the two interpolations methods give accurate results, the same GKW simulation was conducted with a low and a high resolution grid. 
 The low resolution data was then upscaled by each interpolator to match the fine grid.
-
-#include "../../figs/compare_interpolation/lin/circ/fig.typ"
+All plots in this section were created using the new regular triangulation method.
 
 For an intuitive comparison of the interpolated potential $Phi'$ versus the potential of the accurate simulation $Phi$, the relative (normalized) difference of the two is plotted via the following formula:
 
-$ Delta = frac(abs(Phi' - Phi), max(Phi)) $
+$ Delta = frac(abs(Phi' - Phi), max(Phi)) . $
+
+====== Circular
+
+#include "../../figs/compare_interpolation/lin/circ/fig.typ"
 
 One can immediately notice the strong deviation at the left side of the plot in the RBFI results.
 It's located more precisely between the first in the gap of the $s$-grid as specified in @eq:discrete_s.
@@ -250,7 +253,48 @@ The RGI overall performs better than the RBFI.
         [*RGI*], [0.23], [0.02],
         [*RBFI*], [0.73], [0.03]
     ),
-    caption: [Relative differences for $N_s=32$ to $N_s=128$ interpolation.]
+    caption: [Relative differences for $N_s=32$ to $N_s=128$ circular interpolation.]
+)
+
+====== CHEASE
+
+The same was done with two CHEASE boundary simulations, one with $N_s=128$ the other with $N_s=512$.
+Two subsections of the plot are analyzed, specifically the same ones used to benchmark triangulation in @sec:triang:limits.
+First, a low density section around $s=plus.minus 0$ is analyzed.
+The second one is a highly sheared section around $s=plus.minus 0.5$.
+Not that neither figure is to scale, to better visualize the interpolation effects.
+
+#include "../../figs/compare_interpolation/chease/sparse/original.typ"
+
+The figure above shows the two simulation runs without subsequent interpolation.
+The structure of the potential is very similar in both plots.
+The low density plot is characterized by sharply defined edges, where the high density plot generates smooth curves.
+
+#include "../../figs/compare_interpolation/chease/sparse/interpolation.typ"
+
+The RBFI does not perform well in this section, where distances of points differ by multiple orders of magnitude.
+It produces artifacts with relative differences of up to 98% in some sections.
+The RGI on the other hand performs really well in this section and generates data that is really similar to the original plot.
+
+#include "../../figs/compare_interpolation/chease/sheared/original.typ"
+
+The low density plot shows an irregular pattern consisting of red, blue and white stripes, while the plot on the right is more nuanced.
+
+#include "../../figs/compare_interpolation/chease/sheared/interpolation.typ"
+
+In this highly sheared sections both interpolation methods yield similar results.
+One can notice, that the lines are more "washed out" radially in the RBFI results.
+
+The general interpolation benchmark can be subsumized by the table below.
+
+#figure(
+    table(
+        columns: 3,
+        [*difference in %*], [*max*], [*mean*],
+        [*RGI*], [0.42], [0.08],
+        [*RBFI*], [0.98], [0.11]
+    ),
+    caption: [Relative differences for $N_s=128$ to $N_s=512$ CHEASE interpolation.]
 )
 
 === Non-linear Simulations

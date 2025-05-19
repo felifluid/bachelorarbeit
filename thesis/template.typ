@@ -10,14 +10,18 @@
     documentName: [Thesis],
     title: [Title],
     author: "Author",
+    faculty: "Faculty / Group",
+    degree: "Degree",
+    supervisors: ("Name1", "Name 2"),
     city: "City",
-    submissionDate: "Submission Date",
+    submissionDate: datetime(day:1, month: 1, year: 1970),
     disclaimerTitle: "Disclaimer",
     disclaimerText: [
         I hereby declare that I prepared this thesis entirely on my own and have not used outside sources without declaration in the text.
         Any concepts or quotations applicable to these sources are clearly attributed to them.
         This thesis has not been submitted in the same or substantially similar version, not even in part, to any other authority for grading and has not been published elsewhere.
     ],
+    disclaimerSignature: none,
     body
     ) = context {
         // DOCUMENT
@@ -30,8 +34,17 @@
         set page(numbering: none)
 
         align(center)[
+            // TODO: Logo
+            #faculty
+
             //title
             #text(2em, weight: 700, title)
+
+            #v(1fr)
+
+            in Partial Fulfillment of the Requirements for the \
+            Degree of \
+            #text(1.5em, degree)
 
             #v(1fr)
             
@@ -41,7 +54,14 @@
 
             #v(1fr)
 
-            #city, #submissionDate
+            supervized by \
+            #text(1.25em, supervisors.at(0)) \
+            and \
+            #text(1.25em, supervisors.at(1))
+
+            #v(1fr)
+
+            #city, #submissionDate.display("[day].[month].[year]")
         ]
 
         // FONTS
@@ -64,10 +84,10 @@
         
         set heading(
             numbering: numbly(
-                "{1:I.}",
-                "{2:1.}",
-                "{2:1}.{3:1}.",
-                "{2:1}.{3:1}.{4:1}.",
+                "{1:I}",
+                "{2:1}",
+                "{2:1}.{3:1}",
+                "{2:1}.{3:1}.{4:1}",
         ))
 
         show heading: it => {
@@ -190,4 +210,27 @@
         // BIBLIOGRAPHY
         set page(numbering: none)
         bibliography("bibliography.yml")
+        
+        // DISCLAIMER
+        set heading(numbering: none)
+
+        heading(disclaimerTitle, outlined: false)
+
+        disclaimerText
+
+        v(3em)
+        grid(
+          columns: 2,
+          column-gutter: 1fr,
+          row-gutter: 0.5em,
+          align: center,
+          grid.cell(
+            rowspan: 3,
+            [#city, #submissionDate.display("[day].[month].[year]")],
+          ),
+          disclaimerSignature,
+          line(length: 6cm, stroke: 0.5pt),
+          author,
+        )
+
 }

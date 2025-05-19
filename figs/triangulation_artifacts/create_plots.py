@@ -35,13 +35,14 @@ def plot_subsection(r, z, pot, xlim, ylim, grid: bool, method, **kwargs):
         kwargs['cmap'] = 'seismic'
 
         ax.tricontourf(r_flat, z_flat, pot_flat, triangles=triangles, **kwargs)
-        ax.plot(np.ravel(r[-1, :]), np.ravel(z[-1, :]), color='grey', alpha=0.3, linewidth=1)
-        ax.plot(np.ravel(r[0, :]), np.ravel(z[0, :]), color='grey', alpha=0.3, linewidth=1)
+        ax.plot(np.ravel(r[-1, :]), np.ravel(z[-1, :]), color='grey', alpha=0.3, linewidth=1, zorder=11)
+        ax.plot(np.ravel(r[0, :]), np.ravel(z[0, :]), color='grey', alpha=0.3, linewidth=1, zorder=11)
+        ax.fill(r[0, :], z[0, :], color='white', zorder=10)
 
     return fig, ax
 
 figs_dir = './figs/triangulation_artifacts/'
-data_dir = './data/lin/chease/ns128/'
+data_dir = './data/lin/chease/bugfix/ns128/'
 
 def figpath(filename, ext):
     return figs_dir+filename+'.'+ext
@@ -49,15 +50,18 @@ def figpath(filename, ext):
 path = pathlib.Path(data_dir+'topovisdata.h5')
 
 if not path.is_file():
-    topovis.main(topovis.main(['-vv', '--triang-method', 'regular', '--data-out', path.as_posix(), '--omit-axes', data_dir+'gkwdata.h5', '1', '1']))
+    topovis.main(['-vv', '--triang-method', 'regular', '--data-out', path.as_posix(), '--omit-axes', data_dir+'gkwdata.h5', '--fx', '1', '--fs', '1'])
 
 with h5py.File(path.as_posix()) as f:
     R_FLAT = f['r_n'][()]
     Z_FLAT = f['z'][()]
     POT_FLAT = f['pot'][()]
 
-    NX = f['nx'][()]
-    NS = f['ns'][()]
+    X = f['x'][()]
+    S = f['s'][()]
+
+NX = len(X)
+NS = len(S)
 
 R = np.reshape(R_FLAT, (NX,NS))
 Z = np.reshape(Z_FLAT, (NX,NS))
@@ -67,7 +71,7 @@ slc = np.s_[0:None:4, :]
 xlim = (1.245, 1.26)
 ylim = (-0.02, 0.092)
 
-kwargs = {'vmin': -0.5, 'vmax': 0.5}
+kwargs = {}
 fig, ax = plot_subsection(R[slc], Z[slc], POT[slc], xlim=xlim, ylim=ylim, grid=True, method='delaunay', **kwargs)
 fig.savefig(figpath('sparse/delaunay/grid','png'))
 

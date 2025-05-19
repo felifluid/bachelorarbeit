@@ -4,14 +4,14 @@
   columns: 2,
     figure(
     image("toroidal.png"),
-    caption: [toroidal],
+    caption: [cartesian],
   ), <fig:hamada:x:t>,
   figure(
     image("hamada.png"),
     caption: [hamada]
   ), <fig:hamada:x:h>,
   caption: [
-    Toroidal and hamada surfaces for $psi=psi_"max"$. The color gradient represents $zeta$.
+    $psi=psi_"max"$ surfaces. The color gradient represents $zeta$.
   ],
   label: <fig:hamda:x>,
 )
