@@ -11,7 +11,7 @@
   logo: "../figs/logo.svg",
   submissionDate: datetime.today(),
   preface: [
-    ToPoVis is a code that computes and visualizes plasma structures as poloidal cross sections in global tokamak geometry.
+    ToPoVis is a code that computes and visualizes small scale plasma turbolences in a tokamak.
     This thesis tackles the issue of numerical artifacts through interpolation and refined triangulation. 
     To implement these extensive additions, the ToPoVis code is rewritten.
     The accuracy of the interpolation is measured for both linear and non-linear simulations.
@@ -29,7 +29,7 @@
     Björn Luchterhandt for inspiring me to learn Typst and sharing his knowledge about it.
     Elli Quitter for always caring for and comforting me in times of need.
 
-    Thanks to everyone that showed interest in this work and took the time to provide feedback.
+    Thanks to everyone who showed interest in this work and took their time to provide feedback.
   ]
 )[
 

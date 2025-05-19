@@ -14,7 +14,7 @@ The plasma is being contained inside the shape of the pink torus.
 This is done by applying a _toroidal_ magnetic field, meaning the field lines follow a circle the long way around the torus.
 It is created by the blue toroidal field coils.
 The current of the moving plasma itself creates a poloidal magnetic field as depicted by the green arrows.
-For the purpose of plasma stabilisation, a _poloidal_ external magnetic field is created by the outer poloidal field coils.
+For the purpose of plasma stabilization, a _poloidal_ external magnetic field is created by the outer poloidal field coils.
 Altogether this results in a magnetic field that twists helically around the torus as visualized as the black line.
 Inner poloidal field coils can then be used to generate electricity similar to a transformer circuit @samaniego2024topovis[p.11].
 
@@ -101,7 +101,7 @@ in the case of $phi=0$.
 The $zeta$-grid is commonly normalized to $[0,1]$.
 However this mapping is not generally continuous, as will be explained in @sec:background:hamada:periodicity.
 
-For easier understanding of how toroidal and hamadian coordinates are transformed, Figure @fig:hamda:x[] & @fig:hamda:phi[] show side by side comparisons of $psi="const"$ and $phi="const"$ surfaces respectively.
+For easier understanding of how toroidal and Hamadian coordinates are transformed, Figure @fig:hamda:x[] & @fig:hamda:phi[] show side by side comparisons of $psi="const"$ and $phi="const"$ surfaces respectively.
 
 #include "../../figs/hamada/psi_const/fig.typ"
 
@@ -123,7 +123,7 @@ This is caused by a discrepancy between the regularly spaced s-grid and the non-
 
 In hamada coordinates the poloidal slice is represented as a curved surface in 3d-space as can be seen in @fig:hamada:phi:h.
 The surface can be described as a two dimensional function $zeta(psi,s)$, which is referred to as _$zeta$-shift_ on the basis of #cite(<samaniego2024topovis>, form: "prose").
-One can recognise the unique shape of the curve in the $zeta$-$s$-plane from @fig:hamada:x:h, which flattens out to a straight line when approaching $psi=0$.
+One can recognize the unique shape of the curve in the $zeta$-$s$-plane from @fig:hamada:x:h, which flattens out to a straight line when approaching $psi=0$.
 @sec:background:topovis:zeta-shift will discuss details on how $zeta$-shift is defined and calculated using data from GKW.
 
 === Periodicity <sec:background:hamada:periodicity>
@@ -350,7 +350,7 @@ As memory required to solve the interpolation increases quadratically with the n
 // compare details in a table??
 
 == ToPoVis
-_ToPoVis_ is a python script developed by Sofia Samaniego in 2024 @samaniego2024topovis. It aims to compute and visualize poloidal cross sections of eletrostatic potential $Phi$ inside a tokamak, hence the name "ToPoVis" (#strong[To]kamak #strong[Po]loidal cross section #strong[Vis]ualisation) @samaniego2024topovis[p.10,72]. ToPoVis works with the simulation data outputted by GKW.
+_ToPoVis_ is a python script developed by Sofia Samaniego in 2024 @samaniego2024topovis. It aims to compute and visualize poloidal cross sections of electrostatic potential $Phi$ inside a tokamak, hence the name "ToPoVis" (#strong[To]kamak #strong[Po]loidal cross section #strong[Vis]ualisation) @samaniego2024topovis[p.10,72]. ToPoVis works with the simulation data outputted by GKW.
 
 // TODO: Output Bild von ToPoVis einfügen
 
@@ -372,7 +372,7 @@ The program can be subdivided into the following sequences: //TODO: not happy wi
 === Calculating the $zeta$\-shift <sec:background:topovis:zeta-shift>
 A poloidal slice implies satisfying the condition $#sym.phi = #text("const")$. The way the $zeta$\-shift is calculated is different for the kind of geometry being used for the simulation. ToPoVis works for three different geometries: 1) circular, 2) CHEASE and 3) s-#sym.alpha. In each geometry the transformations between toroidal and Hamada coordinates are different @samaniego2024topovis[p.20ff].
 
-In all geometries $zeta$ is the only coordinate that is dependend on #sym.phi and can be defined generally as follows:
+In all geometries $zeta$ is the only coordinate that is dependent on #sym.phi and can be defined generally as follows:
 
 $ zeta = -frac(#sym.phi, 2#sym.pi) + G(psi, s) $ <eq:zeta_s>
 
@@ -458,7 +458,7 @@ However, B-Spline interpolation is the prefered option, as it yielded better res
 
 === Plotting and Data Export <sec:topovis:plotting>
 Finally, after the potential $Phi(psi,s)$ is calculated, a heatmap plot is created using the method `tricontourf`  from `matplotlib.pyplot` @samaniego2024topovis[p.27].
-The poloidal coordinates $R(psi, s)$ and $Z(psi, s)$ (see !!) needed for this are included in the dataset `geom`. // add reference to cylindrical → toroidal coords
+The poloidal coordinates $R(psi, s)$ and $Z(psi, s)$ needed for this are included in the dataset `geom`. // add reference to cylindrical → toroidal coords
 A colorbar and outlines at $psi_"min"$ and $psi_"max"$ are added.
 The area in the center, where no data was simulated, is filled white to hide inapplicable delaunay triangles.
 

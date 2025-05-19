@@ -14,7 +14,7 @@ and then be called using
 #h(2em) #raw("topovis.main(args: list[str])", lang: "py")
 
 Calling from terminal is preferred for generating a quick visualization.
-However, the latter option makes it possible to further analyze and modify the data, or to create embeded plots.
+However, the latter option makes it possible to further analyze and modify the data, or to create embedded plots.
 @tab:topovis_args below provides an overview and explanation of all optional arguments.
 
 #show figure: set block(breakable: true)

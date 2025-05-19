@@ -3,7 +3,7 @@
 The aim of this thesis was to look into and fix numerical artifacts, that occurred in some visualizations created by the previous ToPoVis code.
 The cause of the artifacts was identified as unfavorable delaunay triangulation.
 Simulations in CHEASE geometry with a highly non-uniform point distributions are particularly affected by this.
-To explore means of fixing these artifacts, it was neccessary to understand the functionality of delaunay triangulation.
+To explore means of fixing these artifacts, it was necessary to understand the functionality of delaunay triangulation.
 
 One attempt was made, by implementing a new triangulation method for creating regular grids.
 However, this alone could not compensate the low density of the simulation data.

@@ -106,7 +106,7 @@ However, while the delaunay algorithm leads to points being connected to near ne
 Two points can be close to each other in hamada coordinates, while being really distant poloidally. 
 That is why the regular triangulation can be considered as an interpolation in hamada coordinates, and the delaunay triangulation as a interpolation in poloidal coordinates. 
 There cannot be made a clear decision in favor of neither of the two approaches, without comparing the results with simulations with higher resolutions. 
-Findings in section !! show, that interpolations in hamada coordinates are coinciding better with the high resolution simulations.
+Findings in @sec:topovis:interpolation show, that interpolations in hamada coordinates are coinciding better with the high resolution simulations.
 
 A more and refined way to improve triangulations is to avoid the causes of unfavorable triangulations in the first place. 
 It can be achieved by interpolating the grid by other means _before_ triangulation is done, which will be discussed next.
@@ -137,13 +137,13 @@ This leaves open two different strategies for interpolating the potential:
 
 While option A) is the simpler approach, it also generates worse results. 
 This is presumably due to the potential being a real number.
-So before interpolation the imaginary part of the complex fourier coefficients gets discarted.
+So before interpolation the imaginary part of the complex fourier coefficients gets discarded.
 Whereas the imaginary part is being kept and interpolated in option B).
-Additionaly, $hat(f)$ and $zeta$\-shift each represent smoother surfaces than the potential, which makes interpolation less prone to numerical errors.
-This makes option B) the preffered approach, while option A) will not be discussed or used further in this thesis.
+Additionally, $hat(f)$ and $zeta$\-shift each represent smoother surfaces than the potential, which makes interpolation less prone to numerical errors.
+This makes option B) the preferred approach, while option A) will not be discussed or used further in this thesis.
 
 There is still the choice of the coordinate system to interpolate in. 
-Both poloidal and hamadian interpolation will be discussed in the next sections.
+Both poloidal and Hamadian interpolation will be discussed in the next sections.
 
 ===== Hamadian Interpolation <sec:interpolation:hamada>
 Interpolation in hamada coordinates is done using `RegularGridInterpolator`, which functionality is discussed in @sec:background:rgi. 
@@ -198,11 +198,11 @@ But instead of initializing the interpolator with the grid in hamada coordinates
 
 The challenge of interpolating in poloidal coordinates lies in the scattered structure of the grid. // TODO: ist das gutes Englisch?
 This applies especially to data in CHEASE geometry, which shows multiple different non-uniform characteristics.
-Intuitively interpolation in poloidal coordinates seems like a good approach, as the coordinates describe the real world euclidian space.
-If two points are really close to each other in euclidian space, one can expect similar measurements at these points. // ??: gibts dafür ein Fachbegriff?
+Intuitively interpolation in poloidal coordinates seems like a good approach, as the coordinates describe the real world euclidean space.
+If two points are really close to each other in euclidean space, one can expect similar measurements at these points. // ??: gibts dafür ein Fachbegriff?
 As the electric potential is smooth and continuous inside the tokamak, this property also applies to it. // TODO: dont like this sentence
-Interpolating in hamada coordinates does not take the euclidian distance into account. 
-Due to the non-linear transformation between the two coordinate systems, two points can be close to each other in hamadian space, but have a large distance in euclidian space.
+Interpolating in hamada coordinates does not take the euclidean distance into account. 
+Due to the non-linear transformation between the two coordinate systems, two points can be close to each other in hamadian space, but have a large distance in euclidean space.
 
 Many interpolation methods like multivariate splines, finite element or Clough-Tocher rely on mesh generation through triangulation.
 This makes them unsuitable for this purpose, as triangulation algorithms fail to produce reliable results on non-uniform grids. 
@@ -224,7 +224,7 @@ However, neither the fourier coefficients $hat(f)$ nor the $zeta$-shift are peri
 Extending the grid using parallel periodic boundary conditions as done with interpolation in hamada coordinates is also not an option.
 In hamada interpolation the s-grid is extended regularly outside of $-0.5<s<0.5$.
 But, because $s$ is periodic ($s=s±1$), corresponding extended poloidal points would be coincide precisely poloidally.
-This causes ambigous data as different values are defined on the same poloidal points.
+This causes ambiguous data as different values are defined on the same poloidal points.
 The RBFI cannot handle this and will throw a `SingularMatrix` Error.
 Because the grid is discrete, its also not possible to add new points at the half-way point between $0.5-(Delta s)/2 < s < 0.5$, as the periodic points would be out of bounds as well. 
 Therefore the interpolation results at the boundary will show numerical artifacts for poloidal interpolation.
@@ -285,7 +285,7 @@ The low density plot shows an irregular pattern consisting of red, blue and whit
 In this highly sheared sections both interpolation methods yield similar results.
 One can notice, that the lines are more "washed out" radially in the RBFI results.
 
-The general interpolation benchmark can be subsumized by the table below.
+The general interpolation benchmark can be subsumed by the table below.
 
 #figure(
     table(
@@ -299,7 +299,7 @@ The general interpolation benchmark can be subsumized by the table below.
 
 === Non-linear Simulations
 ==== Functionality // TODO: Überschrift
-The general process of calculating the potential on a poloidal slice in the non-linear case is described in detail in @sec:topovis:nonlin and can be subsumized as follows:
+The general process of calculating the potential on a poloidal slice in the non-linear case is described in detail in @sec:topovis:nonlin and can be subsumed as follows:
 
 #enum(
     numbering: "1.",
@@ -327,7 +327,7 @@ As the RGI demands a strictly ascending or descending grid, the sparse s-grid ha
 This extended grid is used to define the _virtual_ positions of the periodically extended potential.
 The term virtual is chosen, because the points lie outside of domain $-0.5 < s < 0.5$ and are used as reference points for the RGI.
 
-Additionaly, the sparse $(s,psi,zeta)$ grid needs to be extended periodically in regard of the parallel periodic boundary conditions. 
+Additionally, the sparse $(s,psi,zeta)$ grid needs to be extended periodically in regard of the parallel periodic boundary conditions. 
 The s-grid is periodic (see @eq:periodic:s) is therefore extended by wrapping the array periodically.
 The periodic $zeta_p$-grid has to account for the parallel periodic boundary condition
 
@@ -345,7 +345,7 @@ In code this is done by selectively adding or subtracting $q$ based on its $s$-c
 
 Where `s_p` denotes the periodically extended s-grid. 
 To avoid mix-ups the `x_p` ($psi$) and `z_p` ($zeta$) arrays are also denoted that way, even though they are not extended in any way. 
-The dimensionality of the safety factor `q` is extended to correctly add or substract it from $zeta$ depending on its $psi$ value.
+The dimensionality of the safety factor `q` is extended to correctly add or subtract it from $zeta$ depending on its $psi$ value.
 Note that instead of mapping $zeta_p$ back to $[0,1]$, it gets mapped to $[0,max(zeta)]$.
 This is currently a workaround to avoid out-of-bounds errors when evaluating the potential, which is only defined in the range of $zeta$. 
 The error for this is small as $max(zeta) approx 1$, but it's something that should be worked on in future iterations of ToPoVis.
@@ -356,7 +356,7 @@ The potential $Phi$ must fulfill the following parallel periodic boundary condit
 $ Phi(s,psi,zeta(s)) = Phi(s±1, psi, zeta(s±1) ∓ q(psi)) $
 
 Doing so requires prior interpolation.
-This is because $Phi$ needs to be evaluated at the parallely wrapped $zeta_p$ (not $zeta$-shift!) positions, which in general do not conincide with the original $zeta$ positions.
+This is because $Phi$ needs to be evaluated at the parallel wrapped $zeta_p$ (not $zeta$-shift!) positions, which in general do not coincide with the original $zeta$ positions.
 In code this is done by initializing the interpolator with the sparse potential and grid and then calling it multiple times to evaluate on the extended grids.
 
 ```py
@@ -373,7 +373,7 @@ In code this is done by initializing the interpolator with the sparse potential 
 ```
 
 The exact same is done again for $s < -0.5$ using `slc = np.s_[:OVERLAP, :, :]`.
-The preperation for this step is already done constructing the periodic $(s,psi,zeta)$-grid, as the potential is just evaluated at these coordinates and inserted in the corresponding position into the `pot3d_p` array.
+The preparation for this step is already done constructing the periodic $(s,psi,zeta)$-grid, as the potential is just evaluated at these coordinates and inserted in the corresponding position into the `pot3d_p` array.
 As the RGI proofed successful in linear simulations its the only interpolator used in the non-linear cases.
 
 ===== 3. Extending $zeta$-shift
@@ -399,7 +399,7 @@ In code this is done by expanding the $psi$-$s$-grid in the $zeta$ dimension and
     sxz_fine = sss_fine, xxx_fine, zzzeta_s_fine
 ```
 
-After evaluating $Phi'$ on the fine $s$-$psi$-$zeta$-grid, the $zeta$-dimension gets discarted and the potential gets transposed to be of shape $(N_(psi,text("fine")), N_(s,text("fine")))$ for consistency.
+After evaluating $Phi'$ on the fine $s$-$psi$-$zeta$-grid, the $zeta$-dimension gets discarded and the potential gets transposed to be of shape $(N_(psi,text("fine")), N_(s,text("fine")))$ for consistency.
 
 ==== Results
 In the case of non-linear simulations, comparison between different simulations is not possible.
@@ -481,7 +481,7 @@ The input parameters can then be supplied using the `args` parameter instead of 
 The final data is returned by the function for further processing.
 
 In an attempt to standardize the importing of data sets from the `gkwdata.h5` files, a new class `GKWData(path, poten_timestep)` is added.
-Upon initialization, all neccessary data sets are read from file, reformatted for easier access and saved as class variables.
+Upon initialization, all necessary data sets are read from file, reformatted for easier access and saved as class variables.
 This avoids the use of pseudo constants.
 
 On the same note the class `ToPoVisData` is added as singular variable that is being returned, when called from within another script.
