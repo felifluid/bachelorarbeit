@@ -23,6 +23,7 @@
     ],
     disclaimerSignature: none,
     preface: none,
+    acknowledgements: none,
     body
     ) = context {
         // DOCUMENT
@@ -167,7 +168,7 @@
 
         // PREFACE
         align(center + horizon)[
-            #text(1.2em, weight: 600, "Abstract")
+            #smallcaps(text(1.75em, weight: 600, "Abstract"))
 
             #preface
         ]
@@ -218,15 +219,18 @@
         // BIBLIOGRAPHY
         set page(numbering: none)
         bibliography("bibliography.yml")
-        
-        // DISCLAIMER
+
         set heading(numbering: none)
+        
+        // ACKNOWLEDGEMENTS
+        heading("Acknowledgements", outlined: false)
+        acknowledgements
 
+        // DISCLAIMER
         heading(disclaimerTitle, outlined: false)
-
         disclaimerText
 
-        v(3em)
+        v(8em)
         grid(
           columns: 2,
           column-gutter: 1fr,

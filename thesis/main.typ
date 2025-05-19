@@ -15,6 +15,20 @@
     To implement these extensive additions, the ToPoVis code is rewritten.
     The accuracy of the interpolation is measured for both linear and non-linear simulations.
     The new code is publicly avaliable as and can be used and extended in future research.
+  ],
+  acknowledgements: [
+    I would like to express my gratitude to Dr. Florian Rath for his generous time and support.
+    His infectious excitement and patience and openness for answering questions is what convinced me of writing this thesis in the first place and what helped me get through.
+
+    I want to extend my thanks to Prof. Dr. Arthur for offering the opportunity of this thesis and taking his time for our weekly meetings.
+
+    I would further like to thank everyone who has supported me during the time of this research:
+    Leonard Schmid for enduring my infodumps and providing new valuable perspectives.
+    Sara Kleyman for her encouragements and being my body double numerous time.
+    Björn Luchterhandt for inspiring me to learn Typst and sharing his knowledge about it.
+    Elli Quitter for always caring for and comforting me in times of need.
+
+    Thanks to everyone that showed interest in this work and took the time to provide feedback.
   ]
 )[
 
