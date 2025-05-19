@@ -22,6 +22,7 @@
         This thesis has not been submitted in the same or substantially similar version, not even in part, to any other authority for grading and has not been published elsewhere.
     ],
     disclaimerSignature: none,
+    preface: none,
     body
     ) = context {
         // DOCUMENT
@@ -163,6 +164,13 @@
         // don't linebreak inline equations
         show math.equation.where(block: false): box
 
+
+        // PREFACE
+        align(center + horizon)[
+            #text(1.2em, weight: 600, "Abstract")
+
+            #preface
+        ]
 
         // adjust page numbering
         set page(numbering: "i")
