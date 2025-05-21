@@ -23,7 +23,8 @@
         This thesis has not been submitted in the same or substantially similar version, not even in part, to any other authority for grading and has not been published elsewhere.
     ],
     disclaimerSignature: none,
-    preface: none,
+    prefaceEN: none,
+    prefaceDE: none,
     acknowledgements: none,
     body
     ) = context {
@@ -167,11 +168,17 @@
         show math.equation.where(block: false): box
 
 
-        // PREFACE
+        // PREFACE EN
         align(center + horizon)[
             #smallcaps(text(1.75em, weight: 600, "Abstract"))
 
-            #preface
+            #prefaceEN
+
+            #v(8em)
+
+            #smallcaps(text(1.75em, weight: 600, "Zusammenfassung"))
+
+            #prefaceDE
         ]
 
         // adjust page numbering
@@ -236,8 +243,9 @@
           columns: 2,
           column-gutter: 1fr,
           row-gutter: 0.5em,
-          align: center,
+          align: left,
           grid.cell(
+            align: bottom,
             rowspan: 3,
             [#city, #submissionDate.display("[day].[month].[year]")],
           ),
