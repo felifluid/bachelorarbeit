@@ -1,3 +1,26 @@
+"""
+################################################### ToPoVis ##################################################
+                                Tokamak Poloidal cross section Visualisation
+
+
+    Purpose:
+        This code is designed to plot cross sections of the tokamak at certain toroidal angles. It works for linear and nonlinear simulations. 
+        Implemented geometries are circular, global CHEASE and s-alpha. 
+        For nonlinear simulations, the code can plot the zonal as well as the non-zonal potential using two different interpolation methods: B-Spline interpolation
+        or interpolation with a Fast-Fourier-Transformation. The user will be asked which potential (zonal or non-zonal) to plot and which interpolation method to use.
+    Usage: 
+        python topovis.py --help
+    Author:
+        - Sofia Samaniego
+          Universitaet Bayreuth
+          01.08.2024
+        - Feli Berner
+          Universitaet Bayreuth
+          10.06.2025
+
+
+"""
+
 ################################################### IMPORTS ##################################################
 
 import logging
