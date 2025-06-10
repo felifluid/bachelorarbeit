@@ -1,13 +1,13 @@
 """
 ################################################### ToPoVis ##################################################
                                 Tokamak Poloidal cross section Visualisation
-
+##############################################################################################################
 
     Purpose:
         This code is designed to plot cross sections of the tokamak at certain toroidal angles. It works for linear and nonlinear simulations. 
         Implemented geometries are circular, global CHEASE and s-alpha. 
-        For nonlinear simulations, the code can plot the zonal as well as the non-zonal potential using two different interpolation methods: B-Spline interpolation
-        or interpolation with a Fast-Fourier-Transformation. The user will be asked which potential (zonal or non-zonal) to plot and which interpolation method to use.
+        For nonlinear simulations, the code can plot the zonal as well as the non-zonal potential.
+        The data can be interpolated using multilinear interpolation.
     Usage: 
         python topovis.py --help
     Author:
@@ -17,8 +17,6 @@
         - Feli Berner
           Universitaet Bayreuth
           10.06.2025
-
-
 """
 
 ################################################### IMPORTS ##################################################
@@ -39,11 +37,6 @@ import matplotlib.colors
 
 ################################################## FUNCTIONS #################################################
 
-
-def transform_indice(xi, si, ns):
-    return si + xi * ns
-
-
 def array_slice(a, axis, slc : slice):
     """
     Neat little helper function to create a sliced view of an ndarray on a dynamic axis.
@@ -54,6 +47,23 @@ def array_slice(a, axis, slc : slice):
 
 
 def check_regular_spacing(a, tol=1e-9) -> tuple[bool, float]:
+    """
+    Checks if the spacing of float values in an array is regular.
+
+    Params
+    ------
+    a: array
+        1d-array of floats
+    tol: float
+        maximum tolerance for differences
+
+    Returns
+    -------
+    isRegular: bool
+        true if array is regular within the tolerance
+    diff: float
+        the regular difference
+    """
     diffs = np.diff(a)
     if np.allclose(diffs, diffs[0], atol=tol):
         isRegular = True
@@ -104,6 +114,11 @@ def extend_regular_array(a : np.typing.ArrayLike, n : int):
     a : ArrayLike
     n : int
         How many points to prepend and append.
+
+    Returns
+    -------
+    a : ArrayLike
+        The extended array
     """
     a = np.asarray(a)
     is_regular, step = check_regular_spacing(a)
@@ -114,7 +129,16 @@ def extend_regular_array(a : np.typing.ArrayLike, n : int):
 
 def extend_regular_grid(grid : list, n : int, axis : int | list[int]):
     """
-    This build onto `extend_regular_array` to work for ndarrays on multiple axes.
+    This builds onto `extend_regular_array` to work for ndarrays on multiple axes.
+    
+    Parameters
+    ----------
+    grid: list
+        List of ndarrays.
+    n: int
+        How many points to prepend and append.
+    axis : int | list[int]
+        Which axes to extend.
     """
     axs = [axis] if isinstance(axis, int) else axis
     for ax in axs:
@@ -124,6 +148,8 @@ def extend_regular_grid(grid : list, n : int, axis : int | list[int]):
 
 def interpolate_regular_array(a : np.typing.ArrayLike, f : int):
     """
+    Adds additional values inbetween gridpoints of a regularly spaced array.
+
     Parameters
     ----------
     a : ArrayLike
@@ -262,6 +288,8 @@ def interpolate_hamada_grid(x : np.typing.ArrayLike, s : np.typing.ArrayLike, fx
 
 def grid_to_points(grid):
     """
+    A common transformation between grid and point representation.
+
     Parameters
     ----------
     X1, X2,..., XN : tuple of N ndarrays
@@ -308,34 +336,34 @@ def shift_zeta(g, s, phi, geom_type, q=None, r_n=None, r_ref=None, nx=None, ns=N
     Returns
     -------
     out : ndarray
-        The zeta-shift grid which is phi-preserving. It will be mapped back to `0 <= zeta <= 1`.
+        The zeta-shift grid which is phi-preserving.
+    """
+    if geom_type == 'circ' or geom_type == 'universal':
+        G = g
+    elif geom_type == 's-alpha':
+        G = q * s
+    elif geom_type == 'chease_global':
+        G = g * chease_integration(s, r_n, r_ref, nx, ns)
+    else:
+        raise ValueError(f"geom_types other than 'circ', 's-alpha' and 'chease_global' are not supported")
+    return -phi / (2*np.pi) + G
+
+def chease_integration(s, r_n, r_ref, nx, ns):
+    """
+    Calculates the integration needed for calculating zeta-shift in CHEASE global geometry in legacy versions of gkwdata.
+
+        int_0^s 1/(R^2(psi, s)) ds      
+            with    R = R_n * R_ref
 
     Notes
     -----
-    - For 'circ' geometry, the zeta shift is calculated as (-phi_val / (2 * pi) + g) % 1
-    - For 's-alpha' geometry, the zeta shift is calculated as (signB*signJ/(2*pi)*(2*pi*abs(q_val)*s-phi_val)) % 1.
-    - For 'chease_global' geometry, the zeta shift is calculated using numerical integration (trapezoidal rule).  \
-    zeta(s) = -phi/2pi + gmap * integral_0^s (1/(R**2)). Also: R is not the unitless R as for circ geom, but R_N*R_REF.
-    """
-    # TODO: extract shift-factor 'G' out of this function.
-    # circ:
-    #   G = gmap - qs
-    # chease-global: 
-    #   G = gmap * chease_factor - qs
-    # s-alpha:
-    #   G = 0
-    if geom_type == 'circ' or geom_type == 'universal':
-        zeta = -phi / (2*np.pi) + g
-    elif geom_type == 's-alpha':
-        #FIXME: equation for s-alpha is not right
-        zeta = (phi) / (2*np.pi) * q * s
-    elif geom_type == 'chease_global':
-        zeta = -phi/(2*np.pi) + g * chease_integration(s, r_n, r_ref, nx, ns)
-    else:
-        raise ValueError(f"geom_types other than 'circ', 's-alpha' and 'chease_global' are not supported")
-    return zeta
+    This was mostly copied from the original version of ToPoVis made by Sophia Samaniego and modified to work with the current structure of ToPoVis (e.g. solve via multidimensiona arrays instead of for-loops). However, new tests using this method led to wrong results which makes me certain that this method is not (or not anymore) solving the integration correctly. Therefore, im strongly discouraging the use of this method.
+        - Feli Berner (10.06.2025)
 
-def chease_integration(s, r_n, r_ref, nx, ns):
+    """
+
+    logging.warning("Calculating zeta shift in CHEASE geometry will likely lead to wrong results!")
+
     xi = np.arange(nx)
     si = np.arange(ns)
 
@@ -379,19 +407,25 @@ def chease_integration(s, r_n, r_ref, nx, ns):
 
 def calculate_potential(fcoeffs, zeta, k) -> np.ndarray:
     """
+    Calculates the potential for a given zeta using the complex fourier coefficients and the wave vector k.
+
     Parameters
     ----------
     fcoeffs : ndarray
         The complex fourier coefficients.
     zeta : ndarray
         The zeta grid.
-    k : int
+    k : float
         The wave vector.
     
     Returns
     -------
     pot : ndarray
         The real potential.
+
+    Notes
+    -----
+    The wave vector k is assumed to be a float (opposed to an array) as this method is only ever used in linear simulations with a single wave.
     """
     # exponential terms
     exp_pos = np.exp(1j * k * zeta)
@@ -521,6 +555,9 @@ def make_regular_triangles(nx, ns, dir='r', periodic=False):
     return triangles
 
 def _plot_contourf(ax, triangulation, z, show_grid=False, **kwargs):
+    """
+    Wrapper function for the tricontourf plot. Can additionally plot a grid using `_plot_grid`.
+    """
     x = triangulation.x
     y = triangulation.y
     cmap = kwargs.pop('cmap', 'seismic')
@@ -571,6 +608,9 @@ def _clip_cmap(cmap, vmin, vmax, vcenter=None, vmin_clip=None, vmax_clip=None):
     return new_cmap, new_norm
 
 def plot(r, z, pot, fig=None, ax=None, triang_method='regular', omit_axes=False, omit_cbar=False, plot_grid=False, **kwargs):
+    """
+    The plot function, which plots the resulting image.
+    """
     if fig is None:
         fig = plt.gcf()
     if ax is None:
@@ -881,6 +921,7 @@ class GKWData:
         return fcoeff_real + 1j * fcoeff_im
 
 class ToPoVisData:
+    # TODO: this currently uses three different methods to set class variables, which can leave the class in an undetermined state (e.g. some variables haven't been set before being accessed).
     def __init__(self, phi, poten_timestep, method, fx, fs, interpolator):
         self.phi = phi
         self.poten_timestep = poten_timestep
@@ -945,7 +986,7 @@ def main(args = None):
 
     PHI = float(args.phi) % (2*np.pi)
 
-    LEGACY_GMAP = args.legacy_gmap
+    LEGACY_GMAP = bool(args.legacy_gmap)
 
     if int(args.fx) < 1 or int(args.fs) < 1:
         logging.fatal('Interpolating factors FX and FS must be positive integers, exiting.')
