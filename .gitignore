@@ -6,3 +6,4 @@
 *.svg
 *.png
 !/figs/placeholder.svg
+.venv
