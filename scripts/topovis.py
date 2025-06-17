@@ -14,26 +14,38 @@
         - Sofia Samaniego
           Universitaet Bayreuth
           01.08.2024
-        - Feli Berner
+        - Feli Berner 
           Universitaet Bayreuth
           10.06.2025
+    References:
+        - @Samaniego2024: "Visualizing Poloidal Cross Sections of Small Scale Turbulence in Global Tokamak Geometry" by Sofia Samaniego (2024)
+        - @Berner2025: "Improved Visualization of Turbulences in a Tokamak using refined Triangulation and Interpolation" by Feli Berner (2025) 
+
 """
 
 ################################################### IMPORTS ##################################################
 
+"""
+ToPoVIs was developed and tested with the following package versions
+- numpy (v2.2.4)
+- h5py (v3.13.0)
+- scipy (v1.15.2)
+- matplotlib (v3.10.0) 
+"""
+
 import logging
 import argparse
 import sys
-import matplotlib.cm
-import numpy as np
-import h5py
+import numpy as np      # v2.2.3
+import h5py             # v3.13.0
 import enum
-import scipy.integrate
+import scipy.integrate  # v1.15.2
 import scipy.interpolate
+import matplotlib       # v3.10.0
 import matplotlib.tri
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors
+import matplotlib.cm
 
 ################################################## FUNCTIONS #################################################
 
@@ -667,6 +679,9 @@ def plot(r, z, pot, fig=None, ax=None, triang_method='regular', omit_axes=False,
     return fig, ax
 
 def parse_args(args):
+    """
+    Initializes and setups the arg parser.
+    """
     parser = argparse.ArgumentParser(description='Interpolation of a poloidal cross section for given toroidal angle phi and time step for potential data. Zonal or non-zonal potential is displayed.')
 
     parser.add_argument('-v', '--verbose', 
@@ -964,13 +979,14 @@ class ToPoVisData:
 ################################################## MAIN ##################################################
 
 def main(args = None):
-    
 
     # ---------------------- SETUP PARSER ------------------------
 
+    # PARSE ARGUMENTS
+
     args = parse_args(args)
 
-    # Argument Validation
+    # ARGUMENT VALIDATION
 
     if args.verbose > 3: 
         LOGGING_LEVEL = 3
@@ -1142,10 +1158,20 @@ def main(args = None):
         k = 2 * np.pi * dat.n_mod * dat.n_spacing   # constant
 
         if INTERPOLATE:
+            """
+            Simply interpolating between the first and last data point would result in a gap between the first and last poloidal grid point, as the data represents points on a poloidal slice.
+            This issue is solved by adding additional *virtual* points out of bounds using parallel periodic boundary conditions. 
+            The splines are constructed on this extended grid, but are being evaluated on the fine inner-bounds grid.
+            Details on why and how this is done is found in @Berner2025. 
+            """
             # INTERPOLATE DATA
 
             if INTERPOLATOR == 'rgi':
-                # APPLY PERIODIC BOUNDARY CONDITIONS
+                """
+                Interpolate using parallel periodic boundary conditions and `scipy.interpolate.RegularGridInterpolator`.
+                """
+
+                # APPLY BOUNDARY CONDITIONS
 
                 # extend s-grid (not wrap!)
                 s = extend_regular_array(dat.s, OVERLAP)     # shape (ns+2n)
@@ -1161,6 +1187,8 @@ def main(args = None):
                 fcoeffs = extend_periodically(fcoeffs, OVERLAP, 1)              # extend grid periodically in s
                 fcoeffs[:, :OVERLAP] *= np.exp(1j * k * dat.q[:, None])
                 fcoeffs[:, -OVERLAP:None] *= np.exp(-1j * k * dat.q[:, None])
+
+                # INTERPOLATE DATA
 
                 # interpolate zeta-shift
                 logging.info(f'Interpolating zeta-shift')
@@ -1182,7 +1210,7 @@ def main(args = None):
 
                 rz_points = np.column_stack((dat.r_n_flat, dat.z_flat))
 
-                # FIXME: add to argparse
+                # TODO: add to argparse
                 rbf_kwargs = {'neighbors':200}
 
                 # interpolate zeta-shift
@@ -1210,15 +1238,19 @@ def main(args = None):
 
 
     else: # --------------------- NON LINEAR SIMULATION ---------------------
+        """
+        NOTE: maybe it's smarter to first interpolate on the 1/n_spacing part of the torus and THEN repeat periodically. This could lead to derivatives being non-continuous at the edges, but avoids redundant intense calculations especially for higher orders of interpolations.
+        """
+
         logging.info('Nonlinear simulation')
 
-        # NOTE: maybe it's smarter to first interpolate on the 1/n_spacing part of the torus and THEN repeat periodically.
-        # This could lead to derivatives being non-continuous at the edges, but avoids redundant intense calculations especially for higher orders of interpolations.
         whole_zeta = make_zeta_grid(dat.mphi, dat.n_spacing)    # shape (mphi*n_spacing)
 
         pot3d = dat.pot3d
 
+        # check if zonal
         if not ZONAL:
+            # substract radial mean
             pot_mean = np.mean(pot3d, axis=(0,2))    # shape (nx,)
             pot3d = pot3d - pot_mean[None, :, None]
 
@@ -1246,15 +1278,12 @@ def main(args = None):
             zzz_p[:OVERLAP, :, :] += dat.q[None, :, None] 
             zzz_p = zzz_p % np.max(z) # FIXME: this is inaccurate. max(zeta) is smaller 1
 
-            # sxz_p = sss_p, xxx_p, zzz_p
 
             # interpolate pot
             logging.info('Constructing splines, this might take a while...')
             pot3d_rgi = scipy.interpolate.RegularGridInterpolator((s, x, z), pot, method=METHOD)
 
             pot3d_p = np.zeros((len(s_e), len(x_e), len(z_e)))
-
-            # TODO: maybe this can be done in one step?
             
             # copy original pot
             pot3d_p[OVERLAP:-OVERLAP, :, :] = pot
